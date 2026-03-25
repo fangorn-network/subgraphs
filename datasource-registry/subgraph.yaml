@@ -1,0 +1,40 @@
+specVersion: 1.3.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: DatasourceContract
+    network: arbitrum-sepolia
+    source:
+      address: "0x3941c7d50caa56f7f676554bc4e78d77aaf27ebb"
+      abi: DatasourceContract
+      startBlock: 249516177
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - ManifestPublished
+      abis:
+        - name: DatasourceContract
+          file: ./abis/DatasourceContract.json
+      eventHandlers:
+        - event: ManifestPublished(indexed address,indexed bytes32,string,uint64)
+          handler: handleManifestPublished
+      file: ./src/datasource-contract.ts
+templates:
+  - name: FileMetadata
+    kind: file/ipfs
+    mapping:
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      file: ./src/datasource-contract.ts
+      handler: handleMetadata
+      entities:
+        - FileMetadata
+        - FileEntry
+      abis:
+        - name: File
+          file: ./abis/File.json

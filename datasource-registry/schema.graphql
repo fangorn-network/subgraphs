@@ -1,0 +1,27 @@
+type ManifestPublished @entity(immutable: true) {
+  id: Bytes!
+  owner: Bytes! # address
+  schema_id: Bytes! # bytes32
+  manifest_cid: String! # String
+  metadata: FileMetadata
+  version: BigInt! # uint64
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type FileMetadata @entity(immutable: false) {
+  id: ID!
+  manifestVersion: BigInt
+  schemaId: String
+  entries: [FileEntry!]
+}
+
+type FileEntry @entity(immutable: false) {
+  id: ID!
+  tag: String
+  title: String
+  artist: String
+  atType: String
+  acc: String
+}
