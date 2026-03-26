@@ -1,8 +1,8 @@
 {
   "arbitrum-sepolia": {
     "DatasourceContract": {
-      "address": "0x3dfd4393577222f8fd89e75d59bbe9c19be03bec",
-      "startBlock": 253504276
+      "address": "0xddd338e6a200012642a103c6631ea92eea94cabe",
+      "startBlock": 253512719
     }
   }
 }
