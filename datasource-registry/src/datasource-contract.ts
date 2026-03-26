@@ -88,7 +88,7 @@ export function handleMetadata(content: Bytes): void {
 
   let versionVal = obj.get("version")
   if (versionVal == null) return
-  let manifestVersion = BigInt.fromI32(versionVal.toI64() as i32)
+  let manifestVersion = BigInt.fromU64(versionVal.toU64())
   metadata.manifestVersion = manifestVersion
 
   let entriesVal = obj.get("entries")
