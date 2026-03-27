@@ -37,7 +37,7 @@ After you have ensured that your changes are correct and working, navigate to th
 
 ### Querying the Subgraph
 
-Example query:
+#### Querying for a file
 
 ```
 {
@@ -91,9 +91,202 @@ The query above would be for a music based schema where someone is querying for 
 }
 ```
 
+The data output of the above query looks like:
+
+```
+{
+  "data": {
+    "fields": [
+      {
+        "manifestState": {
+          "owner": "0x147c24c5ea2f1ee1ac42ad16820de23bbba45ef6",
+          "schema_name": "noagent-fangorn.test.music.v0",
+          "manifest": {
+            "files": [
+              {
+                "fields": [
+                  {
+                    "name": "artist",
+                    "value": "Ovid the Terrible",
+                    "atType": "string",
+                    "acc": "plain",
+                    "price": null
+                  },
+                  {
+                    "name": "audio",
+                    "value": "enc",
+                    "atType": "encrypted",
+                    "acc": "settled",
+                    "price": {
+                      "price": "1",
+                      "currency": "USDC"
+                    }
+                  },
+                  {
+                    "name": "title",
+                    "value": "Hostile Corporate Takeover by Viking Businessmen",
+                    "atType": "string",
+                    "acc": "plain",
+                    "price": null
+                  }
+                ]
+              },
+              {
+                "fields": [
+                  {
+                    "name": "artist",
+                    "value": "Theo Cappucino",
+                    "atType": "string",
+                    "acc": "plain",
+                    "price": null
+                  },
+                  {
+                    "name": "audio",
+                    "value": "enc",
+                    "atType": "encrypted",
+                    "acc": "settled",
+                    "price": {
+                      "price": "1",
+                      "currency": "USDC"
+                    }
+                  },
+                  {
+                    "name": "title",
+                    "value": "That Boy Ain't Right",
+                    "atType": "string",
+                    "acc": "plain",
+                    "price": null
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
+```
+### Querying for a schema
+
+The schema, which is stored on IPFS, that created the data described in the "Querying for a File section" is:
+
+```
+{
+  "version": 1,
+  "name": "noagent-fangorn.test.music.v0",
+  "owner": "0x147c24c5ea2f1ee1ac42ad16820de23bbba45ef6",
+  "agentId": "",
+  "definition": {
+    "title": {
+      "@type": "string"
+    },
+    "artist": {
+      "@type": "string"
+    },
+    "audio": {
+      "@type": "encrypted",
+      "gadget": "settled"
+    }
+  },
+  "createdAt": "2026-03-26T15:01:14.041Z"
+}
+```
+
+We can query for the Subgraph entry related to this schema with this query:
+
+```
+{
+  schemas (where: {name: "noagent-fangorn.test.music.v0"}) {
+    name
+    schemaId
+    owner
+    name
+    versions {
+      version
+      spec_cid
+      agent_id
+      fields {
+        name
+        fieldType
+      }
+    }
+    
+  }
+}
+```
+
+This returns
+
+```
+{
+  "data": {
+    "schemas": [
+      {
+        "name": "noagent-fangorn.test.music.v0",
+        "schemaId": "0xdd2d15d54e402ac7383280029bd15eb039fba2b3ee0025ea846c67b55155bc9c",
+        "owner": "0x147c24c5ea2f1ee1ac42ad16820de23bbba45ef6",
+        "versions": [
+          {
+            "version": "1",
+            "spec_cid": "bafkreic3t42shcrmdoxrlv3sci3yews7xdbaxslt45wus35ion5c3eznly",
+            "agent_id": null,
+            "fields": [
+              {
+                "name": "artist",
+                "fieldType": "string"
+              },
+              {
+                "name": "audio",
+                "fieldType": "encrypted"
+              },
+              {
+                "name": "title",
+                "fieldType": "string"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+#### Querying for Pricing information
+
+```
+{
+  pricingResources (first: 1) {
+    price
+    currency
+    owner
+    id
+  }
+}
+```
+This query returns
+
+```
+{
+  "data": {
+    "pricingResources": [
+      {
+        "price": "1",
+        "currency": "USDC",
+        "owner": "0x147c24c5ea2f1ee1ac42ad16820de23bbba45ef6",
+        "id": "0x173af741673d83b42315b180d616998a356f661401ecb0c5b9436b43088dc782"
+      }
+    ]
+  }
+}
+```
+Where the ID is the resource ID associated with a specific file.
+
+### File data structure
 The data structure goes as follows:
 
-`ManifestState -> Manifest -> [FileEntry -> [Field -> ManifestStateId]]`
+`ManifestState -> Manifest -> [FileEntry -> [Field -> ManifestState]]`
 
 Where the arrows represent pointers (the id) of related data. It is read as one ManifestState references one Manifest. One Manifest references many FileEntries. Each FileEntry references many Fields. Each Field references the top level ManifestState.
 
@@ -101,4 +294,4 @@ This structure allows for schemas to be the source of truth for what fields are 
 
 Note the difference between ManifestState and Manifest entities is that the ManifestState is the (most recently received) manifest information that lives on-chain. The Manifest entity is what is stored on IPFS.
 
-We also store the entire history of interactions of Manifests, Pricing information, and Schema information. These are all immutable and allow for a history to be maintained in the case of updates.
+We also store the entire history of interactions of Manifests, Pricing information, and Schema information. These are all immutable and allow for a history to be maintained by the Subgraph.
