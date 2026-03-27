@@ -46,14 +46,15 @@ export function handleManifestPublished(event: ManifestPublishedEvent): void {
     schemaName = "unknown_schema_name"
   }
 
+  let stateId = entity.owner.concat(entity.schema_id)
+  let state = new ManifestState(stateId)
+
   let context = new DataSourceContext()
   context.setString("schemaId", event.params.schema_id.toHexString())
   context.setString("fields", fieldPairs.join(","))
+  context.setString("manifestId", state.id.toHexString())
 
   FileMetadataTemplate.createWithContext(event.params.manifest_cid, context)
-
-  let stateId = entity.owner.concat(entity.schema_id)
-  let state = new ManifestState(stateId)
   state.owner = entity.owner
   state.schema_id = entity.schema_id
   state.manifest_cid = entity.manifest_cid
@@ -122,12 +123,6 @@ export function handleManifestUpdated(event: ManifestUpdatedEvent): void {
     }
   }
 
-  let context = new DataSourceContext()
-  context.setString("schemaId", event.params.schema_id.toHexString())
-  context.setString("fields", fieldPairs.join(","))
-
-  FileMetadataTemplate.createWithContext(event.params.manifest_cid, context)
-
   // Update manifest state
   if (state == null) {
     state = new ManifestState(stateId)
@@ -135,6 +130,14 @@ export function handleManifestUpdated(event: ManifestUpdatedEvent): void {
     state.schema_id = entity.schema_id
     state.schema_name = schemaName
   }
+
+  let context = new DataSourceContext()
+  context.setString("schemaId", event.params.schema_id.toHexString())
+  context.setString("fields", fieldPairs.join(","))
+  context.setString("manifestId", state.id.toHexString())
+
+  FileMetadataTemplate.createWithContext(event.params.manifest_cid, context)
+
   state.manifest_cid = entity.manifest_cid
   state.version = entity.version
   state.metadata = entity.manifest_cid
@@ -149,6 +152,11 @@ export function handleMetadata(content: Bytes): void {
   let context = dataSource.context()
   let schemaIdString = context.getString("schemaId")
   let fieldsString = context.getString("fields")
+  let manifestId = context.getString("manifestId");
+
+  if (manifestId == null) {
+    manifestId = "null_ID"
+  }
 
   // Parse the field definitions from context
   let fieldPairs = fieldsString.split(",")
@@ -229,6 +237,7 @@ export function handleMetadata(content: Bytes): void {
         
       }
 
+      fileField.manifestState = Bytes.fromHexString(manifestId)
       fileField.save()
       fileEntryFieldsArray.push(fieldEntityId)
     }

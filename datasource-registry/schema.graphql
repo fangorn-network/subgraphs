@@ -87,4 +87,5 @@ type Field @entity(immutable: false) {
   value: String
   atType: String
   acc: String
+  manifestState: ManifestState!
 }
