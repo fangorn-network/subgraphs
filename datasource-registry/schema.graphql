@@ -62,6 +62,7 @@ type ManifestState @entity(immutable: false) {
   id: Bytes!
   owner: Bytes!
   schema_id: Bytes!
+  schema_name: String!
   manifest_cid: String!
   metadata: FileMetadata
   version: BigInt!
@@ -81,7 +82,7 @@ type FileEntry @entity(immutable: false) {
 }
 
 type Field @entity(immutable: false) {
-  id: ID! # this is the field's name
+  id: ID!
   name: String
   value: String
   atType: String

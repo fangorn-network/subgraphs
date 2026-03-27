@@ -62,9 +62,6 @@ templates:
         - FileMetadata
         - FileEntry
         - Field
-        - Schema
-        - SchemaEntries
-        - SchemaField
       abis:
         - name: Dummy
           file: ./abis/Dummy.json
