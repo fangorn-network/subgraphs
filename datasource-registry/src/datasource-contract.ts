@@ -72,10 +72,22 @@ export function handleManifestUpdated(event: ManifestUpdatedEvent): void {
   let state = ManifestState.load(stateId)
   if (state != null) {
     let oldMetadata = FileMetadata.load(state.manifest_cid)
-    if (oldMetadata != null && oldMetadata.entries != null) {
-      let oldEntries = oldMetadata.entries!
-      for (let i = 0; i < oldEntries.length; i++) {
-        store.remove("FileEntry", oldEntries[i])
+    if (oldMetadata != null) {
+      let oldEntries = oldMetadata.entries
+      if (oldEntries!= null && oldEntries.length > 0)  {
+        for (let i = 0; i < oldEntries.length; i++) {
+          let oldEntryId = oldEntries[i]
+          let oldEntry = FileEntry.load(oldEntryId)
+          if (oldEntry != null ) {
+            let oldFields = oldEntry.fields
+            if( oldFields != null && oldFields.length > 0) {
+              for (let j = 0; j < oldFields.length; j++) {
+                store.remove("Field", oldFields[j])
+              }
+            }
+            store.remove("FileEntry", oldEntryId)
+          }
+        }
       }
       store.remove("FileMetadata", state.manifest_cid)
     }
