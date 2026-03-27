@@ -291,10 +291,10 @@ The data structure goes as follows:
 
 `ManifestState -> Manifest -> [FileEntry -> [Field -> ManifestState]]`
 
-Where the arrows represent pointers (the id) of related data. It is read as one ManifestState references one Manifest. One Manifest references many FileEntries. Each FileEntry references many Fields. Each Field references the top level ManifestState.
+Where the arrows represent pointers (the id) of related data. It is read as one `ManifestState` references one `Manifest`. One `Manifest` references many `FileEntries`. Each `FileEntry` references many `Fields`. Each `Field` references the top level `ManifestState`.
 
 This structure allows for schemas to be the source of truth for what fields are present, queryable, and persisted.
 
-Note the difference between ManifestState and Manifest entities is that the ManifestState is the (most recently received) manifest information that lives on-chain. The Manifest entity is what is stored on IPFS.
+Note the difference between `ManifestState` and `Manifest` entities is that the `ManifestState` is the (most recently received) manifest information that lives on-chain. The `Manifest` entity is what is stored on IPFS.
 
 We also store the entire history of interactions of Manifests, Pricing information, and Schema information. These are all immutable and allow for a history to be maintained by the Subgraph.
