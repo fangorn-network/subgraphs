@@ -1,7 +1,8 @@
-import { BigInt, Bytes, dataSource, json, store } from "@graphprotocol/graph-ts"
+import { BigInt, Bytes, dataSource, json, log, store } from "@graphprotocol/graph-ts"
 import { ManifestPublished as ManifestPublishedEvent, ManifestUpdated as ManifestUpdatedEvent } from "../generated/DatasourceContract/DatasourceContract"
-import { FileEntry, FileMetadata, ManifestPublished, ManifestState, ManifestUpdated } from "../generated/schema"
+import { Field, FileEntry, FileMetadata, ManifestPublished, ManifestState, ManifestUpdated, Schema, SchemaEntries, SchemaField } from "../generated/schema"
 import { FileMetadata as FileMetadataTemplate } from "../generated/templates"
+
 export function handleManifestPublished(event: ManifestPublishedEvent): void {
 
   let entity = new ManifestPublished(
@@ -79,72 +80,123 @@ export function handleManifestUpdated(event: ManifestUpdatedEvent): void {
 export function handleMetadata(content: Bytes): void {
 
   let cid = dataSource.stringParam()
-  let metadata = new FileMetadata(cid)
-  
+  log.debug("File CID {}", [cid])
+  let fileMetadata = new FileMetadata(cid)
+  log.debug("Parsing file", [])
   let parsed = json.try_fromBytes(content)
   if (parsed.isError) return
 
-  let obj = parsed.value.toObject()
+  let ipfsFileObj = parsed.value.toObject()
 
-  let versionVal = obj.get("version")
+  log.debug("Checking version", [])
+  let versionVal = ipfsFileObj.get("version")
   if (versionVal == null) return
   let manifestVersion = BigInt.fromU64(versionVal.toU64())
-  metadata.manifestVersion = manifestVersion
+  fileMetadata.manifestVersion = manifestVersion
 
-  let entriesVal = obj.get("entries")
+  log.debug("Getting entries from IPFS file", [])
+  let entriesVal = ipfsFileObj.get("entries")
   if (entriesVal == null) return
-  let entries = entriesVal.toArray()
+  let fileEntriesArray = entriesVal.toArray()
+
+  log.debug("Getting Schema ID", [])
+  let schemaIdVal = ipfsFileObj.get("schemaId")
+  if (schemaIdVal == null) return
+  let schemaIdString = schemaIdVal.toString()
+  log.debug("Loading Schema with string {}", [schemaIdString])
+  let schema = Schema.load(schemaIdString)
+
+  if (schema == null) return
+  log.debug("Schema loaded", [])
+  let versions = schema.versions
+  log.debug("Checking schema versions", [])
+  if (versions == null) return
+  if (versions.length == 0) return
+  log.debug("Checking first schema versions", [])
+  let version = versions[0]
+  if (version == null) return
+  log.debug("Schema Retrieved", [])
+
+  let schemaEntries = SchemaEntries.load(version)
+
+  if (schemaEntries == null) return
+  let fieldPointers = schemaEntries.fields
+
+  if (fieldPointers == null) return
 
   let currentEntries: string[] = []
-  for (let i = 0; i < entries.length; i++) {
-
-    let entry = entries[i].toObject()
-
-    let tagVal = entry.get("tag")
-    if (tagVal == null) continue
-    let tag = tagVal.toString()
+  log.debug("Entering IPFS loop", [])
+  // Loop over all entries in the IPFS file
+  for (let i = 0; i < fileEntriesArray.length; i++) {
+    let fileEntryObj = fileEntriesArray[i].toObject()
 
     let entryId = `${cid}-${i.toString()}`
 
-    let fieldsVal = entry.get("fields")
-    if (fieldsVal == null) continue
-    let fields = fieldsVal.toObject()
-
-    let titleVal = fields.get("title")
-    if (titleVal == null) continue
-    let title = titleVal.toString()
-
-    let artistVal = fields.get("artist")
-    if (artistVal == null) continue
-    let artist = artistVal.toString()
-
-    let audioVal = fields.get("audio")
-    if (audioVal == null) continue
-    let audio = audioVal.toObject()
-
-    let atTypeVal = audio.get("@type")
-    if (atTypeVal  == null) continue
-    let atType = atTypeVal.toString()
-
-    let gadgetVal = audio.get("gadgetDescriptor")
-    if (gadgetVal == null) continue
-    let gadget = gadgetVal.toObject()
-
-    let accVal = gadget.get("type")
-    if (accVal == null) continue
-    let acc = accVal.toString()
+    let fileFieldsVal = fileEntryObj.get("fields")
+    if (fileFieldsVal == null) continue
+    let fileFields = fileFieldsVal.toObject()
 
     let fileEntry = new FileEntry(entryId)
-    fileEntry.tag = tag
-    fileEntry.title = title
-    fileEntry.artist = artist
-    fileEntry.atType = atType
-    fileEntry.acc = acc
+
+    let fileEntryFieldsArray: string[] = []
+
+    log.debug("Entering Schema loop", [])
+    // Get values from all fields defined by the associated schema
+    for (let j = 0; j < fieldPointers.length; j++) {
+
+      let fieldId = fieldPointers[j]
+
+      let schemaField = SchemaField.load(fieldId)
+
+      if (schemaField == null) return
+
+      let fieldKey = schemaField.name
+
+      let fieldType = schemaField.fieldType
+      let fileField = new Field(cid.concat(fieldKey))
+      fileField.atType = fieldType
+      fileField.name = fieldKey
+
+
+      if (fieldType == "encrypted") {
+
+        let valueVal = fileFields.get(fieldKey)
+        if (valueVal == null) continue
+        let valueObj = valueVal.toObject()
+
+        let gadgetVal = valueObj.get("gadgetDescriptor")
+        if (gadgetVal == null) continue
+        let gadget = gadgetVal.toObject()
+
+        let accVal = gadget.get("type")
+        if ( accVal == null) continue
+        let acc = accVal.toString()
+        fileField.acc = acc
+
+      } else {
+        fileField.acc = ""
+        let valueVal = fileFields.get(fieldKey)
+        if (valueVal == null) continue
+        let value = valueVal.toString()
+        fileField.value = value
+      }
+
+      fileField.save()
+      
+      fileEntryFieldsArray.push(cid.concat(fieldKey))
+
+      log.debug("Inner loop end hit", [])
+
+    }
+
+    log.debug("Outter loop end hit", [])
+    fileEntry.fields = fileEntryFieldsArray
     fileEntry.save()
     currentEntries.push(entryId)
   }
+  log.debug("Final save", [])
+  fileMetadata.schemaId = schemaIdString
+  fileMetadata.entries = currentEntries
 
-  metadata.entries = currentEntries
-
-  metadata.save()
+  fileMetadata.save()
 }

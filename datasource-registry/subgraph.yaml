@@ -10,7 +10,7 @@ dataSources:
     source:
       address: "0xddd338e6a200012642a103c6631ea92eea94cabe"
       abi: DatasourceContract
-      startBlock: 253512719
+      startBlock: 253512343
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -27,6 +27,29 @@ dataSources:
         - event: ManifestUpdated(indexed address,indexed bytes32,string,uint64)
           handler: handleManifestUpdated
       file: ./src/datasource-contract.ts
+  - kind: ethereum
+    name: SchemaContract
+    network: arbitrum-sepolia
+    source:
+      address: "0xef6754c29cfd0c8937a080695899f2a9a23c7c70"
+      abi: SchemaContract
+      startBlock: 253512343
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - SchemaRegistered
+        - SchemaUpdated
+      abis:
+        - name: SchemaContract
+          file: ./abis/SchemaContract.json
+      eventHandlers:
+        - event: SchemaRegistered(indexed bytes32,indexed address,string,string,string)
+          handler: handleSchemaRegistered
+        - event: SchemaUpdated(indexed bytes32,string,string)
+          handler: handleSchemaUpdated
+      file: ./src/schema-contract.ts
 templates:
   - name: FileMetadata
     kind: file/ipfs
@@ -38,6 +61,24 @@ templates:
       entities:
         - FileMetadata
         - FileEntry
+        - Field
+        - Schema
+        - SchemaEntries
+        - SchemaField
       abis:
-        - name: File
-          file: ./abis/File.json
+        - name: Dummy
+          file: ./abis/Dummy.json
+  - name: Schema
+    kind: file/ipfs
+    mapping:
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      file: ./src/schema-contract.ts
+      handler: handleSchema
+      entities:
+        - Schema
+        - SchemaEntries
+        - SchemaField
+      abis:
+        - name: Dummy
+          file: ./abis/Dummy.json
