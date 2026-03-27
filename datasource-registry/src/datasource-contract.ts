@@ -221,20 +221,33 @@ export function handleMetadata(content: Bytes): void {
         if (accVal == null) {
           fileField.acc = "no_acc"
           fileField.value = "unknown"
+          fileField.price = "unknown"
         } else {
           fileField.acc = accVal.toString()
           fileField.value = "enc"
+          let paramsVal = gadget.get("params")
+          if(paramsVal == null) {
+            fileField.price = "unknown"
+          } else {
+
+            let params = paramsVal.toObject()
+            let resourceId = params.get("resourceId")
+            if (resourceId == null) {
+              fileField.price = "unknown"
+            } else {
+              fileField.price = resourceId.toString()
+            }
+          }
         }
       } else {
         fileField.acc = "plain"
+        fileField.price = "NO_PRICE"
         let valueVal = fileFields.get(fieldKey)
         if (valueVal == null) {
           fileField.value = "unknown_val"
         } else {
           fileField.value = valueVal.toString()
-
         }
-        
       }
 
       fileField.manifestState = Bytes.fromHexString(manifestId)

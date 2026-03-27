@@ -1,0 +1,48 @@
+import { Address, BigInt, log } from "@graphprotocol/graph-ts";
+import { PriceUpdated, PricingResource, ResourceCreated } from "../generated/schema";
+import { PriceUpdated as PriceUpdatedEvent, ResourceCreated as ResourceCreatedEvent} from "../generated/SettlementContract/SettlementContract";
+
+
+export function handleResourceCreated(event: ResourceCreatedEvent): void {
+
+    let sentinel = PricingResource.load("NO_PRICE")
+    if (sentinel == null) {
+      sentinel = new PricingResource("NO_PRICE")
+      sentinel.price = BigInt.zero()
+      sentinel.currency = "none"
+      sentinel.owner = Address.empty()
+      sentinel.save()
+    }
+
+    let entity = new ResourceCreated(event.transaction.hash.concatI32(event.logIndex.toI32()))
+
+    entity.resourceId = event.params.resourceId
+    entity.price = event.params.price
+    entity.groupId = event.params.groupId
+    entity.owner = event.params.owner
+
+    let resource = new PricingResource(entity.resourceId.toHexString())
+
+    resource.owner = entity.owner
+    resource.price = entity.price
+    resource.currency = "USDC"
+
+    entity.save()
+    resource.save()
+}
+
+export function handlePriceUpdated(event: PriceUpdatedEvent): void {
+    let entity = new PriceUpdated(event.transaction.hash.concatI32(event.logIndex.toI32()))
+    entity.resourceId = event.params.resourceId
+    entity.owner = event.params.owner
+    entity.price = event.params.price
+
+    let resource = PricingResource.load(entity.resourceId.toHexString())
+    if (resource == null) {
+        log.error("No resource found matching {}", [entity.resourceId.toHexString()])
+        return
+    }
+    resource.price = entity.price
+    entity.save()
+    resource.save()
+}

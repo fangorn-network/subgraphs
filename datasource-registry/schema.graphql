@@ -29,6 +29,21 @@ type SchemaRegistered @entity(immutable: true) {
   agent_id: String!
 }
 
+type ResourceCreated @entity(immutable: true) {
+  id: Bytes!
+  resourceId: Bytes!
+  groupId: BigInt!
+  owner: Bytes!
+  price: BigInt!
+}
+
+type PriceUpdated @entity(immutable: true) {
+  id: Bytes!
+  resourceId: Bytes!
+  owner: Bytes!
+  price: BigInt!
+}
+
 type SchemaUpdated @entity(immutable: true) {
   id: Bytes!
   schemaId: Bytes!
@@ -88,4 +103,12 @@ type Field @entity(immutable: false) {
   atType: String
   acc: String
   manifestState: ManifestState!
+  price: PricingResource
+}
+
+type PricingResource @entity(immutable: false) {
+  id: ID!
+  owner: Bytes!
+  price: BigInt!
+  currency: String!
 }

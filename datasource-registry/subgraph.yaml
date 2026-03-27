@@ -10,7 +10,7 @@ dataSources:
     source:
       address: "0xddd338e6a200012642a103c6631ea92eea94cabe"
       abi: DatasourceContract
-      startBlock: 253512343
+      startBlock: 253501857 
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -33,7 +33,7 @@ dataSources:
     source:
       address: "0xef6754c29cfd0c8937a080695899f2a9a23c7c70"
       abi: SchemaContract
-      startBlock: 253512343
+      startBlock: 253501857
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -50,6 +50,29 @@ dataSources:
         - event: SchemaUpdated(indexed bytes32,string,string)
           handler: handleSchemaUpdated
       file: ./src/schema-contract.ts
+  - kind: ethereum
+    name: SettlementContract
+    network: arbitrum-sepolia
+    source:
+      address: "0x5e918ba3fe33b0bdc68cd46eb6a77db754edef57"
+      abi: SettlementContract
+      startBlock: 253501857 
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - ResourceCreated
+        - PriceUpdated
+      abis:
+        - name: SettlementContract
+          file: ./abis/SettlementContract.json
+      eventHandlers:
+        - event: ResourceCreated(indexed bytes32,uint256,address,uint256)
+          handler: handleResourceCreated
+        - event: PriceUpdated(indexed bytes32,address,uint256)
+          handler: handlePriceUpdated
+      file: ./src/settlement-contract.ts
 templates:
   - name: FileMetadata
     kind: file/ipfs
