@@ -34,3 +34,69 @@ Implement any new logic that will be needed to handle any new events or types th
 Update this file with the new starting block and the new address for the contract.
 
 After you have ensured that your changes are correct and working, navigate to the subgraph studio dashboard, go to the subgraph's dashboard you wish to update, copy the auth command and run it `graph auth whateverSecretItGivesYou`. You can then run `graph build` and `graph deploy your-subgraph-slug`. Make sure you update the version number appropriately when prompted. You can then navigate back to the subgraph's dashboard and use the playground to confirm that everything works as expected.
+
+### Querying the Subgraph
+
+Example query:
+
+```
+{
+  fields (where: {name: "artist", value:"Theo Cappucino"}) {
+    manifestState {
+    owner,
+    schema_name,
+    metadata{
+      entries{
+        fields {
+          name
+          value
+          atType
+          acc
+          price {
+            price
+            currency
+          }
+        }
+      }
+    }
+  }
+}
+}
+```
+
+The query above would be for a music based schema where someone is querying for the artist "Theo Cappucino". It will return every manifest that has Theo Cappucino as the artist. To guarantee the conformance of a schema, one can discriminate even further like this:
+
+```
+{
+  fields (where: {manifestState_: {schema_name: "noagent-fangorn.test.music.v0"}, 
+    name: "artist", 
+    value:"Theo Cappucino"}) {
+    manifestState {
+    owner,
+    schema_name,
+    metadata{
+      entries{
+        fields {
+          name
+          value
+          atType
+          acc
+          price {
+            price
+            currency
+          }
+        }
+      }
+    }
+  }
+}
+}
+```
+
+The data structure goes as follows:
+
+`ManifestState -> FileMetadata -> [FileEntry -> [Field -> ManifestStateId]]`
+
+Where the arrows represent pointers. It is read as one ManifestState references one FileMetadata. One FileMetadata references many FileEntries. Each FileEntry references many Fields. Each Field references the top level ManifestState.
+
+This structure allows for schemas to be the source of truth for what fields are present, queryable, and persisted.
