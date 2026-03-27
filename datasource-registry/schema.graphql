@@ -20,10 +20,64 @@ type ManifestUpdated @entity(immutable: true) {
   transactionHash: Bytes!
 }
 
+type SchemaRegistered @entity(immutable: true) {
+  id: Bytes!
+  schemaId: Bytes!
+  owner: Bytes!
+  name: String!
+  spec_cid: String!
+  agent_id: String!
+}
+
+type ResourceCreated @entity(immutable: true) {
+  id: Bytes!
+  resourceId: Bytes!
+  groupId: BigInt!
+  owner: Bytes!
+  price: BigInt!
+}
+
+type PriceUpdated @entity(immutable: true) {
+  id: Bytes!
+  resourceId: Bytes!
+  owner: Bytes!
+  price: BigInt!
+}
+
+type SchemaUpdated @entity(immutable: true) {
+  id: Bytes!
+  schemaId: Bytes!
+  new_spec_cid: String!
+  new_agent_id: String!
+}
+
+type Schema @entity(immutable: true) {
+  id: ID!
+  schemaId: Bytes!
+  owner: Bytes!
+  name: String!
+  versions: [SchemaEntries!]
+}
+
+type SchemaEntries @entity(immutable: true) {
+  id: ID!
+  version: BigInt!
+  spec_cid: String!
+  agent_id: String
+  fields: [SchemaField!]
+}
+
+type SchemaField @entity(immutable: true) {
+  id: ID!
+  name: String!
+  fieldType: String!
+}
+
 type ManifestState @entity(immutable: false) {
   id: Bytes!
   owner: Bytes!
   schema_id: Bytes!
+  schema_name: String!
   manifest_cid: String!
   metadata: FileMetadata
   version: BigInt!
@@ -39,9 +93,22 @@ type FileMetadata @entity(immutable: false) {
 
 type FileEntry @entity(immutable: false) {
   id: ID!
-  tag: String
-  title: String
-  artist: String
+  fields: [Field!]
+}
+
+type Field @entity(immutable: false) {
+  id: ID!
+  name: String
+  value: String
   atType: String
   acc: String
+  manifestState: ManifestState!
+  price: PricingResource
+}
+
+type PricingResource @entity(immutable: false) {
+  id: ID!
+  owner: Bytes!
+  price: BigInt!
+  currency: String!
 }

@@ -1,7 +1,8 @@
-import { BigInt, Bytes, dataSource, json, store } from "@graphprotocol/graph-ts"
+import { BigInt, Bytes, dataSource, DataSourceContext, json, log, store } from "@graphprotocol/graph-ts"
 import { ManifestPublished as ManifestPublishedEvent, ManifestUpdated as ManifestUpdatedEvent } from "../generated/DatasourceContract/DatasourceContract"
-import { FileEntry, FileMetadata, ManifestPublished, ManifestState, ManifestUpdated } from "../generated/schema"
+import { Field, FileEntry, FileMetadata, ManifestPublished, ManifestState, ManifestUpdated, Schema, SchemaEntries, SchemaField } from "../generated/schema"
 import { FileMetadata as FileMetadataTemplate } from "../generated/templates"
+
 export function handleManifestPublished(event: ManifestPublishedEvent): void {
 
   let entity = new ManifestPublished(
@@ -17,16 +18,49 @@ export function handleManifestPublished(event: ManifestPublishedEvent): void {
   entity.transactionHash = event.transaction.hash
   entity.save()
 
-  // Spawn the file data source to fetch and parse the manifest from IPFS
-  FileMetadataTemplate.create(event.params.manifest_cid)
+  let schema = Schema.load(event.params.schema_id.toHexString())
+  if (schema == null) return
+
+  let versions = schema.versions
+  if (versions == null || versions.length == 0) return
+
+  let schemaEntries = SchemaEntries.load(versions[0])
+  if (schemaEntries == null) return
+
+  let fieldPointers = schemaEntries.fields
+  if (fieldPointers == null) return
+
+  // Build a serialized representation of the schema fields
+  // Format: "name:type,name:type,name:type"
+  let fieldPairs: string[] = []
+  for (let i = 0; i < fieldPointers.length; i++) {
+    let schemaField = SchemaField.load(fieldPointers[i])
+    if (schemaField != null) {
+      fieldPairs.push(schemaField.name + ":" + schemaField.fieldType)
+    }
+  }
+
+  let schemaName = schema.name
+
+  if (schemaName == null) {
+    schemaName = "unknown_schema_name"
+  }
 
   let stateId = entity.owner.concat(entity.schema_id)
   let state = new ManifestState(stateId)
+
+  let context = new DataSourceContext()
+  context.setString("schemaId", event.params.schema_id.toHexString())
+  context.setString("fields", fieldPairs.join(","))
+  context.setString("manifestId", state.id.toHexString())
+
+  FileMetadataTemplate.createWithContext(event.params.manifest_cid, context)
   state.owner = entity.owner
   state.schema_id = entity.schema_id
   state.manifest_cid = entity.manifest_cid
   state.version = entity.version
   state.metadata = entity.manifest_cid
+  state.schema_name = schemaName
   state.lastUpdated = event.block.timestamp
   state.save();
 }
@@ -60,14 +94,50 @@ export function handleManifestUpdated(event: ManifestUpdatedEvent): void {
   entity.transactionHash = event.transaction.hash
   entity.save()
 
-  FileMetadataTemplate.create(entity.manifest_cid)
+  let schema = Schema.load(event.params.schema_id.toHexString())
+  if (schema == null) return
+
+  let versions = schema.versions
+  if (versions == null || versions.length == 0) return
+
+  let schemaEntries = SchemaEntries.load(versions[0])
+  if (schemaEntries == null) return
+
+  let fieldPointers = schemaEntries.fields
+  if (fieldPointers == null) return
+
+  let schemaName = schema.name
+
+  if (schemaName == null) {
+    schemaName = "unknown_schema_name"
+  }
+
+
+  // Build a serialized representation of the schema fields
+  // Format: "name:type,name:type,name:type"
+  let fieldPairs: string[] = []
+  for (let i = 0; i < fieldPointers.length; i++) {
+    let schemaField = SchemaField.load(fieldPointers[i])
+    if (schemaField != null) {
+      fieldPairs.push(schemaField.name + ":" + schemaField.fieldType)
+    }
+  }
 
   // Update manifest state
   if (state == null) {
     state = new ManifestState(stateId)
     state.owner = entity.owner
     state.schema_id = entity.schema_id
+    state.schema_name = schemaName
   }
+
+  let context = new DataSourceContext()
+  context.setString("schemaId", event.params.schema_id.toHexString())
+  context.setString("fields", fieldPairs.join(","))
+  context.setString("manifestId", state.id.toHexString())
+
+  FileMetadataTemplate.createWithContext(event.params.manifest_cid, context)
+
   state.manifest_cid = entity.manifest_cid
   state.version = entity.version
   state.metadata = entity.manifest_cid
@@ -79,72 +149,116 @@ export function handleManifestUpdated(event: ManifestUpdatedEvent): void {
 export function handleMetadata(content: Bytes): void {
 
   let cid = dataSource.stringParam()
-  let metadata = new FileMetadata(cid)
-  
+  let context = dataSource.context()
+  let schemaIdString = context.getString("schemaId")
+  let fieldsString = context.getString("fields")
+  let manifestId = context.getString("manifestId");
+
+  if (manifestId == null) {
+    manifestId = "null_ID"
+  }
+
+  // Parse the field definitions from context
+  let fieldPairs = fieldsString.split(",")
+  let fieldNames: string[] = []
+  let fieldTypes: string[] = []
+  for (let i = 0; i < fieldPairs.length; i++) {
+    let parts = fieldPairs[i].split(":")
+    if (parts.length == 2) {
+      fieldNames.push(parts[0])
+      fieldTypes.push(parts[1])
+    }
+  }
+
+  let fileMetadata = new FileMetadata(cid)
+
   let parsed = json.try_fromBytes(content)
   if (parsed.isError) return
 
-  let obj = parsed.value.toObject()
+  let ipfsFileObj = parsed.value.toObject()
 
-  let versionVal = obj.get("version")
+  let versionVal = ipfsFileObj.get("version")
   if (versionVal == null) return
-  let manifestVersion = BigInt.fromU64(versionVal.toU64())
-  metadata.manifestVersion = manifestVersion
+  fileMetadata.manifestVersion = BigInt.fromU64(versionVal.toU64())
+  fileMetadata.schemaId = schemaIdString
 
-  let entriesVal = obj.get("entries")
+  let entriesVal = ipfsFileObj.get("entries")
   if (entriesVal == null) return
-  let entries = entriesVal.toArray()
+  let fileEntriesArray = entriesVal.toArray()
 
   let currentEntries: string[] = []
-  for (let i = 0; i < entries.length; i++) {
 
-    let entry = entries[i].toObject()
+  for (let i = 0; i < fileEntriesArray.length; i++) {
+    let fileEntryObj = fileEntriesArray[i].toObject()
+    let entryId = cid + "-" + i.toString()
 
-    let tagVal = entry.get("tag")
-    if (tagVal == null) continue
-    let tag = tagVal.toString()
-
-    let entryId = `${cid}-${i.toString()}`
-
-    let fieldsVal = entry.get("fields")
-    if (fieldsVal == null) continue
-    let fields = fieldsVal.toObject()
-
-    let titleVal = fields.get("title")
-    if (titleVal == null) continue
-    let title = titleVal.toString()
-
-    let artistVal = fields.get("artist")
-    if (artistVal == null) continue
-    let artist = artistVal.toString()
-
-    let audioVal = fields.get("audio")
-    if (audioVal == null) continue
-    let audio = audioVal.toObject()
-
-    let atTypeVal = audio.get("@type")
-    if (atTypeVal  == null) continue
-    let atType = atTypeVal.toString()
-
-    let gadgetVal = audio.get("gadgetDescriptor")
-    if (gadgetVal == null) continue
-    let gadget = gadgetVal.toObject()
-
-    let accVal = gadget.get("type")
-    if (accVal == null) continue
-    let acc = accVal.toString()
+    let fileFieldsVal = fileEntryObj.get("fields")
+    if (fileFieldsVal == null) continue
+    let fileFields = fileFieldsVal.toObject()
 
     let fileEntry = new FileEntry(entryId)
-    fileEntry.tag = tag
-    fileEntry.title = title
-    fileEntry.artist = artist
-    fileEntry.atType = atType
-    fileEntry.acc = acc
+    let fileEntryFieldsArray: string[] = []
+
+    for (let j = 0; j < fieldNames.length; j++) {
+      let fieldKey = fieldNames[j]
+      let fieldType = fieldTypes[j]
+
+      let fieldEntityId = entryId + "-" + fieldKey
+      let fileField = new Field(fieldEntityId)
+      fileField.name = fieldKey
+      fileField.atType = fieldType
+
+      if (fieldType == "encrypted") {
+        let valueVal = fileFields.get(fieldKey)
+        if (valueVal == null) continue
+        let valueObj = valueVal.toObject()
+
+        let gadgetVal = valueObj.get("gadgetDescriptor")
+        if (gadgetVal == null) continue
+        let gadget = gadgetVal.toObject()
+
+        let accVal = gadget.get("type")
+        if (accVal == null) {
+          fileField.acc = "no_acc"
+          fileField.value = "unknown"
+          fileField.price = "unknown"
+        } else {
+          fileField.acc = accVal.toString()
+          fileField.value = "enc"
+          let paramsVal = gadget.get("params")
+          if(paramsVal == null) {
+            fileField.price = "unknown"
+          } else {
+
+            let params = paramsVal.toObject()
+            let resourceId = params.get("resourceId")
+            if (resourceId == null) {
+              fileField.price = "unknown"
+            } else {
+              fileField.price = resourceId.toString()
+            }
+          }
+        }
+      } else {
+        fileField.acc = "plain"
+        let valueVal = fileFields.get(fieldKey)
+        if (valueVal == null) {
+          fileField.value = "unknown_val"
+        } else {
+          fileField.value = valueVal.toString()
+        }
+      }
+
+      fileField.manifestState = Bytes.fromHexString(manifestId)
+      fileField.save()
+      fileEntryFieldsArray.push(fieldEntityId)
+    }
+
+    fileEntry.fields = fileEntryFieldsArray
     fileEntry.save()
     currentEntries.push(entryId)
   }
 
-  metadata.entries = currentEntries
-
-  metadata.save()
+  fileMetadata.entries = currentEntries
+  fileMetadata.save()
 }
