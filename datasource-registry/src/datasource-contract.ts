@@ -241,7 +241,6 @@ export function handleMetadata(content: Bytes): void {
         }
       } else {
         fileField.acc = "plain"
-        fileField.price = "NO_PRICE"
         let valueVal = fileFields.get(fieldKey)
         if (valueVal == null) {
           fileField.value = "unknown_val"

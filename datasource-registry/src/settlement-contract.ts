@@ -1,18 +1,9 @@
-import { Address, BigInt, log } from "@graphprotocol/graph-ts";
+import { log } from "@graphprotocol/graph-ts";
 import { PriceUpdated, PricingResource, ResourceCreated } from "../generated/schema";
 import { PriceUpdated as PriceUpdatedEvent, ResourceCreated as ResourceCreatedEvent} from "../generated/SettlementContract/SettlementContract";
 
 
 export function handleResourceCreated(event: ResourceCreatedEvent): void {
-
-    let sentinel = PricingResource.load("NO_PRICE")
-    if (sentinel == null) {
-      sentinel = new PricingResource("NO_PRICE")
-      sentinel.price = BigInt.zero()
-      sentinel.currency = "none"
-      sentinel.owner = Address.empty()
-      sentinel.save()
-    }
 
     let entity = new ResourceCreated(event.transaction.hash.concatI32(event.logIndex.toI32()))
 
