@@ -38,6 +38,9 @@ After you have ensured that your changes are correct and working, navigate to th
 ### Querying the Subgraph
 
 #### Querying for a file
+> Note: Queries are **schema specific**. In order to properly form a query, you must know what schema your data conforms to. For example, if a schema is related to CSV data, it is unlikely to contain an "artist" field.
+
+Here, we are using a music related schema.
 
 ```
 {
