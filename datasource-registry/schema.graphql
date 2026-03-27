@@ -79,16 +79,16 @@ type ManifestState @entity(immutable: false) {
   schema_id: Bytes!
   schema_name: String!
   manifest_cid: String!
-  metadata: FileMetadata!
+  manifest: Manifest!
   version: BigInt!
   lastUpdated: BigInt!
 }
 
-type FileMetadata @entity(immutable: false) {
+type Manifest @entity(immutable: false) {
   id: ID!
   manifestVersion: BigInt
   schemaId: String
-  entries: [FileEntry!]
+  files: [FileEntry!]
 }
 
 type FileEntry @entity(immutable: false) {

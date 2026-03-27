@@ -74,7 +74,7 @@ dataSources:
           handler: handlePriceUpdated
       file: ./src/settlement-contract.ts
 templates:
-  - name: FileMetadata
+  - name: Manifest
     kind: file/ipfs
     mapping:
       apiVersion: 0.0.9
@@ -82,7 +82,7 @@ templates:
       file: ./src/datasource-contract.ts
       handler: handleMetadata
       entities:
-        - FileMetadata
+        - Manifest
         - FileEntry
         - Field
       abis:

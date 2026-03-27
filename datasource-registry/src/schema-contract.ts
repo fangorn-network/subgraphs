@@ -1,7 +1,7 @@
-import { BigInt, Bytes, dataSource, json, log, store } from "@graphprotocol/graph-ts"
+import { BigInt, Bytes, dataSource, json, log } from "@graphprotocol/graph-ts"
 import {SchemaRegistered as SchemaRegisteredEvent, SchemaUpdated as SchemaUpdatedEvent} from "../generated/SchemaContract/SchemaContract"
 import { SchemaRegistered, SchemaUpdated, Schema, SchemaEntries, SchemaField } from "../generated/schema"
-import { FileMetadata as FileMetadataTemplate, Schema as SchemaTemplate } from "../generated/templates"
+import { Schema as SchemaTemplate } from "../generated/templates"
 
 export function handleSchemaRegistered(event: SchemaRegisteredEvent): void {
 

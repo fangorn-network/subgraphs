@@ -45,8 +45,8 @@ Example query:
     manifestState {
     owner,
     schema_name,
-    metadata{
-      entries{
+    manifest{
+      files{
         fields {
           name
           value
@@ -68,14 +68,12 @@ The query above would be for a music based schema where someone is querying for 
 
 ```
 {
-  fields (where: {manifestState_: {schema_name: "noagent-fangorn.test.music.v0"}, 
-    name: "artist", 
-    value:"Theo Cappucino"}) {
+  fields (where: {manifestState_: {schema_name: "noagent-fangorn.test.music.v0"}, name: "artist", value:"Theo Cappucino"}) {
     manifestState {
     owner,
     schema_name,
-    metadata{
-      entries{
+    manifest{
+      files{
         fields {
           name
           value
@@ -95,7 +93,7 @@ The query above would be for a music based schema where someone is querying for 
 
 The data structure goes as follows:
 
-`ManifestState -> FileMetadata -> [FileEntry -> [Field -> ManifestStateId]]`
+`ManifestState -> Manifest -> [FileEntry -> [Field -> ManifestStateId]]`
 
 Where the arrows represent pointers. It is read as one ManifestState references one FileMetadata. One FileMetadata references many FileEntries. Each FileEntry references many Fields. Each Field references the top level ManifestState.
 
