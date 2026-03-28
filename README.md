@@ -37,10 +37,9 @@ After you have ensured that your changes are correct and working, navigate to th
 
 ### Querying the Subgraph
 
-#### Querying for a file
-> Note: Queries are **schema specific**. In order to properly form a query, you must know what schema your data conforms to. For example, if a schema is related to CSV data, it is unlikely to contain an "artist" field.
+#### Querying for a manifest
+> Note: Queries are **schema specific**. In order to properly form a query, you must know what schema your data conforms to. For example, if a schema is related to CSV data, it is unlikely to contain an "artist" field. All examples below use a music related schema
 
-Here, we are using a music related schema.
 
 ```
 {
@@ -67,7 +66,7 @@ Here, we are using a music related schema.
 }
 ```
 
-The query above would be for a music based schema where someone is querying for the artist "Theo Cappucino". It will return every manifest that has Theo Cappucino as the artist. To guarantee the conformance of a schema, one can discriminate even further like this:
+Above, someone wishes to return an entire manifest (all files that are a part of the same document) where one file is related to the artist "Theo Cappucino". It will return every manifest that has Theo Cappucino as the artist. To guarantee the conformance of a schema, one can discriminate even further like this:
 
 ```
 {
@@ -170,6 +169,73 @@ The data output of the above query looks like:
   }
 }
 ```
+
+### Querying for a file
+
+If you only wish to retrieve the files that are associated with the matching field, this can be done like
+
+```
+{
+  fields (first: 1, where: {manifestState_: {schema_name: "noagent-fangorn.test.music.v0"}, name: "artist", value:"Theo Cappucino"}) {
+    fileEntry {
+        fields {
+          name
+          value
+          atType
+          acc
+          price {
+            id
+            price
+            currency
+          }
+        }
+      }
+    }
+  }
+```
+
+This returns:
+
+```
+{
+  "data": {
+    "fields": [
+      {
+        "fileEntry": {
+          "fields": [
+            {
+              "name": "artist",
+              "value": "Theo Cappucino",
+              "atType": "string",
+              "acc": "plain",
+              "price": null
+            },
+            {
+              "name": "audio",
+              "value": "enc",
+              "atType": "encrypted",
+              "acc": "settled",
+              "price": {
+                "id": "0x53fe1f08e8cf5bf6b6e9afa38ab251cdf5f5673494ff965ffbe3528acaf2a68e",
+                "price": "1",
+                "currency": "USDC"
+              }
+            },
+            {
+              "name": "title",
+              "value": "That Boy Ain't Right",
+              "atType": "string",
+              "acc": "plain",
+              "price": null
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
 ### Querying for a schema
 
 The schema, which is stored on IPFS, that created the data described in the "Querying for a File section" is:

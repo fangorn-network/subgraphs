@@ -49,12 +49,6 @@ export function handleManifestPublished(event: ManifestPublishedEvent): void {
   let stateId = entity.owner.concat(entity.schema_id)
   let state = new ManifestState(stateId)
 
-  let context = new DataSourceContext()
-  context.setString("schemaId", event.params.schema_id.toHexString())
-  context.setString("fields", fieldPairs.join(","))
-  context.setString("manifestId", state.id.toHexString())
-
-  ManifestTemplate.createWithContext(event.params.manifest_cid, context)
   state.owner = entity.owner
   state.schema_id = entity.schema_id
   state.manifest_cid = entity.manifest_cid
@@ -63,6 +57,14 @@ export function handleManifestPublished(event: ManifestPublishedEvent): void {
   state.schema_name = schemaName
   state.lastUpdated = event.block.timestamp
   state.save();
+
+  let context = new DataSourceContext()
+  context.setString("schemaId", event.params.schema_id.toHexString())
+  context.setString("fields", fieldPairs.join(","))
+  context.setString("manifestStatetId", state.id.toHexString())
+
+  ManifestTemplate.createWithContext(event.params.manifest_cid, context)
+
 }
 
 export function handleManifestUpdated(event: ManifestUpdatedEvent): void {
@@ -73,16 +75,18 @@ export function handleManifestUpdated(event: ManifestUpdatedEvent): void {
   if (state != null) {
     let oldManifest = Manifest.load(state.manifest_cid)
     if (oldManifest != null) {
-      let oldFiles = oldManifest.files
+      let oldFilesLoader = oldManifest.files
+      let oldFiles = oldFilesLoader.load();
       if (oldFiles != null && oldFiles.length > 0) {
         for (let i = 0; i < oldFiles.length; i++) {
-          let oldFileId = oldFiles[i]
+          let oldFileId = oldFiles[i].id
           let oldFile = FileEntry.load(oldFileId)
           if (oldFile != null) {
-            let oldFields = oldFile.fields
+            let oldFieldsLoader = oldFile.fields
+            let oldFields = oldFieldsLoader.load()
             if(oldFields != null && oldFields.length > 0) {
               for (let j = 0; j < oldFields.length; j++) {
-                store.remove("Field", oldFields[j])
+                store.remove("Field", oldFields[j].id)
               }
             }
             store.remove("FileEntry", oldFileId)
@@ -143,18 +147,18 @@ export function handleManifestUpdated(event: ManifestUpdatedEvent): void {
     state.schema_name = schemaName
   }
 
-  let context = new DataSourceContext()
-  context.setString("schemaId", event.params.schema_id.toHexString())
-  context.setString("fields", fieldPairs.join(","))
-  context.setString("manifestId", state.id.toHexString())
-
-  ManifestTemplate.createWithContext(event.params.manifest_cid, context)
-
   state.manifest_cid = entity.manifest_cid
   state.version = entity.version
   state.manifest = entity.manifest_cid
   state.lastUpdated = entity.blockTimestamp
   state.save()
+
+  let context = new DataSourceContext()
+  context.setString("schemaId", event.params.schema_id.toHexString())
+  context.setString("fields", fieldPairs.join(","))
+  context.setString("manifestStatetId", state.id.toHexString())
+
+  ManifestTemplate.createWithContext(event.params.manifest_cid, context)
 
 }
 
@@ -164,10 +168,11 @@ export function handleMetadata(content: Bytes): void {
   let context = dataSource.context()
   let schemaIdString = context.getString("schemaId")
   let fieldsString = context.getString("fields")
-  let manifestId = context.getString("manifestId");
+  let manifestStatetIdString = context.getString("manifestStatetId");
+  let manifestStateId = Bytes.empty();
 
-  if (manifestId == null) {
-    manifestId = "null_ID"
+  if (manifestStatetIdString != null) {
+      manifestStateId = Bytes.fromHexString(manifestStatetIdString)
   }
 
   // Parse the field definitions from context
@@ -193,12 +198,11 @@ export function handleMetadata(content: Bytes): void {
   if (versionVal == null) return
   manifest.manifestVersion = BigInt.fromU64(versionVal.toU64())
   manifest.schemaId = schemaIdString
+  manifest.save()
 
   let entriesVal = ipfsFileObj.get("entries")
   if (entriesVal == null) return
   let fileEntriesArray = entriesVal.toArray()
-
-  let currentFiles: string[] = []
 
   for (let i = 0; i < fileEntriesArray.length; i++) {
     let fileEntryObj = fileEntriesArray[i].toObject()
@@ -209,7 +213,8 @@ export function handleMetadata(content: Bytes): void {
     let fileFields = fileFieldsVal.toObject()
 
     let fileEntry = new FileEntry(entryId)
-    let fileEntryFieldsArray: string[] = []
+    fileEntry.manifest = manifest.id
+    fileEntry.save()
 
     for (let j = 0; j < fieldNames.length; j++) {
       let fieldKey = fieldNames[j]
@@ -261,16 +266,9 @@ export function handleMetadata(content: Bytes): void {
         }
       }
 
-      fileField.manifestState = Bytes.fromHexString(manifestId)
+      fileField.manifestState = manifestStateId
+      fileField.fileEntry = fileEntry.id
       fileField.save()
-      fileEntryFieldsArray.push(fieldEntityId)
     }
-
-    fileEntry.fields = fileEntryFieldsArray
-    fileEntry.save()
-    currentFiles.push(entryId)
   }
-
-  manifest.files = currentFiles
-  manifest.save()
 }
