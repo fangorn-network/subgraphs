@@ -74,6 +74,7 @@ export function handleManifestPublished(event: ManifestPublishedEvent): void {
 
   state.owner = entity.owner
   state.schema_id = entity.schema_id
+  state.schema = schema.id
   state.manifest_cid = entity.manifest_cid
   state.version = entity.version
   state.manifest = entity.manifest_cid
