@@ -3,6 +3,35 @@ import { ManifestPublished as ManifestPublishedEvent, ManifestUpdated as Manifes
 import { Field, FileEntry, Manifest, ManifestPublished, ManifestState, ManifestUpdated, Schema, SchemaEntries, SchemaField } from "../generated/schema"
 import { Manifest as ManifestTemplate } from "../generated/templates"
 
+function cleanupOldManifest(oldManifestCid: string): void {
+  let oldManifest = Manifest.load(oldManifestCid)
+  if (oldManifest != null) {
+    let fileIds = oldManifest.files
+    if (fileIds != null && fileIds.length > 0) {
+      for (let i = 0; i < fileIds.length; i++) {
+        let fileId = fileIds[i]
+        let file = FileEntry.load(fileId)
+        if (file != null) {
+          let fieldIds = file.fields
+          if (fieldIds != null && fieldIds.length > 0) {
+            for (let j = 0; j < fieldIds.length; j++) {
+              store.remove("Field", fieldIds[j])
+            }
+          } else {
+            log.error("During cleanup, the fileFieldIds were null for {}", [oldManifestCid])
+          }
+          store.remove("FileEntry", fileId)
+        } else {
+          log.error("During cleanup, the fileEntryIds were null for {}", [oldManifestCid])
+        }
+      }
+    }
+    store.remove("Manifest", oldManifestCid)
+  } else {
+    log.warning("During cleanup, oldManifest was null for {}. It may not have been indexed yet via IPFS.", [oldManifestCid])
+  }
+}
+
 export function handleManifestPublished(event: ManifestPublishedEvent): void {
   let entity = new ManifestPublished(
     event.transaction.hash.concatI32(event.logIndex.toI32())
@@ -63,15 +92,15 @@ export function handleManifestPublished(event: ManifestPublishedEvent): void {
   let stateId = entity.owner.concat(entity.schema_id)
 
   let potentialOldState = ManifestState.load(stateId)
-  let oldManifestCid = ""
-  let isUpdate = false
-  if(potentialOldState != null) {
-    log.error("An old manifest was found, but a new Manifest Published event occurred {}", [stateId.toHexString()])
-    oldManifestCid = potentialOldState.manifest_cid
-    isUpdate = true
+  if (potentialOldState != null) {
+    log.warning("An old manifest was found, but a new Manifest Published event occurred {}", [stateId.toHexString()])
+    let oldManifestCid = potentialOldState.manifest_cid
+    if (oldManifestCid != null && oldManifestCid != "") {
+      cleanupOldManifest(oldManifestCid)
+    }
   }
-  let state = new ManifestState(stateId)
 
+  let state = new ManifestState(stateId)
   state.owner = entity.owner
   state.schema_id = entity.schema_id
   state.schema = schema.id
@@ -80,18 +109,15 @@ export function handleManifestPublished(event: ManifestPublishedEvent): void {
   state.manifest = entity.manifest_cid
   state.schema_name = schemaName
   state.lastUpdated = event.block.timestamp
-  state.save();
+  state.save()
 
   let context = new DataSourceContext()
   context.setString("schemaId", event.params.schema_id.toHexString())
   context.setString("fields", fieldPairs.join(","))
   context.setString("manifestStateId", state.id.toHexString())
-  context.setString("oldManifestCid", oldManifestCid)
-  context.setString("currentManifestCid", state.manifest_cid)
-  context.setBoolean("isUpdate", isUpdate)
+  context.setString("lastUpdated", state.lastUpdated.toString())
 
   ManifestTemplate.createWithContext(state.manifest_cid, context)
-
 }
 
 export function handleManifestUpdated(event: ManifestUpdatedEvent): void {
@@ -130,7 +156,6 @@ export function handleManifestUpdated(event: ManifestUpdatedEvent): void {
     schemaName = "unknown_schema_name"
   }
 
-
   // Build a serialized representation of the schema fields
   // Format: "name:type,name:type,name:type"
   let fieldPairs: string[] = []
@@ -148,9 +173,14 @@ export function handleManifestUpdated(event: ManifestUpdatedEvent): void {
     state.owner = entity.owner
     state.schema_id = entity.schema_id
     state.schema_name = schemaName
+    state.schema = schema.id
   }
 
+  // Clean up old manifest data before updating state
   let oldManifestCid = state.manifest_cid
+  if (oldManifestCid != null && oldManifestCid != "" && oldManifestCid != entity.manifest_cid) {
+    cleanupOldManifest(oldManifestCid)
+  }
 
   state.manifest_cid = entity.manifest_cid
   state.version = entity.version
@@ -162,12 +192,9 @@ export function handleManifestUpdated(event: ManifestUpdatedEvent): void {
   context.setString("schemaId", event.params.schema_id.toHexString())
   context.setString("fields", fieldPairs.join(","))
   context.setString("manifestStateId", state.id.toHexString())
-  context.setString("oldManifestCid", oldManifestCid)
-  context.setString("currentManifestCid", state.manifest_cid)
-  context.setBoolean("isUpdate", true)
+  context.setString("lastUpdated", state.lastUpdated.toString())
 
   ManifestTemplate.createWithContext(state.manifest_cid, context)
-
 }
 
 export function handleMetadata(content: Bytes): void {
@@ -177,9 +204,6 @@ export function handleMetadata(content: Bytes): void {
   let schemaIdString = context.getString("schemaId")
   let fieldsString = context.getString("fields")
   let manifestStateIdString = context.getString("manifestStateId")
-  let oldManifestCid = context.getString("oldManifestCid")
-  let currentManifestCid = context.getString("currentManifestCid")
-  let isUpdate = context.getBoolean("isUpdate")
 
   if (manifestStateIdString == null) {
     log.error("No manifestStateId found", [])
@@ -187,6 +211,15 @@ export function handleMetadata(content: Bytes): void {
   }
 
   let manifestStateId = Bytes.fromHexString(manifestStateIdString)
+
+  let lastUpdatedString = context.getString("lastUpdated")
+  let lastUpdated = BigInt.fromString(lastUpdatedString)
+  
+  let currentState = ManifestState.load(manifestStateId)
+  if (currentState != null && currentState.lastUpdated.gt(lastUpdated)) {
+    log.warning("Skipping stale manifest {}. State has moved on.", [cid])
+    return
+  }
 
   let parsed = json.try_fromBytes(content)
   if (parsed.isError) {
@@ -202,41 +235,6 @@ export function handleMetadata(content: Bytes): void {
   if (versionVal == null || entriesVal == null) {
     log.warning("Invalid manifest format for CID: {}", [cid])
     return
-  }
-
-  if (isUpdate && oldManifestCid != null && oldManifestCid != "" && oldManifestCid != currentManifestCid) {
-    let oldManifest = Manifest.load(oldManifestCid)
-    if (oldManifest != null) {
-      let fileIds = oldManifest.files
-      if (fileIds != null && fileIds.length > 0) {
-        for (let i = 0; i < fileIds.length; i++) {
-          let fileId = fileIds[i]
-          let file = FileEntry.load(fileId)
-          if (file != null) {
-            let fieldIds = file.fields
-            if(fieldIds != null && fieldIds.length > 0) {
-              for (let j = 0; j < fieldIds.length; j++) {
-                store.remove("Field", fieldIds[j])
-              }
-          } else {
-            log.error("During cleanup, the fileFieldIds were null for {}", [oldManifestCid])
-          }
-          store.remove("FileEntry", fileId)
-        } else {
-        log.error("During cleanup, the fileEntryIds were null for {}", [oldManifestCid])
-        }
-      } 
-    } else {
-      log.error("During cleanup, oldManifest was null for {}", [oldManifestCid])
-    }
-    store.remove("Manifest", oldManifestCid)
-  }
-  } else if (isUpdate) {
-      if (oldManifestCid == currentManifestCid) {
-        log.error("oldManifestCid and currentManifestCid were the same on an update {}", [currentManifestCid])
-      } else {
-        log.error("An update was received but the oldManifestCid was null or empty", [])
-      }
   }
 
   let fieldPairs = fieldsString.split(",")
@@ -266,7 +264,7 @@ export function handleMetadata(content: Bytes): void {
     if (fileFieldsVal == null) {
       log.error("File's fields object was null. Skipping this for manifest {}", [cid])
       continue
-    } 
+    }
     let fileFields = fileFieldsVal.toObject()
 
     let fileEntry = new FileEntry(entryId)

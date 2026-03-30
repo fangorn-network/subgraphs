@@ -82,6 +82,7 @@ templates:
       file: ./src/datasource-contract.ts
       handler: handleMetadata
       entities:
+        - ManifestState
         - Manifest
         - FileEntry
         - Field
