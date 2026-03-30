@@ -95,6 +95,7 @@ type Manifest @entity(immutable: false) {
 
 type FileEntry @entity(immutable: false) {
   id: ID!
+  tag: String
   manifest: Manifest
   fields: [Field!]
 }

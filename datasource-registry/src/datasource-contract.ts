@@ -214,7 +214,7 @@ export function handleMetadata(content: Bytes): void {
 
   let lastUpdatedString = context.getString("lastUpdated")
   let lastUpdated = BigInt.fromString(lastUpdatedString)
-  
+
   let currentState = ManifestState.load(manifestStateId)
   if (currentState != null && currentState.lastUpdated.gt(lastUpdated)) {
     log.warning("Skipping stale manifest {}. State has moved on.", [cid])
@@ -267,7 +267,17 @@ export function handleMetadata(content: Bytes): void {
     }
     let fileFields = fileFieldsVal.toObject()
 
+    let tagVal = fileEntryObj.get("tag")
+    let tag = ""
+    if (tagVal == null) {
+      log.error("Tag for file entry was null, replacing with empty tag for manifest cid {}", [cid])
+    } else {
+      tag = tagVal.toString()
+    }
+
     let fileEntry = new FileEntry(entryId)
+    fileEntry.tag = tag
+    
     let fileEntryFieldsArray: string[] = []
 
     for (let j = 0; j < fieldNames.length; j++) {
