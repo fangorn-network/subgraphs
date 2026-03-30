@@ -88,13 +88,13 @@ type Manifest @entity(immutable: false) {
   id: ID!
   manifestVersion: BigInt
   schemaId: String
-  files: [FileEntry!] @derivedFrom(field: "manifest")
+  files: [FileEntry!]
 }
 
 type FileEntry @entity(immutable: false) {
   id: ID!
-  manifest: Manifest!
-  fields: [Field!] @derivedFrom(field: "fileEntry")
+  manifest: Manifest
+  fields: [Field!]
 }
 
 type Field @entity(immutable: false) {
@@ -104,7 +104,7 @@ type Field @entity(immutable: false) {
   atType: String
   acc: String
   manifestState: ManifestState!
-  fileEntry: FileEntry!
+  fileEntry: FileEntry
   price: PricingResource
 }
 
