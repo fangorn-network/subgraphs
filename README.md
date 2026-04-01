@@ -1,6 +1,11 @@
 # Fangorn Subgraphs
 A collection of subgraphs that are used by Fangorn
 
+## Motivation
+Currently, obtaining rich data in the web3 ecosystem is a painful process. At a minimum, you must read from the on chain state for IPFS references and then query for them which leads to a poor user experience.
+However, The Graph has created Subgraphs which listen to on-chain events and allow for storage of on-chain data. Not only that, but they also allow for fetching data from IPFS which greatly enhances the developer experience. This means that developers who might be new to the decentralized web/web3 space can query for data in a familiar manner with GraphQL. Subgraphs not only serve as a perfect decentralized backend for traditional web applications,
+but they also enable much more responsive and enriched agentic experiences. To experience this, check out the fangorn-agent repo on github. 
+
 ## Pre-reqs
 Please ensure you have:
 
