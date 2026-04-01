@@ -78,7 +78,7 @@ type ManifestState @entity(immutable: false) {
   id: Bytes!
   owner: Bytes!
   schema_id: Bytes!
-  schema: Schema!
+  schema: Schema
   schema_name: String!
   manifest_cid: String!
   manifest: Manifest

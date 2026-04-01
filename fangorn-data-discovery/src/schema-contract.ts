@@ -61,6 +61,7 @@ export function handleSchemaUpdated(event: SchemaUpdatedEvent): void {
         schema.versions = versions
     }
   }
+  schema.save();
   SchemaTemplate.create(entity.new_spec_cid)
 }
 
@@ -70,12 +71,18 @@ export function handleSchema(content: Bytes): void {
   let schemaData = new SchemaEntries(cid)
   
   let parsed = json.try_fromBytes(content)
-  if (parsed.isError) return
+  if (parsed.isError) {
+    log.warning("parsing failed in handleSchema for cid ", [cid])
+    return
+  }
 
   let ipfsObj = parsed.value.toObject()
 
   let versionVal = ipfsObj.get("version")
-  if (versionVal == null) return
+  if (versionVal == null) {
+    log.warning("versionVal was null for cid {}", [cid])
+    return
+  }
   let version = BigInt.fromU64(versionVal.toU64())
   schemaData.version = version
 
@@ -84,7 +91,10 @@ export function handleSchema(content: Bytes): void {
   schemaData.agent_id = ""
 
   let definitionVal = ipfsObj.get("definition")
-  if (definitionVal == null) return
+  if (definitionVal == null) {
+    log.warning("definitionVal was null for cid {}",[cid])
+    return
+  }
   let definition = definitionVal.toObject()
 
   let fieldEntries = definition.entries;

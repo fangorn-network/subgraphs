@@ -30,7 +30,7 @@ export function handlePriceUpdated(event: PriceUpdatedEvent): void {
 
     let resource = PricingResource.load(entity.resourceId.toHexString())
     if (resource == null) {
-        log.error("No resource found matching {}", [entity.resourceId.toHexString()])
+        log.warning("No resource found matching {}", [entity.resourceId.toHexString()])
         return
     }
     resource.price = entity.price
