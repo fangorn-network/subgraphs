@@ -1,6 +1,6 @@
 import { log } from "@graphprotocol/graph-ts";
 import { PriceUpdated, PricingResource, ResourceCreated } from "../generated/schema";
-import { PriceUpdated as PriceUpdatedEvent, ResourceCreated as ResourceCreatedEvent} from "../generated/SettlementContract/SettlementContract";
+import { PriceUpdated as PriceUpdatedEvent, ResourceCreated as ResourceCreatedEvent } from "../generated/SettlementContract/SettlementContract";
 
 
 export function handleResourceCreated(event: ResourceCreatedEvent): void {

@@ -1,5 +1,5 @@
 import { BigInt, Bytes, dataSource, json, log } from "@graphprotocol/graph-ts"
-import {SchemaRegistered as SchemaRegisteredEvent, SchemaUpdated as SchemaUpdatedEvent} from "../generated/SchemaContract/SchemaContract"
+import { SchemaRegistered as SchemaRegisteredEvent, SchemaUpdated as SchemaUpdatedEvent } from "../generated/SchemaContract/SchemaContract"
 import { SchemaRegistered, SchemaUpdated, SchemaState, Schema, SchemaField } from "../generated/schema"
 import { Schema as SchemaTemplate } from "../generated/templates"
 
@@ -54,12 +54,12 @@ export function handleSchemaUpdated(schemaUpdatedEvent: SchemaUpdatedEvent): voi
     let versions = schema.versions
     if (versions == null) {
       log.warning("Schema Update for SchemaState {} with no found versions. Adding new entry.", [schema.name])
-        versions = []
-        versions.push(schemaUpdate.newIpfsCid)
-        schema.versions = versions
+      versions = []
+      versions.push(schemaUpdate.newIpfsCid)
+      schema.versions = versions
     } else {
-        versions.push(schemaUpdate.newIpfsCid)
-        schema.versions = versions
+      versions.push(schemaUpdate.newIpfsCid)
+      schema.versions = versions
     }
   }
   schema.save();
@@ -70,7 +70,7 @@ export function handleSchema(content: Bytes): void {
 
   let cid = dataSource.stringParam()
   let schema = new Schema(cid)
-  
+
   let parsed = json.try_fromBytes(content)
   if (parsed.isError) {
     log.warning("parsing failed in handleSchema for cid ", [cid])
@@ -92,7 +92,7 @@ export function handleSchema(content: Bytes): void {
 
   let defititionObj = ipfsSchemaObj.get("definition")
   if (defititionObj == null) {
-    log.warning("defititionObj was null for cid {}",[cid])
+    log.warning("defititionObj was null for cid {}", [cid])
   } else {
     let definition = defititionObj.toObject()
     let fieldEntries = definition.entries;
