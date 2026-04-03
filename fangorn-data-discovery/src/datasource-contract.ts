@@ -97,8 +97,7 @@ export function handleManifestPublished(manifestPublishedEvent: ManifestPublishe
 export function handleManifestUpdated(manifestUpdatedEvent: ManifestUpdatedEvent): void {
   let manifestOwner = manifestUpdatedEvent.params.owner
   let schemaId = manifestUpdatedEvent.params.schema_id
-  deriveManifestStateId(manifestOwner, schemaId)
-  let stateId = manifestOwner.concat(schemaId)
+  let stateId = deriveManifestStateId(manifestOwner, schemaId)
 
   let state = ManifestState.load(stateId)
 
