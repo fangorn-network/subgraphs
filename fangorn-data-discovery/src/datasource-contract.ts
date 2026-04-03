@@ -37,25 +37,25 @@ export function handleManifestPublished(manifestPublishedEvent: ManifestPublishe
   manifestPublished.transactionHash = manifestPublishedEvent.transaction.hash
   manifestPublished.save()
 
-  let schema = SchemaState.load(manifestPublished.schemaId.toHexString())
-  if (schema == null) {
-    log.warning("Schema wasn't found for schema_id: {}", [manifestPublished.schemaId.toHexString()])
+  let schemaState = SchemaState.load(manifestPublished.schemaId.toHexString())
+  if (schemaState == null) {
+    log.warning("SchemaState wasn't found for schema_id: {}", [manifestPublished.schemaId.toHexString()])
     return
 
   } else {
-    let schemas = schema.versions
+    let schemas = schemaState.versions
   if (schemas == null || schemas.length == 0){
-    log.warning("Schema hasn't/wasn't retrieved from IPFS for SchemaState: {}", [schema?.schemaId.toHexString()])
+    log.warning("Schemas weren't retrieved from IPFS for SchemaState: {}", [schemaState?.schemaId.toHexString()])
     return
   }
 
-  let schemaEntries = Schema.load(schemas[0])
-  if (schemaEntries == null) {
-    log.warning("Schema entries weren't found for schema_id: {}", [manifestPublishedEvent.params.schema_id.toHexString()])
+  let schema = Schema.load(schemas[0])
+  if (schema == null) {
+    log.warning("Schema wasn't found for schema_id: {}", [manifestPublishedEvent.params.schema_id.toHexString()])
     return
   }
 
-  let fieldPointers = schemaEntries.fields
+  let fieldPointers = schema.fields
   if (fieldPointers == null) {
     log.warning("Schema fields weren't found for schema_id: {}", [manifestPublishedEvent.params.schema_id.toHexString()])
     return
@@ -63,7 +63,7 @@ export function handleManifestPublished(manifestPublishedEvent: ManifestPublishe
 
   let fieldPairs = deriveSchemaFields(fieldPointers)
 
-  let schemaName = schema.name
+  let schemaName = schemaState.name
 
   if (schemaName == null) {
     log.warning("schema name was null", [])
@@ -75,7 +75,7 @@ export function handleManifestPublished(manifestPublishedEvent: ManifestPublishe
   let manifestState = new ManifestState(stateId)
   manifestState.owner = manifestPublished.owner
   manifestState.schemaId = manifestPublished.schemaId
-  manifestState.schema = schema.id
+  manifestState.schema = schemaState.id
   manifestState.manifestCid = manifestPublished.manifestCid
   manifestState.version = manifestPublished.version
   manifestState.manifest = manifestPublished.manifestCid
