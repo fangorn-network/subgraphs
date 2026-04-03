@@ -61,7 +61,7 @@ type SchemaState @entity(immutable: true) {
 
 type Schema @entity(immutable: true) {
   id: ID!
-  version: BigInt
+  version: String
   agentId: String
   fields: [SchemaField!]
 }

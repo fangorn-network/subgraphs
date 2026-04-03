@@ -84,8 +84,8 @@ templates:
       entities:
         - ManifestState
         - Manifest
-        - FileEntry
-        - Field
+        - File
+        - FileField
       abis:
         - name: Dummy
           file: ./abis/Dummy.json
@@ -98,7 +98,6 @@ templates:
       handler: handleSchema
       entities:
         - Schema
-        - SchemaEntries
         - SchemaField
       abis:
         - name: Dummy

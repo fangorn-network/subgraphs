@@ -45,7 +45,7 @@ export function handleManifestPublished(manifestPublishedEvent: ManifestPublishe
   } else {
     let schemas = schemaState.versions
   if (schemas == null || schemas.length == 0){
-    log.warning("Schemas weren't retrieved from IPFS for SchemaState: {}", [schemaState?.schemaId.toHexString()])
+    log.warning("Schemas weren't retrieved from IPFS for SchemaState: {}", [schemaState.schemaId.toHexString()])
     return
   }
 

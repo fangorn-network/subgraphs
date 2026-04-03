@@ -79,12 +79,12 @@ export function handleSchema(content: Bytes): void {
 
   let ipfsSchemaObj = parsed.value.toObject()
 
-  let version = null;
+  let version = "";
   let versionObj = ipfsSchemaObj.get("version")
   if (versionObj == null) {
     log.warning("versionObj was null for cid {}", [cid])
   } else {
-    version = BigInt.fromU64(versionObj.toU64())
+    version = versionObj.toU64().toString()
   }
 
   schema.version = version
