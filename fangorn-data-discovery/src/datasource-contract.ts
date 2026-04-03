@@ -1,4 +1,4 @@
-import { BigInt, Bytes, dataSource, DataSourceContext, json, log } from "@graphprotocol/graph-ts"
+import { BigInt, Bytes, dataSource, DataSourceContext, ipfs, json, log } from "@graphprotocol/graph-ts"
 import { ManifestPublished as ManifestPublishedEvent, ManifestUpdated as ManifestUpdatedEvent } from "../generated/DatasourceContract/DatasourceContract"
 import { FileField, File, Manifest, ManifestPublished, ManifestState, ManifestUpdated, SchemaState, Schema, SchemaField } from "../generated/schema"
 import { Manifest as ManifestTemplate } from "../generated/templates"
@@ -6,6 +6,50 @@ import { Manifest as ManifestTemplate } from "../generated/templates"
 
 function deriveManifestStateId(owner: Bytes, schemaId: Bytes): Bytes {
 	return owner.concat(schemaId)
+}
+
+// This function is for when a SchemaState has populated CIDS, but the Schema hasn't been populated by the 
+// appropriate IPFS handler yet. We depend on these, so we attempt a direct fetch from IPFS for them.
+function deriveSchemaFieldsFromIpfs(ipfsCid: string): string[] {
+	let fieldPairs: string[] = []
+	let schemaBytes = ipfs.cat(ipfsCid)
+	if (schemaBytes === null) {
+		log.warning("Direct IPFS fetch failed for schema CID: {}", [ipfsCid])
+		return fieldPairs
+	}
+
+	let parsed = json.try_fromBytes(schemaBytes as Bytes)
+	if (parsed.isError) {
+		log.warning("Failed to parse schema from IPFS for CID: {}", [ipfsCid])
+		return fieldPairs
+	}
+
+	let ipfsSchemaObj = parsed.value.toObject()
+	let definitionVal = ipfsSchemaObj.get("definition")
+	if (definitionVal === null) {
+		log.warning("definitionObj was null for IPFS CID: {}", [ipfsCid])
+		return fieldPairs
+	}
+
+	let definition = definitionVal.toObject()
+	let fieldEntries = definition.entries
+	for (let i = 0; i < fieldEntries.length; i++) {
+		let entry = fieldEntries[i]
+		let key = entry.key
+		let valObj = entry.value.toObject()
+		let atTypeVal = valObj.get("@type")
+		let fieldType = "unknown"
+		if (atTypeVal !== null) {
+			fieldType = atTypeVal.toString()
+		}
+		fieldPairs.push(key + ":" + fieldType)
+	}
+	
+	if (fieldPairs.length > 0) {
+		log.info("Fetching directly from IPFS succeeded for ipfsCid {}", [ipfsCid])
+	}
+
+	return fieldPairs
 }
 
 function deriveSchemaFields(fieldPointers: string[]): string[] {
@@ -41,56 +85,59 @@ export function handleManifestPublished(manifestPublishedEvent: ManifestPublishe
 	if (schemaState == null) {
 		log.warning("SchemaState wasn't found for schema_id: {}", [manifestPublished.schemaId.toHexString()])
 		return
-	} else {
-		let schemas = schemaState.versions
-		if (schemas == null || schemas.length == 0) {
-			log.warning("Schemas weren't retrieved from IPFS for SchemaState: {}", [schemaState.schemaId.toHexString()])
-			return
-		}
-
-		let schema = Schema.load(schemas[0])
-		if (schema == null) {
-			log.warning("Schema wasn't found for schema_id: {}", [manifestPublishedEvent.params.schema_id.toHexString()])
-			return
-		}
-
-		let fieldPointers = schema.fields
-		if (fieldPointers == null) {
-			log.warning("Schema fields weren't found for schema_id: {}", [manifestPublishedEvent.params.schema_id.toHexString()])
-			return
-		}
-
-		let fieldPairs = deriveSchemaFields(fieldPointers)
-
-		let schemaName = schemaState.name
-
-		if (schemaName == null) {
-			log.warning("schema name was null", [])
-			schemaName = "unknown_schema_name"
-		}
-
-		let stateId = deriveManifestStateId(manifestPublished.owner, manifestPublished.schemaId)
-
-		let manifestState = new ManifestState(stateId)
-		manifestState.owner = manifestPublished.owner
-		manifestState.schemaId = manifestPublished.schemaId
-		manifestState.schema = schemaState.id
-		manifestState.manifestCid = manifestPublished.manifestCid
-		manifestState.version = manifestPublished.version
-		manifestState.manifest = manifestPublished.manifestCid
-		manifestState.schemaName = schemaName
-		manifestState.lastUpdated = manifestPublishedEvent.block.timestamp
-		manifestState.save()
-
-		let context = new DataSourceContext()
-		context.setString("schemaId", manifestPublishedEvent.params.schema_id.toHexString())
-		context.setString("fields", fieldPairs.join(","))
-		context.setString("manifestStateId", manifestState.id.toHexString())
-		context.setString("lastUpdated", manifestState.lastUpdated.toString())
-
-		ManifestTemplate.createWithContext(manifestState.manifestCid, context)
 	}
 
+	let schemas = schemaState.versions
+	if (schemas == null || schemas.length == 0) {
+		log.warning("Schemas IPFS CIDs weren't set for SchemaState: {}", [schemaState.schemaId.toHexString()])
+		return
+	}
+
+	let fieldPairs: string[] = [];
+
+	// Try loading the Schema entity first
+	let schema = Schema.load(schemas[0])
+	if (schema != null) {
+		let fieldPointers = schema.fields
+		if (fieldPointers != null) {
+			fieldPairs = deriveSchemaFields(fieldPointers)
+		}
+	} else {
+		log.warning("ManifestPublish: Schema failed to load. Attempting direct fetch from IPFS.", [])
+		fieldPairs = deriveSchemaFieldsFromIpfs(schemas[0])
+	}
+
+	if (fieldPairs.length == 0) {
+		log.warning("Could not resolve schema fields for schema_id: {}", [manifestPublished.schemaId.toHexString()])
+		return
+	}
+
+	let schemaName = schemaState.name
+	if (schemaName == null) {
+		log.warning("schema name was null", [])
+		schemaName = "unknown_schema_name"
+	}
+
+	let stateId = deriveManifestStateId(manifestPublished.owner, manifestPublished.schemaId)
+
+	let manifestState = new ManifestState(stateId)
+	manifestState.owner = manifestPublished.owner
+	manifestState.schemaId = manifestPublished.schemaId
+	manifestState.schema = schemaState.id
+	manifestState.manifestCid = manifestPublished.manifestCid
+	manifestState.version = manifestPublished.version
+	manifestState.manifest = manifestPublished.manifestCid
+	manifestState.schemaName = schemaName
+	manifestState.lastUpdated = manifestPublishedEvent.block.timestamp
+	manifestState.save()
+
+	let context = new DataSourceContext()
+	context.setString("schemaId", manifestPublishedEvent.params.schema_id.toHexString())
+	context.setString("fields", fieldPairs.join(","))
+	context.setString("manifestStateId", manifestState.id.toHexString())
+	context.setString("lastUpdated", manifestState.lastUpdated.toString())
+
+	ManifestTemplate.createWithContext(manifestState.manifestCid, context)
 }
 
 export function handleManifestUpdated(manifestUpdatedEvent: ManifestUpdatedEvent): void {
@@ -113,38 +160,42 @@ export function handleManifestUpdated(manifestUpdatedEvent: ManifestUpdatedEvent
 	manifestUpdated.transactionHash = manifestUpdatedEvent.transaction.hash
 	manifestUpdated.save()
 
-	let schema = SchemaState.load(manifestUpdatedEvent.params.schema_id.toHexString())
-	if (schema == null) {
+	let schemaState = SchemaState.load(manifestUpdatedEvent.params.schema_id.toHexString())
+	if (schemaState == null) {
 		log.warning("schema was null in manifest update for {}", [manifestUpdated.manifestCid])
 		return
 	}
 
-	let versions = schema.versions
-	if (versions == null || versions.length == 0) {
+	let schemas = schemaState.versions
+	if (schemas == null || schemas.length == 0) {
 		log.warning("schema.versions was null or there were no versions in manifest update for {}", [manifestUpdated.manifestCid])
 		return
 	}
 
-	let schemaEntries = Schema.load(versions[0])
-	if (schemaEntries == null) {
-		log.warning("schemaEntries was null in manifest update for {}", [manifestUpdated.manifestCid])
+	let fieldPairs: string[] = [];
+	// Try loading the Schema entity first
+	let schema = Schema.load(schemas[0])
+	if (schema != null) {
+		let fieldPointers = schema.fields
+		if (fieldPointers != null) {
+			fieldPairs = deriveSchemaFields(fieldPointers)
+		}
+	} else {
+		log.warning("ManifestUpdate: Schema failed to load. Attempting direct fetch from IPFS.", [])
+		fieldPairs = deriveSchemaFieldsFromIpfs(schemas[0])
+	}
+
+	if (fieldPairs.length == 0) {
+		log.warning("Could not resolve schema fields for schema_id: {}", [manifestUpdated.schemaId.toHexString()])
 		return
 	}
 
-	let fieldPointers = schemaEntries.fields
-	if (fieldPointers == null) {
-		log.warning("fieldPointers was null in manifest update for {}", [manifestUpdated.manifestCid])
-		return
-	}
-
-	let schemaName = schema.name
+	let schemaName = schemaState.name
 
 	if (schemaName == null) {
 		log.warning("schemaName was null in manifest update for {}", [manifestUpdated.manifestCid])
 		schemaName = "unknown_schema_name"
 	}
-
-	let fieldPairs: string[] = deriveSchemaFields(fieldPointers)
 
 	// Update manifest state
 	if (state == null) {
@@ -153,7 +204,7 @@ export function handleManifestUpdated(manifestUpdatedEvent: ManifestUpdatedEvent
 		state.owner = manifestUpdated.owner
 		state.schemaId = manifestUpdated.schemaId
 		state.schemaName = schemaName
-		state.schema = schema.id
+		state.schema = schemaState.id
 	}
 
 	state.manifestCid = manifestUpdated.manifestCid
