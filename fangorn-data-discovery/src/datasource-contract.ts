@@ -210,6 +210,8 @@ export function handleMetadata(content: Bytes): void {
 		if (parts.length == 2) {
 			fieldNames.push(parts[0])
 			fieldTypes.push(parts[1])
+		} else {
+			log.warning("SchemField name value pair found no pair for ManifestState ID {}", [manifestStateIdString])
 		}
 	}
 

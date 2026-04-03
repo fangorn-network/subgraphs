@@ -90,11 +90,11 @@ export function handleSchema(content: Bytes): void {
   schema.version = version
   schema.agentId = ""
 
-  let defititionObj = ipfsSchemaObj.get("definition")
-  if (defititionObj == null) {
-    log.warning("defititionObj was null for cid {}", [cid])
+  let definitionObj = ipfsSchemaObj.get("definition")
+  if (definitionObj == null) {
+    log.warning("definitionObj was null for cid {}", [cid])
   } else {
-    let definition = defititionObj.toObject()
+    let definition = definitionObj.toObject()
     let fieldEntries = definition.entries;
     let schemaFields: string[] = []
     for (let i = 0; i < fieldEntries.length; i++) {

@@ -29,6 +29,13 @@ type SchemaRegistered @entity(immutable: true) {
   agentId: String!
 }
 
+type SchemaUpdated @entity(immutable: true) {
+  id: Bytes!
+  schemaId: Bytes!
+  newIpfsCid: String!
+  newAgentId: String!
+}
+
 type ResourceCreated @entity(immutable: true) {
   id: Bytes!
   resourceId: Bytes!
@@ -42,13 +49,6 @@ type PriceUpdated @entity(immutable: true) {
   resourceId: Bytes!
   owner: Bytes!
   price: BigInt!
-}
-
-type SchemaUpdated @entity(immutable: true) {
-  id: Bytes!
-  schemaId: Bytes!
-  newIpfsCid: String!
-  newAgentId: String!
 }
 
 type SchemaState @entity(immutable: true) {
