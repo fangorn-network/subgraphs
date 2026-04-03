@@ -226,19 +226,19 @@ export function handleMetadata(content: Bytes): void {
     let fileEntryObj = fileEntriesArray[i].toObject()
     let entryId = cid + "-" + i.toString()
 
-    let fileFieldsVal = fileEntryObj.get("fields")
-    if (fileFieldsVal == null) {
+    let fileFieldsObj = fileEntryObj.get("fields")
+    if (fileFieldsObj == null) {
       log.warning("File's fields object was null. Skipping this for manifest {}", [cid])
       continue
     }
-    let fileFields = fileFieldsVal.toObject()
+    let fileFields = fileFieldsObj.toObject()
 
-    let tagVal = fileEntryObj.get("tag")
+    let tagObj = fileEntryObj.get("tag")
     let tag = ""
-    if (tagVal == null) {
+    if (tagObj == null) {
       log.warning("Tag for file entry was null, replacing with empty tag for manifest cid {}", [cid])
     } else {
-      tag = tagVal.toString()
+      tag = tagObj.toString()
     }
 
     let fileEntry = new File(entryId)
@@ -263,26 +263,26 @@ export function handleMetadata(content: Bytes): void {
         }
         let valueObj = valueVal.toObject()
 
-        let gadgetVal = valueObj.get("gadgetDescriptor")
-        if (gadgetVal == null) {
+        let gadgetObj = valueObj.get("gadgetDescriptor")
+        if (gadgetObj == null) {
           log.warning("Field's type was encrypted, but the gadgetVal was null. Skipping this for manifest {}", [cid])
           continue
         }
-        let gadget = gadgetVal.toObject()
+        let gadget = gadgetObj.toObject()
 
-        let accVal = gadget.get("type")
-        if (accVal == null) {
+        let accObj = gadget.get("type")
+        if (accObj == null) {
           fileField.acc = "no_acc"
           fileField.value = "unknown"
           fileField.pricing = "unknown"
         } else {
-          fileField.acc = accVal.toString()
+          fileField.acc = accObj.toString()
           fileField.value = "enc"
-          let paramsVal = gadget.get("params")
-          if(paramsVal == null) {
+          let paramsObj = gadget.get("params")
+          if(paramsObj == null) {
             fileField.pricing = "unknown"
           } else {
-            let params = paramsVal.toObject()
+            let params = paramsObj.toObject()
             let resourceId = params.get("resourceId")
             if (resourceId == null) {
               fileField.pricing = "unknown"
@@ -293,11 +293,11 @@ export function handleMetadata(content: Bytes): void {
         }
       } else {
         fileField.acc = "plain"
-        let valueVal = fileFields.get(fieldKey)
-        if (valueVal == null) {
+        let valueObj = fileFields.get(fieldKey)
+        if (valueObj == null) {
           fileField.value = "unknown_val"
         } else {
-          fileField.value = valueVal.toString()
+          fileField.value = valueObj.toString()
         }
       }
 
