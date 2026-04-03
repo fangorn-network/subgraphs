@@ -1,46 +1,14 @@
-import { BigInt, Bytes, dataSource, DataSourceContext, json, log, store } from "@graphprotocol/graph-ts"
+import { BigInt, Bytes, dataSource, DataSourceContext, json, log } from "@graphprotocol/graph-ts"
 import { ManifestPublished as ManifestPublishedEvent, ManifestUpdated as ManifestUpdatedEvent } from "../generated/DatasourceContract/DatasourceContract"
-import { Field, FileEntry, Manifest, ManifestPublished, ManifestState, ManifestUpdated, Schema, SchemaEntries, SchemaField } from "../generated/schema"
+import { FileField, File, Manifest, ManifestPublished, ManifestState, ManifestUpdated, SchemaState, Schema, SchemaField } from "../generated/schema"
 import { Manifest as ManifestTemplate } from "../generated/templates"
 
-export function handleManifestPublished(event: ManifestPublishedEvent): void {
-  let entity = new ManifestPublished(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.owner = event.params.owner
-  entity.schema_id = event.params.schema_id
-  entity.manifest_cid = event.params.manifest_cid
-  entity.version = event.params.version
 
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-  entity.save()
+function deriveManifestStateId(owner: Bytes, schemaId: Bytes):Bytes {
+  return owner.concat(schemaId)
+}
 
-  let schema = Schema.load(event.params.schema_id.toHexString())
-  if (schema == null) {
-    log.warning("Schema wasn't found for schema_id: {}", [event.params.schema_id.toHexString()])
-    return
-  }
-
-  let versions = schema.versions
-  if (versions == null || versions.length == 0){
-    log.warning("Schema version wasn't proper for schema_id: {}", [event.params.schema_id.toHexString()])
-    return
-  }
-
-  let schemaEntries = SchemaEntries.load(versions[0])
-  if (schemaEntries == null) {
-    log.warning("Schema entries weren't found for schema_id: {}", [event.params.schema_id.toHexString()])
-    return
-  }
-
-  let fieldPointers = schemaEntries.fields
-  if (fieldPointers == null) {
-    log.warning("Schema fields weren't found for schema_id: {}", [event.params.schema_id.toHexString()])
-    return
-  }
-
+function deriveSchemaFields(fieldPointers: string[]): string[] {
   // Build a serialized representation of the schema fields
   // Format: "name:type,name:type,name:type"
   let fieldPairs: string[] = []
@@ -52,6 +20,48 @@ export function handleManifestPublished(event: ManifestPublishedEvent): void {
       log.warning("schemaField was null", [])
     }
   }
+  return fieldPairs;
+}
+
+export function handleManifestPublished(manifestPublishedEvent: ManifestPublishedEvent): void {
+  let manifestPublished = new ManifestPublished(
+    manifestPublishedEvent.transaction.hash.concatI32(manifestPublishedEvent.logIndex.toI32())
+  )
+  manifestPublished.owner = manifestPublishedEvent.params.owner
+  manifestPublished.schemaId = manifestPublishedEvent.params.schema_id
+  manifestPublished.manifestCid = manifestPublishedEvent.params.manifest_cid
+  manifestPublished.version = manifestPublishedEvent.params.version
+
+  manifestPublished.blockNumber = manifestPublishedEvent.block.number
+  manifestPublished.blockTimestamp = manifestPublishedEvent.block.timestamp
+  manifestPublished.transactionHash = manifestPublishedEvent.transaction.hash
+  manifestPublished.save()
+
+  let schema = SchemaState.load(manifestPublished.schemaId.toHexString())
+  if (schema == null) {
+    log.warning("Schema wasn't found for schema_id: {}", [manifestPublished.schemaId.toHexString()])
+    return
+
+  } else {
+    let schemas = schema.versions
+  if (schemas == null || schemas.length == 0){
+    log.warning("Schema hasn't/wasn't retrieved from IPFS for SchemaState: {}", [schema?.schemaId.toHexString()])
+    return
+  }
+
+  let schemaEntries = Schema.load(schemas[0])
+  if (schemaEntries == null) {
+    log.warning("Schema entries weren't found for schema_id: {}", [manifestPublishedEvent.params.schema_id.toHexString()])
+    return
+  }
+
+  let fieldPointers = schemaEntries.fields
+  if (fieldPointers == null) {
+    log.warning("Schema fields weren't found for schema_id: {}", [manifestPublishedEvent.params.schema_id.toHexString()])
+    return
+  }
+
+  let fieldPairs = deriveSchemaFields(fieldPointers)
 
   let schemaName = schema.name
 
@@ -60,110 +70,107 @@ export function handleManifestPublished(event: ManifestPublishedEvent): void {
     schemaName = "unknown_schema_name"
   }
 
-  let stateId = entity.owner.concat(entity.schema_id)
+  let stateId = deriveManifestStateId(manifestPublished.owner, manifestPublished.schemaId)
 
-  let state = new ManifestState(stateId)
-  state.owner = entity.owner
-  state.schema_id = entity.schema_id
-  state.schema = schema.id
-  state.manifest_cid = entity.manifest_cid
-  state.version = entity.version
-  state.manifest = entity.manifest_cid
-  state.schema_name = schemaName
-  state.lastUpdated = event.block.timestamp
-  state.save()
+  let manifestState = new ManifestState(stateId)
+  manifestState.owner = manifestPublished.owner
+  manifestState.schemaId = manifestPublished.schemaId
+  manifestState.schema = schema.id
+  manifestState.manifestCid = manifestPublished.manifestCid
+  manifestState.version = manifestPublished.version
+  manifestState.manifest = manifestPublished.manifestCid
+  manifestState.schemaName = schemaName
+  manifestState.lastUpdated = manifestPublishedEvent.block.timestamp
+  manifestState.save()
 
   let context = new DataSourceContext()
-  context.setString("schemaId", event.params.schema_id.toHexString())
+  context.setString("schemaId", manifestPublishedEvent.params.schema_id.toHexString())
   context.setString("fields", fieldPairs.join(","))
-  context.setString("manifestStateId", state.id.toHexString())
-  context.setString("lastUpdated", state.lastUpdated.toString())
+  context.setString("manifestStateId", manifestState.id.toHexString())
+  context.setString("lastUpdated", manifestState.lastUpdated.toString())
 
-  ManifestTemplate.createWithContext(state.manifest_cid, context)
+  ManifestTemplate.createWithContext(manifestState.manifestCid, context)
+  }
+
 }
 
-export function handleManifestUpdated(event: ManifestUpdatedEvent): void {
+export function handleManifestUpdated(manifestUpdatedEvent: ManifestUpdatedEvent): void {
+  let manifestOwner = manifestUpdatedEvent.params.owner
+  let schemaId = manifestUpdatedEvent.params.schema_id
+  deriveManifestStateId(manifestOwner, schemaId)
+  let stateId = manifestOwner.concat(schemaId)
 
-  let stateId = event.params.owner.concat(event.params.schema_id)
   let state = ManifestState.load(stateId)
 
   // record that an update has occurred
-  let entity = new ManifestUpdated(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
+  let manifestUpdated = new ManifestUpdated(
+    manifestUpdatedEvent.transaction.hash.concatI32(manifestUpdatedEvent.logIndex.toI32())
   )
-  entity.owner = event.params.owner
-  entity.schema_id = event.params.schema_id
-  entity.manifest_cid = event.params.manifest_cid
-  entity.version = event.params.version
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-  entity.save()
+  manifestUpdated.owner = manifestUpdatedEvent.params.owner
+  manifestUpdated.schemaId = manifestUpdatedEvent.params.schema_id
+  manifestUpdated.manifestCid = manifestUpdatedEvent.params.manifest_cid
+  manifestUpdated.version = manifestUpdatedEvent.params.version
+  manifestUpdated.blockNumber = manifestUpdatedEvent.block.number
+  manifestUpdated.blockTimestamp = manifestUpdatedEvent.block.timestamp
+  manifestUpdated.transactionHash = manifestUpdatedEvent.transaction.hash
+  manifestUpdated.save()
 
-  let schema = Schema.load(event.params.schema_id.toHexString())
+  let schema = SchemaState.load(manifestUpdatedEvent.params.schema_id.toHexString())
   if (schema == null) {
-    log.warning("schema was null in manifest update for {}", [entity.manifest_cid]) 
+    log.warning("schema was null in manifest update for {}", [manifestUpdated.manifestCid]) 
     return
   }
 
   let versions = schema.versions
   if (versions == null || versions.length == 0){
-    log.warning("schema.versions was null or there were no versions in manifest update for {}", [entity.manifest_cid]) 
+    log.warning("schema.versions was null or there were no versions in manifest update for {}", [manifestUpdated.manifestCid]) 
     return
   }
 
-  let schemaEntries = SchemaEntries.load(versions[0])
+  let schemaEntries = Schema.load(versions[0])
   if (schemaEntries == null) {
-    log.warning("schemaEntries was null in manifest update for {}", [entity.manifest_cid]) 
+    log.warning("schemaEntries was null in manifest update for {}", [manifestUpdated.manifestCid]) 
     return
   }
 
   let fieldPointers = schemaEntries.fields
   if (fieldPointers == null) {
-    log.warning("fieldPointers was null in manifest update for {}", [entity.manifest_cid]) 
+    log.warning("fieldPointers was null in manifest update for {}", [manifestUpdated.manifestCid]) 
     return
   }
 
   let schemaName = schema.name
 
   if (schemaName == null) {
-    log.warning("schemaName was null in manifest update for {}", [entity.manifest_cid])
+    log.warning("schemaName was null in manifest update for {}", [manifestUpdated.manifestCid])
     schemaName = "unknown_schema_name"
   }
 
-  // Build a serialized representation of the schema fields
-  // Format: "name:type,name:type,name:type"
-  let fieldPairs: string[] = []
-  for (let i = 0; i < fieldPointers.length; i++) {
-    let schemaField = SchemaField.load(fieldPointers[i])
-    if (schemaField != null) {
-      fieldPairs.push(schemaField.name + ":" + schemaField.fieldType)
-    }
-  }
+  let fieldPairs: string[] = deriveSchemaFields(fieldPointers)
 
   // Update manifest state
   if (state == null) {
     log.warning("Manifest state was found to be null with ID {}", [stateId.toHexString()])
     state = new ManifestState(stateId)
-    state.owner = entity.owner
-    state.schema_id = entity.schema_id
-    state.schema_name = schemaName
+    state.owner = manifestUpdated.owner
+    state.schemaId = manifestUpdated.schemaId
+    state.schemaName = schemaName
     state.schema = schema.id
   }
 
-  state.manifest_cid = entity.manifest_cid
-  state.version = entity.version
-  state.manifest = entity.manifest_cid
-  state.lastUpdated = entity.blockTimestamp
+  state.manifestCid = manifestUpdated.manifestCid
+  state.version = manifestUpdated.version
+  state.manifest = manifestUpdated.manifestCid
+  state.lastUpdated = manifestUpdated.blockTimestamp
   state.save()
 
   let context = new DataSourceContext()
-  context.setString("schemaId", event.params.schema_id.toHexString())
+  context.setString("schemaId", manifestUpdatedEvent.params.schema_id.toHexString())
   context.setString("fields", fieldPairs.join(","))
   context.setString("manifestStateId", state.id.toHexString())
   context.setString("lastUpdated", state.lastUpdated.toString())
 
-  ManifestTemplate.createWithContext(state.manifest_cid, context)
+  ManifestTemplate.createWithContext(state.manifestCid, context)
 }
 
 export function handleMetadata(content: Bytes): void {
@@ -235,7 +242,7 @@ export function handleMetadata(content: Bytes): void {
       tag = tagVal.toString()
     }
 
-    let fileEntry = new FileEntry(entryId)
+    let fileEntry = new File(entryId)
     fileEntry.tag = tag
     
     let fileEntryFieldsArray: string[] = []
@@ -245,7 +252,7 @@ export function handleMetadata(content: Bytes): void {
       let fieldType = fieldTypes[j]
 
       let fieldEntityId = entryId + "-" + fieldKey
-      let fileField = new Field(fieldEntityId)
+      let fileField = new FileField(fieldEntityId)
       fileField.name = fieldKey
       fileField.atType = fieldType
 
@@ -268,20 +275,20 @@ export function handleMetadata(content: Bytes): void {
         if (accVal == null) {
           fileField.acc = "no_acc"
           fileField.value = "unknown"
-          fileField.price = "unknown"
+          fileField.pricing = "unknown"
         } else {
           fileField.acc = accVal.toString()
           fileField.value = "enc"
           let paramsVal = gadget.get("params")
           if(paramsVal == null) {
-            fileField.price = "unknown"
+            fileField.pricing = "unknown"
           } else {
             let params = paramsVal.toObject()
             let resourceId = params.get("resourceId")
             if (resourceId == null) {
-              fileField.price = "unknown"
+              fileField.pricing = "unknown"
             } else {
-              fileField.price = resourceId.toString()
+              fileField.pricing = resourceId.toString()
             }
           }
         }
@@ -296,7 +303,7 @@ export function handleMetadata(content: Bytes): void {
       }
 
       fileField.manifestState = manifestStateId
-      fileField.fileEntry = entryId
+      fileField.parentFile = entryId
       fileField.save()
       fileEntryFieldsArray.push(fileField.id)
     }

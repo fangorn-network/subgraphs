@@ -1,74 +1,75 @@
 import { BigInt, Bytes, dataSource, json, log } from "@graphprotocol/graph-ts"
 import {SchemaRegistered as SchemaRegisteredEvent, SchemaUpdated as SchemaUpdatedEvent} from "../generated/SchemaContract/SchemaContract"
-import { SchemaRegistered, SchemaUpdated, Schema, SchemaEntries, SchemaField } from "../generated/schema"
+import { SchemaRegistered, SchemaUpdated, SchemaState, Schema, SchemaField } from "../generated/schema"
 import { Schema as SchemaTemplate } from "../generated/templates"
 
-export function handleSchemaRegistered(event: SchemaRegisteredEvent): void {
+export function handleSchemaRegistered(schemaRegisteredEvent: SchemaRegisteredEvent): void {
 
-  let entity = new SchemaRegistered(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
+  let schemaRegistration = new SchemaRegistered(
+    schemaRegisteredEvent.transaction.hash.concatI32(schemaRegisteredEvent.logIndex.toI32())
   )
-  entity.owner = event.params.owner
-  entity.schemaId = event.params.id
-  entity.agent_id = event.params.agent_id
-  entity.name = event.params.name
-  entity.spec_cid = event.params.spec_cid
-  entity.save()
+  schemaRegistration.owner = schemaRegisteredEvent.params.owner
+  schemaRegistration.schemaId = schemaRegisteredEvent.params.id
+  schemaRegistration.agentId = schemaRegisteredEvent.params.agent_id
+  schemaRegistration.name = schemaRegisteredEvent.params.name
+  schemaRegistration.ipfsCid = schemaRegisteredEvent.params.spec_cid
+  schemaRegistration.save()
 
-  log.debug("Creating new Schema with string {}", [entity.schemaId.toHexString()])
-  let schema = new Schema(entity.schemaId.toHexString())
+  log.debug("Creating new Schema with string {}", [schemaRegistration.schemaId.toHexString()])
+  let schema = new SchemaState(schemaRegistration.schemaId.toHexString())
 
-  schema.schemaId = entity.schemaId
-  schema.owner = entity.owner
-  schema.name = entity.name
-  let version = [entity.spec_cid]
+  schema.schemaId = schemaRegistration.schemaId
+  schema.owner = schemaRegistration.owner
+  schema.name = schemaRegistration.name
+  let version = [schemaRegistration.ipfsCid]
 
   schema.versions = version
 
   schema.save()
   // Spawn the schema template fetch and parse the schema from IPFS
-  SchemaTemplate.create(entity.spec_cid)
+  SchemaTemplate.create(schemaRegistration.ipfsCid)
 }
 
-export function handleSchemaUpdated(event: SchemaUpdatedEvent): void {
+export function handleSchemaUpdated(schemaUpdatedEvent: SchemaUpdatedEvent): void {
 
   // record that an update has occurred
-  let entity = new SchemaUpdated(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
+  let schemaUpdate = new SchemaUpdated(
+    schemaUpdatedEvent.transaction.hash.concatI32(schemaUpdatedEvent.logIndex.toI32())
   )
 
-  entity.schemaId = event.params.id
-  entity.new_spec_cid = event.params.new_spec_cid
-  entity.new_agent_id = event.params.new_agent_id
+  schemaUpdate.schemaId = schemaUpdatedEvent.params.id
+  schemaUpdate.newIpfsCid = schemaUpdatedEvent.params.new_spec_cid
+  schemaUpdate.newAgentId = schemaUpdatedEvent.params.new_agent_id
 
-  entity.save()
+  schemaUpdate.save()
 
-  let schema = Schema.load(entity.schemaId.toHexString())
+  let schema = SchemaState.load(schemaUpdate.schemaId.toHexString())
   let versions: string[] = []
 
   if (schema == null) {
-    schema = new Schema(entity.schemaId.toHexString())
-    versions.push(entity.new_spec_cid)
+    schema = new SchemaState(schemaUpdate.schemaId.toHexString())
+    versions.push(schemaUpdate.newIpfsCid)
     schema.versions = versions
   } else {
     let versions = schema.versions
     if (versions == null) {
+      log.warning("Schema Update for SchemaState {} with no found versions. Adding new entry.", [schema.name])
         versions = []
-        versions.push(entity.new_spec_cid)
+        versions.push(schemaUpdate.newIpfsCid)
         schema.versions = versions
     } else {
-        versions.push(entity.new_spec_cid)
+        versions.push(schemaUpdate.newIpfsCid)
         schema.versions = versions
     }
   }
   schema.save();
-  SchemaTemplate.create(entity.new_spec_cid)
+  SchemaTemplate.create(schemaUpdate.newIpfsCid)
 }
 
 export function handleSchema(content: Bytes): void {
 
   let cid = dataSource.stringParam()
-  let schemaData = new SchemaEntries(cid)
+  let schema = new Schema(cid)
   
   let parsed = json.try_fromBytes(content)
   if (parsed.isError) {
@@ -76,44 +77,40 @@ export function handleSchema(content: Bytes): void {
     return
   }
 
-  let ipfsObj = parsed.value.toObject()
+  let ipfsSchemaObj = parsed.value.toObject()
 
-  let versionVal = ipfsObj.get("version")
-  if (versionVal == null) {
-    log.warning("versionVal was null for cid {}", [cid])
-    return
-  }
-  let version = BigInt.fromU64(versionVal.toU64())
-  schemaData.version = version
-
-  schemaData.spec_cid = cid
-
-  schemaData.agent_id = ""
-
-  let definitionVal = ipfsObj.get("definition")
-  if (definitionVal == null) {
-    log.warning("definitionVal was null for cid {}",[cid])
-    return
-  }
-  let definition = definitionVal.toObject()
-
-  let fieldEntries = definition.entries;
-
-  let schemaFields: string[] = []
-  for (let i = 0; i < fieldEntries.length; i++) {
-    let key = fieldEntries[i].key;
-    let val = fieldEntries[i].value.toObject()
-    let atTypeVal = val.get("@type")
-    let fieldType = atTypeVal != null ? atTypeVal.toString() : "unknown"
-    let schemaFieldId = cid.concat(key)
-    let schemaField = new SchemaField(schemaFieldId)
-    schemaField.fieldType = fieldType
-    schemaField.name = key
-    schemaField.save()
-    schemaFields.push(schemaFieldId)
+  let version = null;
+  let versionObj = ipfsSchemaObj.get("version")
+  if (versionObj == null) {
+    log.warning("versionObj was null for cid {}", [cid])
+  } else {
+    version = BigInt.fromU64(versionObj.toU64())
   }
 
-  schemaData.fields = schemaFields
+  schema.version = version
+  schema.agentId = ""
 
-  schemaData.save()
+  let defititionObj = ipfsSchemaObj.get("definition")
+  if (defititionObj == null) {
+    log.warning("defititionObj was null for cid {}",[cid])
+  } else {
+    let definition = defititionObj.toObject()
+    let fieldEntries = definition.entries;
+    let schemaFields: string[] = []
+    for (let i = 0; i < fieldEntries.length; i++) {
+      let key = fieldEntries[i].key;
+      let val = fieldEntries[i].value.toObject()
+      let atTypeVal = val.get("@type")
+      let fieldType = atTypeVal != null ? atTypeVal.toString() : "unknown"
+      let schemaFieldId = cid.concat(key)
+      let schemaField = new SchemaField(schemaFieldId)
+      schemaField.fieldType = fieldType
+      schemaField.name = key
+      schemaField.save()
+      schemaFields.push(schemaFieldId)
+    }
+    schema.fields = schemaFields
+  }
+
+  schema.save()
 }
