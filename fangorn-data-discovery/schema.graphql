@@ -79,7 +79,7 @@ type ManifestState @entity(immutable: false) {
   schema: SchemaState
   schemaName: String!
   manifestCid: String!
-  manifest: Manifest
+  manifest: Manifest @derivedFrom(field: "parentState")
   version: BigInt!
   lastUpdated: BigInt!
 }
@@ -88,14 +88,15 @@ type Manifest @entity(immutable: false) {
   id: ID!
   manifestVersion: BigInt
   schemaId: String
-  files: [File!]
+  parentState: ManifestState!
+  files: [File!] @derivedFrom(field: "parentManifest")
 }
 
 type File @entity(immutable: false) {
   id: ID!
   tag: String
-  manifest: Manifest
-  fields: [FileField!]
+  parentManifest: Manifest!
+  fields: [FileField!] @derivedFrom(field: "parentFile")
 }
 
 type FileField @entity(immutable: false) {
@@ -104,8 +105,7 @@ type FileField @entity(immutable: false) {
   value: String
   atType: String
   acc: String
-  manifestState: ManifestState!
-  parentFile: File
+  parentFile: File!
   pricing: PricingResource
 }
 

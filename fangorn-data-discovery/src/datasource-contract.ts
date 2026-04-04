@@ -9,7 +9,7 @@ function deriveManifestStateId(owner: Bytes, schemaId: Bytes): Bytes {
 }
 
 // This function is for when a SchemaState has populated CIDS, but the Schema hasn't been populated by the 
-// appropriate IPFS handler yet. We depend on these, so we attempt a direct fetch from IPFS for them.
+// appropriate IPFS handler yet. We depend on these; attempt a direct fetch from IPFS for them.
 function deriveSchemaFieldsFromIpfs(ipfsCid: string): string[] {
 	let fieldPairs: string[] = []
 	let schemaBytes = ipfs.cat(ipfsCid)
@@ -126,7 +126,6 @@ export function handleManifestPublished(manifestPublishedEvent: ManifestPublishe
 	manifestState.schema = schemaState.id
 	manifestState.manifestCid = manifestPublished.manifestCid
 	manifestState.version = manifestPublished.version
-	manifestState.manifest = manifestPublished.manifestCid
 	manifestState.schemaName = schemaName
 	manifestState.lastUpdated = manifestPublishedEvent.block.timestamp
 	manifestState.save()
@@ -209,7 +208,6 @@ export function handleManifestUpdated(manifestUpdatedEvent: ManifestUpdatedEvent
 
 	state.manifestCid = manifestUpdated.manifestCid
 	state.version = manifestUpdated.version
-	state.manifest = manifestUpdated.manifestCid
 	state.lastUpdated = manifestUpdated.blockTimestamp
 	state.save()
 
@@ -269,10 +267,10 @@ export function handleMetadata(content: Bytes): void {
 	let manifest = new Manifest(cid)
 	manifest.manifestVersion = BigInt.fromU64(versionVal.toU64())
 	manifest.schemaId = schemaIdString
+	manifest.parentState = manifestStateId
+	manifest.save()
 
 	let fileEntriesArray = entriesVal.toArray()
-
-	let currentFiles: string[] = []
 
 	for (let i = 0; i < fileEntriesArray.length; i++) {
 		let fileEntryObj = fileEntriesArray[i].toObject()
@@ -293,10 +291,11 @@ export function handleMetadata(content: Bytes): void {
 			tag = tagObj.toString()
 		}
 
-		let fileEntry = new File(entryId)
-		fileEntry.tag = tag
+		let file = new File(entryId)
+		file.tag = tag
 
-		let fileEntryFieldsArray: string[] = []
+		file.parentManifest = manifest.id
+		file.save()
 
 		for (let j = 0; j < fieldNames.length; j++) {
 			let fieldKey = fieldNames[j]
@@ -352,21 +351,10 @@ export function handleMetadata(content: Bytes): void {
 					fileField.value = valueObj.toString()
 				}
 			}
-
-			fileField.manifestState = manifestStateId
-			fileField.parentFile = entryId
+			fileField.parentFile = file.id
 			fileField.save()
-			fileEntryFieldsArray.push(fileField.id)
 		}
-
-		fileEntry.fields = fileEntryFieldsArray
-		fileEntry.manifest = cid
-		fileEntry.save()
-		currentFiles.push(fileEntry.id)
 	}
-
-	manifest.files = currentFiles
-	manifest.save()
 
 	log.info("Manifest processed safely: {}", [cid])
 }
