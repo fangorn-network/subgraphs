@@ -16,16 +16,16 @@ export function handleSchemaRegistered(schemaRegisteredEvent: SchemaRegisteredEv
   schemaRegistration.save()
 
   log.debug("Creating new Schema with string {}", [schemaRegistration.schemaId.toHexString()])
-  let schema = new SchemaState(schemaRegistration.schemaId)
+  let schemaState = new SchemaState(schemaRegistration.schemaId)
 
-  schema.schemaId = schemaRegistration.schemaId
-  schema.owner = schemaRegistration.owner
-  schema.name = schemaRegistration.name
+  schemaState.schemaId = schemaRegistration.schemaId
+  schemaState.owner = schemaRegistration.owner
+  schemaState.name = schemaRegistration.name
   let version = [schemaRegistration.ipfsCid]
 
-  schema.versions = version
+  schemaState.versions = version
 
-  schema.save()
+  schemaState.save()
   // Spawn the schema template fetch and parse the schema from IPFS
   SchemaTemplate.create(schemaRegistration.ipfsCid)
 }

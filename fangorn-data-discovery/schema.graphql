@@ -61,6 +61,7 @@ type SchemaState @entity(immutable: false) {
 
 type Schema @entity(immutable: false) {
   id: ID!
+  manifests: [ManifestState!] @derivedFrom(field: "schema")
   version: String
   agentId: String
   fields: [SchemaField!]
@@ -76,7 +77,7 @@ type ManifestState @entity(immutable: false) {
   id: Bytes!
   owner: Bytes!
   schemaId: Bytes!
-  schema: SchemaState
+  schema: Schema
   schemaName: String!
   manifestCid: String!
   manifest: Manifest @derivedFrom(field: "manifestState")

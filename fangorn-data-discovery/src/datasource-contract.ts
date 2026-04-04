@@ -123,7 +123,7 @@ export function handleManifestPublished(manifestPublishedEvent: ManifestPublishe
 	let manifestState = new ManifestState(stateId)
 	manifestState.owner = manifestPublished.owner
 	manifestState.schemaId = manifestPublished.schemaId
-	manifestState.schema = schemaState.id
+	manifestState.schema = schemas[0]
 	manifestState.manifestCid = manifestPublished.manifestCid
 	manifestState.version = manifestPublished.version
 	manifestState.schemaName = schemaName
@@ -203,7 +203,7 @@ export function handleManifestUpdated(manifestUpdatedEvent: ManifestUpdatedEvent
 		state.owner = manifestUpdated.owner
 		state.schemaId = manifestUpdated.schemaId
 		state.schemaName = schemaName
-		state.schema = schemaState.id
+		state.schema = schemas[0]
 	}
 
 	state.manifestCid = manifestUpdated.manifestCid
