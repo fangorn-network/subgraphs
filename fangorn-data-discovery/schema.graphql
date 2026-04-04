@@ -51,22 +51,22 @@ type PriceUpdated @entity(immutable: true) {
   price: BigInt!
 }
 
-type SchemaState @entity(immutable: true) {
-  id: ID!
+type SchemaState @entity(immutable: false) {
+  id: Bytes!
   schemaId: Bytes!
   owner: Bytes!
   name: String!
   versions: [Schema!]
 }
 
-type Schema @entity(immutable: true) {
+type Schema @entity(immutable: false) {
   id: ID!
   version: String
   agentId: String
   fields: [SchemaField!]
 }
 
-type SchemaField @entity(immutable: true) {
+type SchemaField @entity(immutable: false) {
   id: ID!
   name: String!
   fieldType: String!
@@ -79,7 +79,7 @@ type ManifestState @entity(immutable: false) {
   schema: SchemaState
   schemaName: String!
   manifestCid: String!
-  manifest: Manifest @derivedFrom(field: "parentState")
+  manifest: Manifest @derivedFrom(field: "manifestState")
   version: BigInt!
   lastUpdated: BigInt!
 }
@@ -88,15 +88,15 @@ type Manifest @entity(immutable: false) {
   id: ID!
   manifestVersion: BigInt
   schemaId: String
-  parentState: ManifestState!
-  files: [File!] @derivedFrom(field: "parentManifest")
+  manifestState: ManifestState!
+  files: [File!] @derivedFrom(field: "manifest")
 }
 
 type File @entity(immutable: false) {
   id: ID!
   tag: String
-  parentManifest: Manifest!
-  fields: [FileField!] @derivedFrom(field: "parentFile")
+  manifest: Manifest!
+  fileFields: [FileField!] @derivedFrom(field: "file")
 }
 
 type FileField @entity(immutable: false) {
@@ -105,7 +105,7 @@ type FileField @entity(immutable: false) {
   value: String
   atType: String
   acc: String
-  parentFile: File!
+  file: File!
   pricing: PricingResource
 }
 

@@ -81,7 +81,7 @@ export function handleManifestPublished(manifestPublishedEvent: ManifestPublishe
 	manifestPublished.transactionHash = manifestPublishedEvent.transaction.hash
 	manifestPublished.save()
 
-	let schemaState = SchemaState.load(manifestPublished.schemaId.toHexString())
+	let schemaState = SchemaState.load(manifestPublished.schemaId)
 	if (schemaState == null) {
 		log.warning("SchemaState wasn't found for schema_id: {}", [manifestPublished.schemaId.toHexString()])
 		return
@@ -159,7 +159,7 @@ export function handleManifestUpdated(manifestUpdatedEvent: ManifestUpdatedEvent
 	manifestUpdated.transactionHash = manifestUpdatedEvent.transaction.hash
 	manifestUpdated.save()
 
-	let schemaState = SchemaState.load(manifestUpdatedEvent.params.schema_id.toHexString())
+	let schemaState = SchemaState.load(manifestUpdatedEvent.params.schema_id)
 	if (schemaState == null) {
 		log.warning("schema was null in manifest update for {}", [manifestUpdated.manifestCid])
 		return
@@ -267,7 +267,7 @@ export function handleMetadata(content: Bytes): void {
 	let manifest = new Manifest(cid)
 	manifest.manifestVersion = BigInt.fromU64(versionVal.toU64())
 	manifest.schemaId = schemaIdString
-	manifest.parentState = manifestStateId
+	manifest.manifestState = manifestStateId
 	manifest.save()
 
 	let fileEntriesArray = entriesVal.toArray()
@@ -294,7 +294,7 @@ export function handleMetadata(content: Bytes): void {
 		let file = new File(entryId)
 		file.tag = tag
 
-		file.parentManifest = manifest.id
+		file.manifest = manifest.id
 		file.save()
 
 		for (let j = 0; j < fieldNames.length; j++) {
@@ -351,7 +351,7 @@ export function handleMetadata(content: Bytes): void {
 					fileField.value = valueObj.toString()
 				}
 			}
-			fileField.parentFile = file.id
+			fileField.file = file.id
 			fileField.save()
 		}
 	}

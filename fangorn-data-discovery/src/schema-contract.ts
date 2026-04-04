@@ -16,7 +16,7 @@ export function handleSchemaRegistered(schemaRegisteredEvent: SchemaRegisteredEv
   schemaRegistration.save()
 
   log.debug("Creating new Schema with string {}", [schemaRegistration.schemaId.toHexString()])
-  let schema = new SchemaState(schemaRegistration.schemaId.toHexString())
+  let schema = new SchemaState(schemaRegistration.schemaId)
 
   schema.schemaId = schemaRegistration.schemaId
   schema.owner = schemaRegistration.owner
@@ -43,11 +43,11 @@ export function handleSchemaUpdated(schemaUpdatedEvent: SchemaUpdatedEvent): voi
 
   schemaUpdate.save()
 
-  let schema = SchemaState.load(schemaUpdate.schemaId.toHexString())
+  let schema = SchemaState.load(schemaUpdate.schemaId)
   let versions: string[] = []
 
   if (schema == null) {
-    schema = new SchemaState(schemaUpdate.schemaId.toHexString())
+    schema = new SchemaState(schemaUpdate.schemaId)
     versions.push(schemaUpdate.newIpfsCid)
     schema.versions = versions
   } else {
