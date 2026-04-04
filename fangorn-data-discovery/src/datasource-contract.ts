@@ -44,7 +44,7 @@ function deriveSchemaFieldsFromIpfs(ipfsCid: string): string[] {
 		}
 		fieldPairs.push(key + ":" + fieldType)
 	}
-	
+
 	if (fieldPairs.length > 0) {
 		log.info("Fetching directly from IPFS succeeded for ipfsCid {}", [ipfsCid])
 	}
