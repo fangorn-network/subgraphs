@@ -1,0 +1,8 @@
+sources:
+  - name: fangorn
+    handler:
+      graphql:
+        endpoint: https://api.studio.thegraph.com/query/1745244/test-graph/version/latest
+documents:
+  - './src/**/*.graphql'
+  - './src/**/*.{ts,tsx,js,jsx}'

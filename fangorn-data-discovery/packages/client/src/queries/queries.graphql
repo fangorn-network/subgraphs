@@ -1,0 +1,10 @@
+query ManifestsBySchemaName ($name: String) {
+	schemaStates (where: {name: $name}){
+		name
+		versions {
+			manifests {
+				id
+			}
+		}
+	}
+}

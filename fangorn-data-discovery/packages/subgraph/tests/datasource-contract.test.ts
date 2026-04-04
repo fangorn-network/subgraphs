@@ -5,7 +5,7 @@ import {
   clearStore,
   beforeAll,
   afterAll
-} from "matchstick-as/assembly/index"
+} from "matchstick-as"
 import { Address, Bytes, BigInt } from "@graphprotocol/graph-ts"
 import { ManifestPublished } from "../generated/schema"
 import { ManifestPublished as ManifestPublishedEvent } from "../generated/DatasourceContract/DatasourceContract"
