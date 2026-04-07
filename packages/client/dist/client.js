@@ -170,17 +170,64 @@ export const FileByFileFieldFragmentDoc = gql `
   }
 }
     `;
-export const GetManifestsBySchemaNameDocument = gql `
-    query GetManifestsBySchemaName($name: String, $first: Int = 100, $skip: Int = 0) {
-  schemaStates(where: {name: $name}, first: $first, skip: $skip) {
-    ...SchemaStateWithManifests
+export const GetFileByFileFieldIdDocument = gql `
+    query GetFileByFileFieldId($id: ID) {
+  fileFields(where: {id: $id}) {
+    ...FileByFileField
   }
 }
-    ${SchemaStateWithManifestsFragmentDoc}
-${SchemaStateCoreFragmentDoc}
-${SchemaWithManifestsFragmentDoc}
-${SchemaCoreFragmentDoc}
-${ManifestStateFragmentDoc}
+    ${FileByFileFieldFragmentDoc}
+${FileFieldFragmentDoc}
+${FileFieldCoreFragmentDoc}
+${PricingResourceFragmentDoc}`;
+export const GetFileByFileFieldNameValuePairDocument = gql `
+    query GetFileByFileFieldNameValuePair($name: String, $value: String, $first: Int = 100, $skip: Int = 0) {
+  fileFields(where: {name: $name, value: $value}, first: $first, skip: $skip) {
+    ...FileByFileField
+  }
+}
+    ${FileByFileFieldFragmentDoc}
+${FileFieldFragmentDoc}
+${FileFieldCoreFragmentDoc}
+${PricingResourceFragmentDoc}`;
+export const GetFileEntriesByManifestIdDocument = gql `
+    query GetFileEntriesByManifestId($manifestId: String, $first: Int = 100, $skip: Int = 0) {
+  files(where: {manifest: $manifestId}, first: $first, skip: $skip) {
+    ...File
+  }
+}
+    ${FileFragmentDoc}
+${FileCoreFragmentDoc}
+${FileFieldFragmentDoc}
+${FileFieldCoreFragmentDoc}
+${PricingResourceFragmentDoc}`;
+export const GetPriceByFileFieldIdDocument = gql `
+    query GetPriceByFileFieldId($id: ID) {
+  fileFields(where: {id: $id}) {
+    pricing {
+      ...PricingResource
+    }
+  }
+}
+    ${PricingResourceFragmentDoc}`;
+export const GetFileFieldsByFileIdDocument = gql `
+    query GetFileFieldsByFileId($id: ID, $first: Int = 100, $skip: Int = 0) {
+  files(where: {id: $id}, first: $first, skip: $skip) {
+    fileFields {
+      ...FileField
+    }
+  }
+}
+    ${FileFieldFragmentDoc}
+${FileFieldCoreFragmentDoc}
+${PricingResourceFragmentDoc}`;
+export const GetManifestStatesBySchemaNameDocument = gql `
+    query GetManifestStatesBySchemaName($name: String, $first: Int = 100, $skip: Int = 0) {
+  manifestStates(where: {schemaName: $name}, first: $first, skip: $skip) {
+    ...ManifestState
+  }
+}
+    ${ManifestStateFragmentDoc}
 ${ManifestStateCoreFragmentDoc}
 ${ManifestFragmentDoc}
 ${ManifestCoreFragmentDoc}
@@ -189,19 +236,47 @@ ${FileCoreFragmentDoc}
 ${FileFieldFragmentDoc}
 ${FileFieldCoreFragmentDoc}
 ${PricingResourceFragmentDoc}`;
-export const GetManifestsBySchemaIdDocument = gql `
-    query GetManifestsBySchemaId($id: Bytes, $first: Int = 100, $skip: Int = 0) {
-  schemaStates(where: {id: $id}, first: $first, skip: $skip) {
-    ...SchemaStateWithManifests
+export const GetManifestStatesBySchemaNameAndOwnerDocument = gql `
+    query GetManifestStatesBySchemaNameAndOwner($name: String, $owner: Bytes, $first: Int = 100, $skip: Int = 0) {
+  manifestStates(
+    where: {schemaName: $name, owner: $owner}
+    first: $first
+    skip: $skip
+  ) {
+    ...ManifestState
   }
 }
-    ${SchemaStateWithManifestsFragmentDoc}
-${SchemaStateCoreFragmentDoc}
-${SchemaWithManifestsFragmentDoc}
-${SchemaCoreFragmentDoc}
-${ManifestStateFragmentDoc}
+    ${ManifestStateFragmentDoc}
 ${ManifestStateCoreFragmentDoc}
 ${ManifestFragmentDoc}
+${ManifestCoreFragmentDoc}
+${FileFragmentDoc}
+${FileCoreFragmentDoc}
+${FileFieldFragmentDoc}
+${FileFieldCoreFragmentDoc}
+${PricingResourceFragmentDoc}`;
+export const GetManifestStatesBySchemaIdDocument = gql `
+    query GetManifestStatesBySchemaId($id: Bytes, $first: Int = 100, $skip: Int = 0) {
+  manifestStates(where: {id: $id}, first: $first, skip: $skip) {
+    ...ManifestState
+  }
+}
+    ${ManifestStateFragmentDoc}
+${ManifestStateCoreFragmentDoc}
+${ManifestFragmentDoc}
+${ManifestCoreFragmentDoc}
+${FileFragmentDoc}
+${FileCoreFragmentDoc}
+${FileFieldFragmentDoc}
+${FileFieldCoreFragmentDoc}
+${PricingResourceFragmentDoc}`;
+export const GetManifestByIdDocument = gql `
+    query GetManifestById($id: ID) {
+  manifests(where: {id: $id}) {
+    ...Manifest
+  }
+}
+    ${ManifestFragmentDoc}
 ${ManifestCoreFragmentDoc}
 ${FileFragmentDoc}
 ${FileCoreFragmentDoc}
@@ -236,23 +311,20 @@ ${FileCoreFragmentDoc}
 ${FileFieldFragmentDoc}
 ${FileFieldCoreFragmentDoc}
 ${PricingResourceFragmentDoc}`;
-export const GetFileByFileFieldIdDocument = gql `
-    query GetFileByFileFieldId($id: ID) {
-  fileFields(where: {id: $id}) {
-    ...FileByFileField
-  }
-}
-    ${FileByFileFieldFragmentDoc}
-${FileFieldFragmentDoc}
-${FileFieldCoreFragmentDoc}
-${PricingResourceFragmentDoc}`;
 export const GetManifestByFileFieldNameValuePairDocument = gql `
     query GetManifestByFileFieldNameValuePair($name: String, $value: String, $first: Int = 100, $skip: Int = 0) {
   fileFields(where: {name: $name, value: $value}, first: $first, skip: $skip) {
-    ...ManifestByFileField
+    file {
+      manifest {
+        manifestState {
+          ...ManifestState
+        }
+      }
+    }
   }
 }
-    ${ManifestByFileFieldFragmentDoc}
+    ${ManifestStateFragmentDoc}
+${ManifestStateCoreFragmentDoc}
 ${ManifestFragmentDoc}
 ${ManifestCoreFragmentDoc}
 ${FileFragmentDoc}
@@ -260,33 +332,115 @@ ${FileCoreFragmentDoc}
 ${FileFieldFragmentDoc}
 ${FileFieldCoreFragmentDoc}
 ${PricingResourceFragmentDoc}`;
-export const GetFileByFileFieldNameValuePairDocument = gql `
-    query GetFileByFileFieldNameValuePair($name: String, $value: String, $first: Int = 100, $skip: Int = 0) {
-  fileFields(where: {name: $name, value: $value}, first: $first, skip: $skip) {
-    ...FileByFileField
+export const GetAllSchemaStatesDocument = gql `
+    query GetAllSchemaStates($first: Int = 100, $skip: Int = 0) {
+  schemaStates(first: $first, skip: $skip) {
+    ...SchemaState
   }
 }
-    ${FileByFileFieldFragmentDoc}
+    ${SchemaStateFragmentDoc}
+${SchemaStateCoreFragmentDoc}
+${SchemaFragmentDoc}
+${SchemaCoreFragmentDoc}
+${ManifestStateFragmentDoc}
+${ManifestStateCoreFragmentDoc}
+${ManifestFragmentDoc}
+${ManifestCoreFragmentDoc}
+${FileFragmentDoc}
+${FileCoreFragmentDoc}
 ${FileFieldFragmentDoc}
 ${FileFieldCoreFragmentDoc}
-${PricingResourceFragmentDoc}`;
-export const GetPriceByFileFieldIdDocument = gql `
-    query GetPriceByFileFieldId($id: ID) {
-  fileFields(where: {id: $id}) {
-    pricing {
-      ...PricingResource
-    }
+${PricingResourceFragmentDoc}
+${SchemaFieldFragmentDoc}`;
+export const GetAllSchemaStatesByOwnerDocument = gql `
+    query GetAllSchemaStatesByOwner($owner: Bytes, $first: Int = 100, $skip: Int = 0) {
+  schemaStates(where: {owner: $owner}, first: $first, skip: $skip) {
+    ...SchemaState
   }
 }
-    ${PricingResourceFragmentDoc}`;
+    ${SchemaStateFragmentDoc}
+${SchemaStateCoreFragmentDoc}
+${SchemaFragmentDoc}
+${SchemaCoreFragmentDoc}
+${ManifestStateFragmentDoc}
+${ManifestStateCoreFragmentDoc}
+${ManifestFragmentDoc}
+${ManifestCoreFragmentDoc}
+${FileFragmentDoc}
+${FileCoreFragmentDoc}
+${FileFieldFragmentDoc}
+${FileFieldCoreFragmentDoc}
+${PricingResourceFragmentDoc}
+${SchemaFieldFragmentDoc}`;
+export const GetSchemaStateByNameDocument = gql `
+    query GetSchemaStateByName($name: String) {
+  schemaStates(where: {name: $name}) {
+    ...SchemaState
+  }
+}
+    ${SchemaStateFragmentDoc}
+${SchemaStateCoreFragmentDoc}
+${SchemaFragmentDoc}
+${SchemaCoreFragmentDoc}
+${ManifestStateFragmentDoc}
+${ManifestStateCoreFragmentDoc}
+${ManifestFragmentDoc}
+${ManifestCoreFragmentDoc}
+${FileFragmentDoc}
+${FileCoreFragmentDoc}
+${FileFieldFragmentDoc}
+${FileFieldCoreFragmentDoc}
+${PricingResourceFragmentDoc}
+${SchemaFieldFragmentDoc}`;
+export const GetSchemasBySchemaIdDocument = gql `
+    query GetSchemasBySchemaId($id: Bytes, $first: Int = 100, $skip: Int = 0) {
+  schemaStates(where: {id: $id}, first: $first, skip: $skip) {
+    ...SchemaState
+  }
+}
+    ${SchemaStateFragmentDoc}
+${SchemaStateCoreFragmentDoc}
+${SchemaFragmentDoc}
+${SchemaCoreFragmentDoc}
+${ManifestStateFragmentDoc}
+${ManifestStateCoreFragmentDoc}
+${ManifestFragmentDoc}
+${ManifestCoreFragmentDoc}
+${FileFragmentDoc}
+${FileCoreFragmentDoc}
+${FileFieldFragmentDoc}
+${FileFieldCoreFragmentDoc}
+${PricingResourceFragmentDoc}
+${SchemaFieldFragmentDoc}`;
 const defaultWrapper = (action, _operationName, _operationType, _variables) => action();
 export function getSdk(client, withWrapper = defaultWrapper) {
     return {
-        GetManifestsBySchemaName(variables, requestHeaders, signal) {
-            return withWrapper((wrappedRequestHeaders) => client.request({ document: GetManifestsBySchemaNameDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetManifestsBySchemaName', 'query', variables);
+        GetFileByFileFieldId(variables, requestHeaders, signal) {
+            return withWrapper((wrappedRequestHeaders) => client.request({ document: GetFileByFileFieldIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetFileByFileFieldId', 'query', variables);
         },
-        GetManifestsBySchemaId(variables, requestHeaders, signal) {
-            return withWrapper((wrappedRequestHeaders) => client.request({ document: GetManifestsBySchemaIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetManifestsBySchemaId', 'query', variables);
+        GetFileByFileFieldNameValuePair(variables, requestHeaders, signal) {
+            return withWrapper((wrappedRequestHeaders) => client.request({ document: GetFileByFileFieldNameValuePairDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetFileByFileFieldNameValuePair', 'query', variables);
+        },
+        GetFileEntriesByManifestId(variables, requestHeaders, signal) {
+            return withWrapper((wrappedRequestHeaders) => client.request({ document: GetFileEntriesByManifestIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetFileEntriesByManifestId', 'query', variables);
+        },
+        GetPriceByFileFieldId(variables, requestHeaders, signal) {
+            return withWrapper((wrappedRequestHeaders) => client.request({ document: GetPriceByFileFieldIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetPriceByFileFieldId', 'query', variables);
+        },
+        GetFileFieldsByFileId(variables, requestHeaders, signal) {
+            return withWrapper((wrappedRequestHeaders) => client.request({ document: GetFileFieldsByFileIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetFileFieldsByFileId', 'query', variables);
+        },
+        GetManifestStatesBySchemaName(variables, requestHeaders, signal) {
+            return withWrapper((wrappedRequestHeaders) => client.request({ document: GetManifestStatesBySchemaNameDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetManifestStatesBySchemaName', 'query', variables);
+        },
+        GetManifestStatesBySchemaNameAndOwner(variables, requestHeaders, signal) {
+            return withWrapper((wrappedRequestHeaders) => client.request({ document: GetManifestStatesBySchemaNameAndOwnerDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetManifestStatesBySchemaNameAndOwner', 'query', variables);
+        },
+        GetManifestStatesBySchemaId(variables, requestHeaders, signal) {
+            return withWrapper((wrappedRequestHeaders) => client.request({ document: GetManifestStatesBySchemaIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetManifestStatesBySchemaId', 'query', variables);
+        },
+        GetManifestById(variables, requestHeaders, signal) {
+            return withWrapper((wrappedRequestHeaders) => client.request({ document: GetManifestByIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetManifestById', 'query', variables);
         },
         GetManifestByFileFieldId(variables, requestHeaders, signal) {
             return withWrapper((wrappedRequestHeaders) => client.request({ document: GetManifestByFileFieldIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetManifestByFileFieldId', 'query', variables);
@@ -294,17 +448,20 @@ export function getSdk(client, withWrapper = defaultWrapper) {
         GetManifestByFileId(variables, requestHeaders, signal) {
             return withWrapper((wrappedRequestHeaders) => client.request({ document: GetManifestByFileIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetManifestByFileId', 'query', variables);
         },
-        GetFileByFileFieldId(variables, requestHeaders, signal) {
-            return withWrapper((wrappedRequestHeaders) => client.request({ document: GetFileByFileFieldIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetFileByFileFieldId', 'query', variables);
-        },
         GetManifestByFileFieldNameValuePair(variables, requestHeaders, signal) {
             return withWrapper((wrappedRequestHeaders) => client.request({ document: GetManifestByFileFieldNameValuePairDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetManifestByFileFieldNameValuePair', 'query', variables);
         },
-        GetFileByFileFieldNameValuePair(variables, requestHeaders, signal) {
-            return withWrapper((wrappedRequestHeaders) => client.request({ document: GetFileByFileFieldNameValuePairDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetFileByFileFieldNameValuePair', 'query', variables);
+        GetAllSchemaStates(variables, requestHeaders, signal) {
+            return withWrapper((wrappedRequestHeaders) => client.request({ document: GetAllSchemaStatesDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetAllSchemaStates', 'query', variables);
         },
-        GetPriceByFileFieldId(variables, requestHeaders, signal) {
-            return withWrapper((wrappedRequestHeaders) => client.request({ document: GetPriceByFileFieldIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetPriceByFileFieldId', 'query', variables);
+        GetAllSchemaStatesByOwner(variables, requestHeaders, signal) {
+            return withWrapper((wrappedRequestHeaders) => client.request({ document: GetAllSchemaStatesByOwnerDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetAllSchemaStatesByOwner', 'query', variables);
+        },
+        GetSchemaStateByName(variables, requestHeaders, signal) {
+            return withWrapper((wrappedRequestHeaders) => client.request({ document: GetSchemaStateByNameDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetSchemaStateByName', 'query', variables);
+        },
+        GetSchemasBySchemaId(variables, requestHeaders, signal) {
+            return withWrapper((wrappedRequestHeaders) => client.request({ document: GetSchemasBySchemaIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetSchemasBySchemaId', 'query', variables);
         }
     };
 }

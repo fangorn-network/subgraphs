@@ -1,12 +1,24 @@
-query GetManifestsBySchemaName($name: String, $first: Int = 100, $skip: Int = 0) {
-	schemaStates (where: {name: $name}, first: $first, skip: $skip) {
-		...SchemaStateWithManifests
+query GetManifestStatesBySchemaName($name: String, $first: Int = 100, $skip: Int = 0) {
+	manifestStates(where: {schemaName: $name}, first: $first, skip: $skip) {
+		...ManifestState
 	}
 }
 
-query GetManifestsBySchemaId($id: Bytes, $first: Int = 100, $skip: Int = 0) {
-	schemaStates (where: {id: $id}, first: $first, skip: $skip) {
-		...SchemaStateWithManifests
+query GetManifestStatesBySchemaNameAndOwner($name: String, $owner: Bytes, $first: Int = 100, $skip: Int = 0) {
+	manifestStates(where: {schemaName: $name, owner: $owner}, first: $first, skip: $skip) {
+		...ManifestState
+	}
+}
+
+query GetManifestStatesBySchemaId($id: Bytes, $first: Int = 100, $skip: Int = 0) {
+	manifestStates (where: {id: $id}, first: $first, skip: $skip) {
+		...ManifestState
+	}
+}
+
+query GetManifestById($id: ID) {
+	manifests (where: {id: $id}) {
+		...Manifest
 	}
 }
 
@@ -22,28 +34,14 @@ query GetManifestByFileId($id: ID) {
 	}
 }
 
-query GetFileByFileFieldId($id: ID) {
-	fileFields (where: {id: $id}) {
-		...FileByFileField
-	}
-}
-
 query GetManifestByFileFieldNameValuePair($name: String, $value: String, $first: Int = 100, $skip: Int = 0) {
 	fileFields (where: {name: $name, value: $value}, first: $first, skip: $skip) {
-		...ManifestByFileField
-	}
-}
-
-query GetFileByFileFieldNameValuePair($name: String, $value: String, $first: Int = 100, $skip: Int = 0) {
-	fileFields (where: {name: $name, value: $value}, first: $first, skip: $skip) {
-		...FileByFileField
-	}
-}
-
-query GetPriceByFileFieldId($id: ID) {
-	fileFields (where: {id: $id}) {
-		pricing{
-			...PricingResource
+		file {
+			manifest {
+				manifestState{
+					...ManifestState
+				}
+			}
 		}
 	}
 }

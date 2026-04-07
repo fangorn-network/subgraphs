@@ -1,17 +1,25 @@
 import { GraphQLClient } from "graphql-request";
-import { GetManifestsBySchemaIdQuery, getSdk } from "./client.js";
-import { configDotenv } from "dotenv";
-export { getSdk };
+import { getSdk, Sdk } from "./client.js";
 
-configDotenv()
+export type * from './client.js'
 
-const subgraphUrl = process.env.SUBGRAPH_URL
-if (!subgraphUrl) throw new Error("No subgraph URL provided")
-const client = new GraphQLClient(subgraphUrl)
-const typedClient = getSdk(client)
+export type {Sdk}
 
-const result: GetManifestsBySchemaIdQuery = await typedClient.GetManifestsBySchemaId({id: "0x1823e9fabeb770332c7140bde6e497699f50fe9681c0b8270733a913d0bd4ac1"})
+export type { SchemaStateFragment as SchemaState } from './client.js';
+export type { SchemaFragment as Schema } from './client.js';
+export type { SchemaFieldFragment as SchemaField } from './client.js';
+export type { ManifestStateFragment as ManifestState } from './client.js';
+export type { ManifestFragment as Manifest } from './client.js';
+export type { FileFragment as FileEntry } from './client.js';
+export type { FileFieldFragment as FileField } from './client.js';
+export type { PricingResourceFragment as PricingResource } from './client.js';
 
-console.log(result)
 
-console.log(result!.schemaStates![0].versions![0])
+export function getSubgraphClients(url: string): {client: GraphQLClient, typedClient: Sdk} {
+
+	const client = new GraphQLClient(url);
+	const typedClient = getSdk(client);
+
+	return {client, typedClient};
+
+}

@@ -35,10 +35,10 @@ const config: CodegenConfig = {
         enumsAsTypes: true,
       },
     },
-    "./src/graphql/schema.graphql": {
+    "./src/schema.graphql": {
       plugins: ["schema-ast"],
       config: {
-        includeIntrospectionTypes: true,
+        includeIntrospectionTypes: false,
 				includeDirectives: true,
       },
     },

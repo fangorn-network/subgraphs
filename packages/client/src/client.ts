@@ -1731,6 +1731,48 @@ export type _SubgraphErrorPolicy_ =
   /** If the subgraph has indexing errors, data will be omitted. The default. */
   | 'deny';
 
+export type GetFileByFileFieldIdQueryVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type GetFileByFileFieldIdQuery = { __typename?: 'Query', fileFields: Array<{ __typename?: 'FileField', file: { __typename?: 'File', fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null } }> };
+
+export type GetFileByFileFieldNameValuePairQueryVariables = Exact<{
+  name?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetFileByFileFieldNameValuePairQuery = { __typename?: 'Query', fileFields: Array<{ __typename?: 'FileField', file: { __typename?: 'File', fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null } }> };
+
+export type GetFileEntriesByManifestIdQueryVariables = Exact<{
+  manifestId?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetFileEntriesByManifestIdQuery = { __typename?: 'Query', files: Array<{ __typename?: 'File', id: string, tag?: string | null, fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null }> };
+
+export type GetPriceByFileFieldIdQueryVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type GetPriceByFileFieldIdQuery = { __typename?: 'Query', fileFields: Array<{ __typename?: 'FileField', pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> };
+
+export type GetFileFieldsByFileIdQueryVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetFileFieldsByFileIdQuery = { __typename?: 'Query', files: Array<{ __typename?: 'File', fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null }> };
+
 export type SchemaStateCoreFragment = { __typename?: 'SchemaState', id: string, schemaId: string, owner: string, name: string };
 
 export type SchemaStateWithFieldsFragment = { __typename?: 'SchemaState', id: string, schemaId: string, owner: string, name: string, versions?: Array<{ __typename?: 'Schema', id: string, version?: string | null, agentId?: string | null, fields?: Array<{ __typename?: 'SchemaField', id: string, name: string, fieldType: string }> | null }> | null };
@@ -1773,23 +1815,40 @@ export type ManifestByFileFragment = { __typename?: 'File', manifest: { __typena
 
 export type FileByFileFieldFragment = { __typename?: 'FileField', file: { __typename?: 'File', fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null } };
 
-export type GetManifestsBySchemaNameQueryVariables = Exact<{
+export type GetManifestStatesBySchemaNameQueryVariables = Exact<{
   name?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   skip?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
-export type GetManifestsBySchemaNameQuery = { __typename?: 'Query', schemaStates: Array<{ __typename?: 'SchemaState', id: string, schemaId: string, owner: string, name: string, versions?: Array<{ __typename?: 'Schema', id: string, version?: string | null, agentId?: string | null, manifests?: Array<{ __typename?: 'ManifestState', id: string, owner: string, schemaId: string, schemaName: string, manifestCid: string, version: string, lastUpdated: string, manifest?: { __typename?: 'Manifest', id: string, manifestVersion?: string | null, schemaId?: string | null, files?: Array<{ __typename?: 'File', id: string, tag?: string | null, fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null }> | null } | null }> | null }> | null }> };
+export type GetManifestStatesBySchemaNameQuery = { __typename?: 'Query', manifestStates: Array<{ __typename?: 'ManifestState', id: string, owner: string, schemaId: string, schemaName: string, manifestCid: string, version: string, lastUpdated: string, manifest?: { __typename?: 'Manifest', id: string, manifestVersion?: string | null, schemaId?: string | null, files?: Array<{ __typename?: 'File', id: string, tag?: string | null, fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null }> | null } | null }> };
 
-export type GetManifestsBySchemaIdQueryVariables = Exact<{
+export type GetManifestStatesBySchemaNameAndOwnerQueryVariables = Exact<{
+  name?: InputMaybe<Scalars['String']['input']>;
+  owner?: InputMaybe<Scalars['Bytes']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetManifestStatesBySchemaNameAndOwnerQuery = { __typename?: 'Query', manifestStates: Array<{ __typename?: 'ManifestState', id: string, owner: string, schemaId: string, schemaName: string, manifestCid: string, version: string, lastUpdated: string, manifest?: { __typename?: 'Manifest', id: string, manifestVersion?: string | null, schemaId?: string | null, files?: Array<{ __typename?: 'File', id: string, tag?: string | null, fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null }> | null } | null }> };
+
+export type GetManifestStatesBySchemaIdQueryVariables = Exact<{
   id?: InputMaybe<Scalars['Bytes']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   skip?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
-export type GetManifestsBySchemaIdQuery = { __typename?: 'Query', schemaStates: Array<{ __typename?: 'SchemaState', id: string, schemaId: string, owner: string, name: string, versions?: Array<{ __typename?: 'Schema', id: string, version?: string | null, agentId?: string | null, manifests?: Array<{ __typename?: 'ManifestState', id: string, owner: string, schemaId: string, schemaName: string, manifestCid: string, version: string, lastUpdated: string, manifest?: { __typename?: 'Manifest', id: string, manifestVersion?: string | null, schemaId?: string | null, files?: Array<{ __typename?: 'File', id: string, tag?: string | null, fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null }> | null } | null }> | null }> | null }> };
+export type GetManifestStatesBySchemaIdQuery = { __typename?: 'Query', manifestStates: Array<{ __typename?: 'ManifestState', id: string, owner: string, schemaId: string, schemaName: string, manifestCid: string, version: string, lastUpdated: string, manifest?: { __typename?: 'Manifest', id: string, manifestVersion?: string | null, schemaId?: string | null, files?: Array<{ __typename?: 'File', id: string, tag?: string | null, fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null }> | null } | null }> };
+
+export type GetManifestByIdQueryVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type GetManifestByIdQuery = { __typename?: 'Query', manifests: Array<{ __typename?: 'Manifest', id: string, manifestVersion?: string | null, schemaId?: string | null, files?: Array<{ __typename?: 'File', id: string, tag?: string | null, fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null }> | null }> };
 
 export type GetManifestByFileFieldIdQueryVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -1805,13 +1864,6 @@ export type GetManifestByFileIdQueryVariables = Exact<{
 
 export type GetManifestByFileIdQuery = { __typename?: 'Query', files: Array<{ __typename?: 'File', manifest: { __typename?: 'Manifest', id: string, manifestVersion?: string | null, schemaId?: string | null, files?: Array<{ __typename?: 'File', id: string, tag?: string | null, fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null }> | null } }> };
 
-export type GetFileByFileFieldIdQueryVariables = Exact<{
-  id?: InputMaybe<Scalars['ID']['input']>;
-}>;
-
-
-export type GetFileByFileFieldIdQuery = { __typename?: 'Query', fileFields: Array<{ __typename?: 'FileField', file: { __typename?: 'File', fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null } }> };
-
 export type GetManifestByFileFieldNameValuePairQueryVariables = Exact<{
   name?: InputMaybe<Scalars['String']['input']>;
   value?: InputMaybe<Scalars['String']['input']>;
@@ -1820,24 +1872,40 @@ export type GetManifestByFileFieldNameValuePairQueryVariables = Exact<{
 }>;
 
 
-export type GetManifestByFileFieldNameValuePairQuery = { __typename?: 'Query', fileFields: Array<{ __typename?: 'FileField', file: { __typename?: 'File', manifest: { __typename?: 'Manifest', id: string, manifestVersion?: string | null, schemaId?: string | null, files?: Array<{ __typename?: 'File', id: string, tag?: string | null, fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null }> | null } } }> };
+export type GetManifestByFileFieldNameValuePairQuery = { __typename?: 'Query', fileFields: Array<{ __typename?: 'FileField', file: { __typename?: 'File', manifest: { __typename?: 'Manifest', manifestState: { __typename?: 'ManifestState', id: string, owner: string, schemaId: string, schemaName: string, manifestCid: string, version: string, lastUpdated: string, manifest?: { __typename?: 'Manifest', id: string, manifestVersion?: string | null, schemaId?: string | null, files?: Array<{ __typename?: 'File', id: string, tag?: string | null, fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null }> | null } | null } } } }> };
 
-export type GetFileByFileFieldNameValuePairQueryVariables = Exact<{
-  name?: InputMaybe<Scalars['String']['input']>;
-  value?: InputMaybe<Scalars['String']['input']>;
+export type GetAllSchemaStatesQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   skip?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
-export type GetFileByFileFieldNameValuePairQuery = { __typename?: 'Query', fileFields: Array<{ __typename?: 'FileField', file: { __typename?: 'File', fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null } }> };
+export type GetAllSchemaStatesQuery = { __typename?: 'Query', schemaStates: Array<{ __typename?: 'SchemaState', id: string, schemaId: string, owner: string, name: string, versions?: Array<{ __typename?: 'Schema', id: string, version?: string | null, agentId?: string | null, manifests?: Array<{ __typename?: 'ManifestState', id: string, owner: string, schemaId: string, schemaName: string, manifestCid: string, version: string, lastUpdated: string, manifest?: { __typename?: 'Manifest', id: string, manifestVersion?: string | null, schemaId?: string | null, files?: Array<{ __typename?: 'File', id: string, tag?: string | null, fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null }> | null } | null }> | null, fields?: Array<{ __typename?: 'SchemaField', id: string, name: string, fieldType: string }> | null }> | null }> };
 
-export type GetPriceByFileFieldIdQueryVariables = Exact<{
-  id?: InputMaybe<Scalars['ID']['input']>;
+export type GetAllSchemaStatesByOwnerQueryVariables = Exact<{
+  owner?: InputMaybe<Scalars['Bytes']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
-export type GetPriceByFileFieldIdQuery = { __typename?: 'Query', fileFields: Array<{ __typename?: 'FileField', pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> };
+export type GetAllSchemaStatesByOwnerQuery = { __typename?: 'Query', schemaStates: Array<{ __typename?: 'SchemaState', id: string, schemaId: string, owner: string, name: string, versions?: Array<{ __typename?: 'Schema', id: string, version?: string | null, agentId?: string | null, manifests?: Array<{ __typename?: 'ManifestState', id: string, owner: string, schemaId: string, schemaName: string, manifestCid: string, version: string, lastUpdated: string, manifest?: { __typename?: 'Manifest', id: string, manifestVersion?: string | null, schemaId?: string | null, files?: Array<{ __typename?: 'File', id: string, tag?: string | null, fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null }> | null } | null }> | null, fields?: Array<{ __typename?: 'SchemaField', id: string, name: string, fieldType: string }> | null }> | null }> };
+
+export type GetSchemaStateByNameQueryVariables = Exact<{
+  name?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetSchemaStateByNameQuery = { __typename?: 'Query', schemaStates: Array<{ __typename?: 'SchemaState', id: string, schemaId: string, owner: string, name: string, versions?: Array<{ __typename?: 'Schema', id: string, version?: string | null, agentId?: string | null, manifests?: Array<{ __typename?: 'ManifestState', id: string, owner: string, schemaId: string, schemaName: string, manifestCid: string, version: string, lastUpdated: string, manifest?: { __typename?: 'Manifest', id: string, manifestVersion?: string | null, schemaId?: string | null, files?: Array<{ __typename?: 'File', id: string, tag?: string | null, fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null }> | null } | null }> | null, fields?: Array<{ __typename?: 'SchemaField', id: string, name: string, fieldType: string }> | null }> | null }> };
+
+export type GetSchemasBySchemaIdQueryVariables = Exact<{
+  id?: InputMaybe<Scalars['Bytes']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetSchemasBySchemaIdQuery = { __typename?: 'Query', schemaStates: Array<{ __typename?: 'SchemaState', id: string, schemaId: string, owner: string, name: string, versions?: Array<{ __typename?: 'Schema', id: string, version?: string | null, agentId?: string | null, manifests?: Array<{ __typename?: 'ManifestState', id: string, owner: string, schemaId: string, schemaName: string, manifestCid: string, version: string, lastUpdated: string, manifest?: { __typename?: 'Manifest', id: string, manifestVersion?: string | null, schemaId?: string | null, files?: Array<{ __typename?: 'File', id: string, tag?: string | null, fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null }> | null } | null }> | null, fields?: Array<{ __typename?: 'SchemaField', id: string, name: string, fieldType: string }> | null }> | null }> };
 
 export const SchemaStateCoreFragmentDoc = gql`
     fragment SchemaStateCore on SchemaState {
@@ -2010,17 +2078,64 @@ export const FileByFileFieldFragmentDoc = gql`
   }
 }
     `;
-export const GetManifestsBySchemaNameDocument = gql`
-    query GetManifestsBySchemaName($name: String, $first: Int = 100, $skip: Int = 0) {
-  schemaStates(where: {name: $name}, first: $first, skip: $skip) {
-    ...SchemaStateWithManifests
+export const GetFileByFileFieldIdDocument = gql`
+    query GetFileByFileFieldId($id: ID) {
+  fileFields(where: {id: $id}) {
+    ...FileByFileField
   }
 }
-    ${SchemaStateWithManifestsFragmentDoc}
-${SchemaStateCoreFragmentDoc}
-${SchemaWithManifestsFragmentDoc}
-${SchemaCoreFragmentDoc}
-${ManifestStateFragmentDoc}
+    ${FileByFileFieldFragmentDoc}
+${FileFieldFragmentDoc}
+${FileFieldCoreFragmentDoc}
+${PricingResourceFragmentDoc}`;
+export const GetFileByFileFieldNameValuePairDocument = gql`
+    query GetFileByFileFieldNameValuePair($name: String, $value: String, $first: Int = 100, $skip: Int = 0) {
+  fileFields(where: {name: $name, value: $value}, first: $first, skip: $skip) {
+    ...FileByFileField
+  }
+}
+    ${FileByFileFieldFragmentDoc}
+${FileFieldFragmentDoc}
+${FileFieldCoreFragmentDoc}
+${PricingResourceFragmentDoc}`;
+export const GetFileEntriesByManifestIdDocument = gql`
+    query GetFileEntriesByManifestId($manifestId: String, $first: Int = 100, $skip: Int = 0) {
+  files(where: {manifest: $manifestId}, first: $first, skip: $skip) {
+    ...File
+  }
+}
+    ${FileFragmentDoc}
+${FileCoreFragmentDoc}
+${FileFieldFragmentDoc}
+${FileFieldCoreFragmentDoc}
+${PricingResourceFragmentDoc}`;
+export const GetPriceByFileFieldIdDocument = gql`
+    query GetPriceByFileFieldId($id: ID) {
+  fileFields(where: {id: $id}) {
+    pricing {
+      ...PricingResource
+    }
+  }
+}
+    ${PricingResourceFragmentDoc}`;
+export const GetFileFieldsByFileIdDocument = gql`
+    query GetFileFieldsByFileId($id: ID, $first: Int = 100, $skip: Int = 0) {
+  files(where: {id: $id}, first: $first, skip: $skip) {
+    fileFields {
+      ...FileField
+    }
+  }
+}
+    ${FileFieldFragmentDoc}
+${FileFieldCoreFragmentDoc}
+${PricingResourceFragmentDoc}`;
+export const GetManifestStatesBySchemaNameDocument = gql`
+    query GetManifestStatesBySchemaName($name: String, $first: Int = 100, $skip: Int = 0) {
+  manifestStates(where: {schemaName: $name}, first: $first, skip: $skip) {
+    ...ManifestState
+  }
+}
+    ${ManifestStateFragmentDoc}
 ${ManifestStateCoreFragmentDoc}
 ${ManifestFragmentDoc}
 ${ManifestCoreFragmentDoc}
@@ -2029,19 +2144,47 @@ ${FileCoreFragmentDoc}
 ${FileFieldFragmentDoc}
 ${FileFieldCoreFragmentDoc}
 ${PricingResourceFragmentDoc}`;
-export const GetManifestsBySchemaIdDocument = gql`
-    query GetManifestsBySchemaId($id: Bytes, $first: Int = 100, $skip: Int = 0) {
-  schemaStates(where: {id: $id}, first: $first, skip: $skip) {
-    ...SchemaStateWithManifests
+export const GetManifestStatesBySchemaNameAndOwnerDocument = gql`
+    query GetManifestStatesBySchemaNameAndOwner($name: String, $owner: Bytes, $first: Int = 100, $skip: Int = 0) {
+  manifestStates(
+    where: {schemaName: $name, owner: $owner}
+    first: $first
+    skip: $skip
+  ) {
+    ...ManifestState
   }
 }
-    ${SchemaStateWithManifestsFragmentDoc}
-${SchemaStateCoreFragmentDoc}
-${SchemaWithManifestsFragmentDoc}
-${SchemaCoreFragmentDoc}
-${ManifestStateFragmentDoc}
+    ${ManifestStateFragmentDoc}
 ${ManifestStateCoreFragmentDoc}
 ${ManifestFragmentDoc}
+${ManifestCoreFragmentDoc}
+${FileFragmentDoc}
+${FileCoreFragmentDoc}
+${FileFieldFragmentDoc}
+${FileFieldCoreFragmentDoc}
+${PricingResourceFragmentDoc}`;
+export const GetManifestStatesBySchemaIdDocument = gql`
+    query GetManifestStatesBySchemaId($id: Bytes, $first: Int = 100, $skip: Int = 0) {
+  manifestStates(where: {id: $id}, first: $first, skip: $skip) {
+    ...ManifestState
+  }
+}
+    ${ManifestStateFragmentDoc}
+${ManifestStateCoreFragmentDoc}
+${ManifestFragmentDoc}
+${ManifestCoreFragmentDoc}
+${FileFragmentDoc}
+${FileCoreFragmentDoc}
+${FileFieldFragmentDoc}
+${FileFieldCoreFragmentDoc}
+${PricingResourceFragmentDoc}`;
+export const GetManifestByIdDocument = gql`
+    query GetManifestById($id: ID) {
+  manifests(where: {id: $id}) {
+    ...Manifest
+  }
+}
+    ${ManifestFragmentDoc}
 ${ManifestCoreFragmentDoc}
 ${FileFragmentDoc}
 ${FileCoreFragmentDoc}
@@ -2076,23 +2219,20 @@ ${FileCoreFragmentDoc}
 ${FileFieldFragmentDoc}
 ${FileFieldCoreFragmentDoc}
 ${PricingResourceFragmentDoc}`;
-export const GetFileByFileFieldIdDocument = gql`
-    query GetFileByFileFieldId($id: ID) {
-  fileFields(where: {id: $id}) {
-    ...FileByFileField
-  }
-}
-    ${FileByFileFieldFragmentDoc}
-${FileFieldFragmentDoc}
-${FileFieldCoreFragmentDoc}
-${PricingResourceFragmentDoc}`;
 export const GetManifestByFileFieldNameValuePairDocument = gql`
     query GetManifestByFileFieldNameValuePair($name: String, $value: String, $first: Int = 100, $skip: Int = 0) {
   fileFields(where: {name: $name, value: $value}, first: $first, skip: $skip) {
-    ...ManifestByFileField
+    file {
+      manifest {
+        manifestState {
+          ...ManifestState
+        }
+      }
+    }
   }
 }
-    ${ManifestByFileFieldFragmentDoc}
+    ${ManifestStateFragmentDoc}
+${ManifestStateCoreFragmentDoc}
 ${ManifestFragmentDoc}
 ${ManifestCoreFragmentDoc}
 ${FileFragmentDoc}
@@ -2100,25 +2240,86 @@ ${FileCoreFragmentDoc}
 ${FileFieldFragmentDoc}
 ${FileFieldCoreFragmentDoc}
 ${PricingResourceFragmentDoc}`;
-export const GetFileByFileFieldNameValuePairDocument = gql`
-    query GetFileByFileFieldNameValuePair($name: String, $value: String, $first: Int = 100, $skip: Int = 0) {
-  fileFields(where: {name: $name, value: $value}, first: $first, skip: $skip) {
-    ...FileByFileField
+export const GetAllSchemaStatesDocument = gql`
+    query GetAllSchemaStates($first: Int = 100, $skip: Int = 0) {
+  schemaStates(first: $first, skip: $skip) {
+    ...SchemaState
   }
 }
-    ${FileByFileFieldFragmentDoc}
+    ${SchemaStateFragmentDoc}
+${SchemaStateCoreFragmentDoc}
+${SchemaFragmentDoc}
+${SchemaCoreFragmentDoc}
+${ManifestStateFragmentDoc}
+${ManifestStateCoreFragmentDoc}
+${ManifestFragmentDoc}
+${ManifestCoreFragmentDoc}
+${FileFragmentDoc}
+${FileCoreFragmentDoc}
 ${FileFieldFragmentDoc}
 ${FileFieldCoreFragmentDoc}
-${PricingResourceFragmentDoc}`;
-export const GetPriceByFileFieldIdDocument = gql`
-    query GetPriceByFileFieldId($id: ID) {
-  fileFields(where: {id: $id}) {
-    pricing {
-      ...PricingResource
-    }
+${PricingResourceFragmentDoc}
+${SchemaFieldFragmentDoc}`;
+export const GetAllSchemaStatesByOwnerDocument = gql`
+    query GetAllSchemaStatesByOwner($owner: Bytes, $first: Int = 100, $skip: Int = 0) {
+  schemaStates(where: {owner: $owner}, first: $first, skip: $skip) {
+    ...SchemaState
   }
 }
-    ${PricingResourceFragmentDoc}`;
+    ${SchemaStateFragmentDoc}
+${SchemaStateCoreFragmentDoc}
+${SchemaFragmentDoc}
+${SchemaCoreFragmentDoc}
+${ManifestStateFragmentDoc}
+${ManifestStateCoreFragmentDoc}
+${ManifestFragmentDoc}
+${ManifestCoreFragmentDoc}
+${FileFragmentDoc}
+${FileCoreFragmentDoc}
+${FileFieldFragmentDoc}
+${FileFieldCoreFragmentDoc}
+${PricingResourceFragmentDoc}
+${SchemaFieldFragmentDoc}`;
+export const GetSchemaStateByNameDocument = gql`
+    query GetSchemaStateByName($name: String) {
+  schemaStates(where: {name: $name}) {
+    ...SchemaState
+  }
+}
+    ${SchemaStateFragmentDoc}
+${SchemaStateCoreFragmentDoc}
+${SchemaFragmentDoc}
+${SchemaCoreFragmentDoc}
+${ManifestStateFragmentDoc}
+${ManifestStateCoreFragmentDoc}
+${ManifestFragmentDoc}
+${ManifestCoreFragmentDoc}
+${FileFragmentDoc}
+${FileCoreFragmentDoc}
+${FileFieldFragmentDoc}
+${FileFieldCoreFragmentDoc}
+${PricingResourceFragmentDoc}
+${SchemaFieldFragmentDoc}`;
+export const GetSchemasBySchemaIdDocument = gql`
+    query GetSchemasBySchemaId($id: Bytes, $first: Int = 100, $skip: Int = 0) {
+  schemaStates(where: {id: $id}, first: $first, skip: $skip) {
+    ...SchemaState
+  }
+}
+    ${SchemaStateFragmentDoc}
+${SchemaStateCoreFragmentDoc}
+${SchemaFragmentDoc}
+${SchemaCoreFragmentDoc}
+${ManifestStateFragmentDoc}
+${ManifestStateCoreFragmentDoc}
+${ManifestFragmentDoc}
+${ManifestCoreFragmentDoc}
+${FileFragmentDoc}
+${FileCoreFragmentDoc}
+${FileFieldFragmentDoc}
+${FileFieldCoreFragmentDoc}
+${PricingResourceFragmentDoc}
+${SchemaFieldFragmentDoc}`;
 
 export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string, variables?: any) => Promise<T>;
 
@@ -2127,11 +2328,32 @@ const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationTy
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {
-    GetManifestsBySchemaName(variables?: GetManifestsBySchemaNameQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetManifestsBySchemaNameQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetManifestsBySchemaNameQuery>({ document: GetManifestsBySchemaNameDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetManifestsBySchemaName', 'query', variables);
+    GetFileByFileFieldId(variables?: GetFileByFileFieldIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetFileByFileFieldIdQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetFileByFileFieldIdQuery>({ document: GetFileByFileFieldIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetFileByFileFieldId', 'query', variables);
     },
-    GetManifestsBySchemaId(variables?: GetManifestsBySchemaIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetManifestsBySchemaIdQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetManifestsBySchemaIdQuery>({ document: GetManifestsBySchemaIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetManifestsBySchemaId', 'query', variables);
+    GetFileByFileFieldNameValuePair(variables?: GetFileByFileFieldNameValuePairQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetFileByFileFieldNameValuePairQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetFileByFileFieldNameValuePairQuery>({ document: GetFileByFileFieldNameValuePairDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetFileByFileFieldNameValuePair', 'query', variables);
+    },
+    GetFileEntriesByManifestId(variables?: GetFileEntriesByManifestIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetFileEntriesByManifestIdQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetFileEntriesByManifestIdQuery>({ document: GetFileEntriesByManifestIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetFileEntriesByManifestId', 'query', variables);
+    },
+    GetPriceByFileFieldId(variables?: GetPriceByFileFieldIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetPriceByFileFieldIdQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetPriceByFileFieldIdQuery>({ document: GetPriceByFileFieldIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetPriceByFileFieldId', 'query', variables);
+    },
+    GetFileFieldsByFileId(variables?: GetFileFieldsByFileIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetFileFieldsByFileIdQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetFileFieldsByFileIdQuery>({ document: GetFileFieldsByFileIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetFileFieldsByFileId', 'query', variables);
+    },
+    GetManifestStatesBySchemaName(variables?: GetManifestStatesBySchemaNameQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetManifestStatesBySchemaNameQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetManifestStatesBySchemaNameQuery>({ document: GetManifestStatesBySchemaNameDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetManifestStatesBySchemaName', 'query', variables);
+    },
+    GetManifestStatesBySchemaNameAndOwner(variables?: GetManifestStatesBySchemaNameAndOwnerQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetManifestStatesBySchemaNameAndOwnerQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetManifestStatesBySchemaNameAndOwnerQuery>({ document: GetManifestStatesBySchemaNameAndOwnerDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetManifestStatesBySchemaNameAndOwner', 'query', variables);
+    },
+    GetManifestStatesBySchemaId(variables?: GetManifestStatesBySchemaIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetManifestStatesBySchemaIdQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetManifestStatesBySchemaIdQuery>({ document: GetManifestStatesBySchemaIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetManifestStatesBySchemaId', 'query', variables);
+    },
+    GetManifestById(variables?: GetManifestByIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetManifestByIdQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetManifestByIdQuery>({ document: GetManifestByIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetManifestById', 'query', variables);
     },
     GetManifestByFileFieldId(variables?: GetManifestByFileFieldIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetManifestByFileFieldIdQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetManifestByFileFieldIdQuery>({ document: GetManifestByFileFieldIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetManifestByFileFieldId', 'query', variables);
@@ -2139,17 +2361,20 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     GetManifestByFileId(variables?: GetManifestByFileIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetManifestByFileIdQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetManifestByFileIdQuery>({ document: GetManifestByFileIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetManifestByFileId', 'query', variables);
     },
-    GetFileByFileFieldId(variables?: GetFileByFileFieldIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetFileByFileFieldIdQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetFileByFileFieldIdQuery>({ document: GetFileByFileFieldIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetFileByFileFieldId', 'query', variables);
-    },
     GetManifestByFileFieldNameValuePair(variables?: GetManifestByFileFieldNameValuePairQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetManifestByFileFieldNameValuePairQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetManifestByFileFieldNameValuePairQuery>({ document: GetManifestByFileFieldNameValuePairDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetManifestByFileFieldNameValuePair', 'query', variables);
     },
-    GetFileByFileFieldNameValuePair(variables?: GetFileByFileFieldNameValuePairQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetFileByFileFieldNameValuePairQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetFileByFileFieldNameValuePairQuery>({ document: GetFileByFileFieldNameValuePairDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetFileByFileFieldNameValuePair', 'query', variables);
+    GetAllSchemaStates(variables?: GetAllSchemaStatesQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetAllSchemaStatesQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetAllSchemaStatesQuery>({ document: GetAllSchemaStatesDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetAllSchemaStates', 'query', variables);
     },
-    GetPriceByFileFieldId(variables?: GetPriceByFileFieldIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetPriceByFileFieldIdQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetPriceByFileFieldIdQuery>({ document: GetPriceByFileFieldIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetPriceByFileFieldId', 'query', variables);
+    GetAllSchemaStatesByOwner(variables?: GetAllSchemaStatesByOwnerQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetAllSchemaStatesByOwnerQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetAllSchemaStatesByOwnerQuery>({ document: GetAllSchemaStatesByOwnerDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetAllSchemaStatesByOwner', 'query', variables);
+    },
+    GetSchemaStateByName(variables?: GetSchemaStateByNameQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetSchemaStateByNameQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetSchemaStateByNameQuery>({ document: GetSchemaStateByNameDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetSchemaStateByName', 'query', variables);
+    },
+    GetSchemasBySchemaId(variables?: GetSchemasBySchemaIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetSchemasBySchemaIdQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetSchemasBySchemaIdQuery>({ document: GetSchemasBySchemaIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetSchemasBySchemaId', 'query', variables);
     }
   };
 }

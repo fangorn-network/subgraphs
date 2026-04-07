@@ -1551,6 +1551,133 @@ export type _SubgraphErrorPolicy_ =
 'allow'
 /** If the subgraph has indexing errors, data will be omitted. The default. */
  | 'deny';
+export type GetFileByFileFieldIdQueryVariables = Exact<{
+    id?: InputMaybe<Scalars['ID']['input']>;
+}>;
+export type GetFileByFileFieldIdQuery = {
+    __typename?: 'Query';
+    fileFields: Array<{
+        __typename?: 'FileField';
+        file: {
+            __typename?: 'File';
+            fileFields?: Array<{
+                __typename?: 'FileField';
+                id: string;
+                name?: string | null;
+                value?: string | null;
+                atType?: string | null;
+                acc?: string | null;
+                pricing?: {
+                    __typename?: 'PricingResource';
+                    id: string;
+                    owner: string;
+                    price: string;
+                    currency: string;
+                } | null;
+            }> | null;
+        };
+    }>;
+};
+export type GetFileByFileFieldNameValuePairQueryVariables = Exact<{
+    name?: InputMaybe<Scalars['String']['input']>;
+    value?: InputMaybe<Scalars['String']['input']>;
+    first?: InputMaybe<Scalars['Int']['input']>;
+    skip?: InputMaybe<Scalars['Int']['input']>;
+}>;
+export type GetFileByFileFieldNameValuePairQuery = {
+    __typename?: 'Query';
+    fileFields: Array<{
+        __typename?: 'FileField';
+        file: {
+            __typename?: 'File';
+            fileFields?: Array<{
+                __typename?: 'FileField';
+                id: string;
+                name?: string | null;
+                value?: string | null;
+                atType?: string | null;
+                acc?: string | null;
+                pricing?: {
+                    __typename?: 'PricingResource';
+                    id: string;
+                    owner: string;
+                    price: string;
+                    currency: string;
+                } | null;
+            }> | null;
+        };
+    }>;
+};
+export type GetFileEntriesByManifestIdQueryVariables = Exact<{
+    manifestId?: InputMaybe<Scalars['String']['input']>;
+    first?: InputMaybe<Scalars['Int']['input']>;
+    skip?: InputMaybe<Scalars['Int']['input']>;
+}>;
+export type GetFileEntriesByManifestIdQuery = {
+    __typename?: 'Query';
+    files: Array<{
+        __typename?: 'File';
+        id: string;
+        tag?: string | null;
+        fileFields?: Array<{
+            __typename?: 'FileField';
+            id: string;
+            name?: string | null;
+            value?: string | null;
+            atType?: string | null;
+            acc?: string | null;
+            pricing?: {
+                __typename?: 'PricingResource';
+                id: string;
+                owner: string;
+                price: string;
+                currency: string;
+            } | null;
+        }> | null;
+    }>;
+};
+export type GetPriceByFileFieldIdQueryVariables = Exact<{
+    id?: InputMaybe<Scalars['ID']['input']>;
+}>;
+export type GetPriceByFileFieldIdQuery = {
+    __typename?: 'Query';
+    fileFields: Array<{
+        __typename?: 'FileField';
+        pricing?: {
+            __typename?: 'PricingResource';
+            id: string;
+            owner: string;
+            price: string;
+            currency: string;
+        } | null;
+    }>;
+};
+export type GetFileFieldsByFileIdQueryVariables = Exact<{
+    id?: InputMaybe<Scalars['ID']['input']>;
+    first?: InputMaybe<Scalars['Int']['input']>;
+    skip?: InputMaybe<Scalars['Int']['input']>;
+}>;
+export type GetFileFieldsByFileIdQuery = {
+    __typename?: 'Query';
+    files: Array<{
+        __typename?: 'File';
+        fileFields?: Array<{
+            __typename?: 'FileField';
+            id: string;
+            name?: string | null;
+            value?: string | null;
+            atType?: string | null;
+            acc?: string | null;
+            pricing?: {
+                __typename?: 'PricingResource';
+                id: string;
+                owner: string;
+                price: string;
+                currency: string;
+            } | null;
+        }> | null;
+    }>;
+};
 export type SchemaStateCoreFragment = {
     __typename?: 'SchemaState';
     id: string;
@@ -2010,115 +2137,166 @@ export type FileByFileFieldFragment = {
         }> | null;
     };
 };
-export type GetManifestsBySchemaNameQueryVariables = Exact<{
+export type GetManifestStatesBySchemaNameQueryVariables = Exact<{
     name?: InputMaybe<Scalars['String']['input']>;
     first?: InputMaybe<Scalars['Int']['input']>;
     skip?: InputMaybe<Scalars['Int']['input']>;
 }>;
-export type GetManifestsBySchemaNameQuery = {
+export type GetManifestStatesBySchemaNameQuery = {
     __typename?: 'Query';
-    schemaStates: Array<{
-        __typename?: 'SchemaState';
+    manifestStates: Array<{
+        __typename?: 'ManifestState';
         id: string;
-        schemaId: string;
         owner: string;
-        name: string;
-        versions?: Array<{
-            __typename?: 'Schema';
+        schemaId: string;
+        schemaName: string;
+        manifestCid: string;
+        version: string;
+        lastUpdated: string;
+        manifest?: {
+            __typename?: 'Manifest';
             id: string;
-            version?: string | null;
-            agentId?: string | null;
-            manifests?: Array<{
-                __typename?: 'ManifestState';
+            manifestVersion?: string | null;
+            schemaId?: string | null;
+            files?: Array<{
+                __typename?: 'File';
                 id: string;
-                owner: string;
-                schemaId: string;
-                schemaName: string;
-                manifestCid: string;
-                version: string;
-                lastUpdated: string;
-                manifest?: {
-                    __typename?: 'Manifest';
+                tag?: string | null;
+                fileFields?: Array<{
+                    __typename?: 'FileField';
                     id: string;
-                    manifestVersion?: string | null;
-                    schemaId?: string | null;
-                    files?: Array<{
-                        __typename?: 'File';
+                    name?: string | null;
+                    value?: string | null;
+                    atType?: string | null;
+                    acc?: string | null;
+                    pricing?: {
+                        __typename?: 'PricingResource';
                         id: string;
-                        tag?: string | null;
-                        fileFields?: Array<{
-                            __typename?: 'FileField';
-                            id: string;
-                            name?: string | null;
-                            value?: string | null;
-                            atType?: string | null;
-                            acc?: string | null;
-                            pricing?: {
-                                __typename?: 'PricingResource';
-                                id: string;
-                                owner: string;
-                                price: string;
-                                currency: string;
-                            } | null;
-                        }> | null;
-                    }> | null;
-                } | null;
+                        owner: string;
+                        price: string;
+                        currency: string;
+                    } | null;
+                }> | null;
             }> | null;
-        }> | null;
+        } | null;
     }>;
 };
-export type GetManifestsBySchemaIdQueryVariables = Exact<{
+export type GetManifestStatesBySchemaNameAndOwnerQueryVariables = Exact<{
+    name?: InputMaybe<Scalars['String']['input']>;
+    owner?: InputMaybe<Scalars['Bytes']['input']>;
+    first?: InputMaybe<Scalars['Int']['input']>;
+    skip?: InputMaybe<Scalars['Int']['input']>;
+}>;
+export type GetManifestStatesBySchemaNameAndOwnerQuery = {
+    __typename?: 'Query';
+    manifestStates: Array<{
+        __typename?: 'ManifestState';
+        id: string;
+        owner: string;
+        schemaId: string;
+        schemaName: string;
+        manifestCid: string;
+        version: string;
+        lastUpdated: string;
+        manifest?: {
+            __typename?: 'Manifest';
+            id: string;
+            manifestVersion?: string | null;
+            schemaId?: string | null;
+            files?: Array<{
+                __typename?: 'File';
+                id: string;
+                tag?: string | null;
+                fileFields?: Array<{
+                    __typename?: 'FileField';
+                    id: string;
+                    name?: string | null;
+                    value?: string | null;
+                    atType?: string | null;
+                    acc?: string | null;
+                    pricing?: {
+                        __typename?: 'PricingResource';
+                        id: string;
+                        owner: string;
+                        price: string;
+                        currency: string;
+                    } | null;
+                }> | null;
+            }> | null;
+        } | null;
+    }>;
+};
+export type GetManifestStatesBySchemaIdQueryVariables = Exact<{
     id?: InputMaybe<Scalars['Bytes']['input']>;
     first?: InputMaybe<Scalars['Int']['input']>;
     skip?: InputMaybe<Scalars['Int']['input']>;
 }>;
-export type GetManifestsBySchemaIdQuery = {
+export type GetManifestStatesBySchemaIdQuery = {
     __typename?: 'Query';
-    schemaStates: Array<{
-        __typename?: 'SchemaState';
+    manifestStates: Array<{
+        __typename?: 'ManifestState';
         id: string;
-        schemaId: string;
         owner: string;
-        name: string;
-        versions?: Array<{
-            __typename?: 'Schema';
+        schemaId: string;
+        schemaName: string;
+        manifestCid: string;
+        version: string;
+        lastUpdated: string;
+        manifest?: {
+            __typename?: 'Manifest';
             id: string;
-            version?: string | null;
-            agentId?: string | null;
-            manifests?: Array<{
-                __typename?: 'ManifestState';
+            manifestVersion?: string | null;
+            schemaId?: string | null;
+            files?: Array<{
+                __typename?: 'File';
                 id: string;
-                owner: string;
-                schemaId: string;
-                schemaName: string;
-                manifestCid: string;
-                version: string;
-                lastUpdated: string;
-                manifest?: {
-                    __typename?: 'Manifest';
+                tag?: string | null;
+                fileFields?: Array<{
+                    __typename?: 'FileField';
                     id: string;
-                    manifestVersion?: string | null;
-                    schemaId?: string | null;
-                    files?: Array<{
-                        __typename?: 'File';
+                    name?: string | null;
+                    value?: string | null;
+                    atType?: string | null;
+                    acc?: string | null;
+                    pricing?: {
+                        __typename?: 'PricingResource';
                         id: string;
-                        tag?: string | null;
-                        fileFields?: Array<{
-                            __typename?: 'FileField';
-                            id: string;
-                            name?: string | null;
-                            value?: string | null;
-                            atType?: string | null;
-                            acc?: string | null;
-                            pricing?: {
-                                __typename?: 'PricingResource';
-                                id: string;
-                                owner: string;
-                                price: string;
-                                currency: string;
-                            } | null;
-                        }> | null;
-                    }> | null;
+                        owner: string;
+                        price: string;
+                        currency: string;
+                    } | null;
+                }> | null;
+            }> | null;
+        } | null;
+    }>;
+};
+export type GetManifestByIdQueryVariables = Exact<{
+    id?: InputMaybe<Scalars['ID']['input']>;
+}>;
+export type GetManifestByIdQuery = {
+    __typename?: 'Query';
+    manifests: Array<{
+        __typename?: 'Manifest';
+        id: string;
+        manifestVersion?: string | null;
+        schemaId?: string | null;
+        files?: Array<{
+            __typename?: 'File';
+            id: string;
+            tag?: string | null;
+            fileFields?: Array<{
+                __typename?: 'FileField';
+                id: string;
+                name?: string | null;
+                value?: string | null;
+                atType?: string | null;
+                acc?: string | null;
+                pricing?: {
+                    __typename?: 'PricingResource';
+                    id: string;
+                    owner: string;
+                    price: string;
+                    currency: string;
                 } | null;
             }> | null;
         }> | null;
@@ -2197,33 +2375,6 @@ export type GetManifestByFileIdQuery = {
         };
     }>;
 };
-export type GetFileByFileFieldIdQueryVariables = Exact<{
-    id?: InputMaybe<Scalars['ID']['input']>;
-}>;
-export type GetFileByFileFieldIdQuery = {
-    __typename?: 'Query';
-    fileFields: Array<{
-        __typename?: 'FileField';
-        file: {
-            __typename?: 'File';
-            fileFields?: Array<{
-                __typename?: 'FileField';
-                id: string;
-                name?: string | null;
-                value?: string | null;
-                atType?: string | null;
-                acc?: string | null;
-                pricing?: {
-                    __typename?: 'PricingResource';
-                    id: string;
-                    owner: string;
-                    price: string;
-                    currency: string;
-                } | null;
-            }> | null;
-        };
-    }>;
-};
 export type GetManifestByFileFieldNameValuePairQueryVariables = Exact<{
     name?: InputMaybe<Scalars['String']['input']>;
     value?: InputMaybe<Scalars['String']['input']>;
@@ -2238,77 +2389,293 @@ export type GetManifestByFileFieldNameValuePairQuery = {
             __typename?: 'File';
             manifest: {
                 __typename?: 'Manifest';
-                id: string;
-                manifestVersion?: string | null;
-                schemaId?: string | null;
-                files?: Array<{
-                    __typename?: 'File';
+                manifestState: {
+                    __typename?: 'ManifestState';
                     id: string;
-                    tag?: string | null;
-                    fileFields?: Array<{
-                        __typename?: 'FileField';
+                    owner: string;
+                    schemaId: string;
+                    schemaName: string;
+                    manifestCid: string;
+                    version: string;
+                    lastUpdated: string;
+                    manifest?: {
+                        __typename?: 'Manifest';
                         id: string;
-                        name?: string | null;
-                        value?: string | null;
-                        atType?: string | null;
-                        acc?: string | null;
-                        pricing?: {
-                            __typename?: 'PricingResource';
+                        manifestVersion?: string | null;
+                        schemaId?: string | null;
+                        files?: Array<{
+                            __typename?: 'File';
                             id: string;
-                            owner: string;
-                            price: string;
-                            currency: string;
-                        } | null;
-                    }> | null;
-                }> | null;
+                            tag?: string | null;
+                            fileFields?: Array<{
+                                __typename?: 'FileField';
+                                id: string;
+                                name?: string | null;
+                                value?: string | null;
+                                atType?: string | null;
+                                acc?: string | null;
+                                pricing?: {
+                                    __typename?: 'PricingResource';
+                                    id: string;
+                                    owner: string;
+                                    price: string;
+                                    currency: string;
+                                } | null;
+                            }> | null;
+                        }> | null;
+                    } | null;
+                };
             };
         };
     }>;
 };
-export type GetFileByFileFieldNameValuePairQueryVariables = Exact<{
-    name?: InputMaybe<Scalars['String']['input']>;
-    value?: InputMaybe<Scalars['String']['input']>;
+export type GetAllSchemaStatesQueryVariables = Exact<{
     first?: InputMaybe<Scalars['Int']['input']>;
     skip?: InputMaybe<Scalars['Int']['input']>;
 }>;
-export type GetFileByFileFieldNameValuePairQuery = {
+export type GetAllSchemaStatesQuery = {
     __typename?: 'Query';
-    fileFields: Array<{
-        __typename?: 'FileField';
-        file: {
-            __typename?: 'File';
-            fileFields?: Array<{
-                __typename?: 'FileField';
+    schemaStates: Array<{
+        __typename?: 'SchemaState';
+        id: string;
+        schemaId: string;
+        owner: string;
+        name: string;
+        versions?: Array<{
+            __typename?: 'Schema';
+            id: string;
+            version?: string | null;
+            agentId?: string | null;
+            manifests?: Array<{
+                __typename?: 'ManifestState';
                 id: string;
-                name?: string | null;
-                value?: string | null;
-                atType?: string | null;
-                acc?: string | null;
-                pricing?: {
-                    __typename?: 'PricingResource';
+                owner: string;
+                schemaId: string;
+                schemaName: string;
+                manifestCid: string;
+                version: string;
+                lastUpdated: string;
+                manifest?: {
+                    __typename?: 'Manifest';
                     id: string;
-                    owner: string;
-                    price: string;
-                    currency: string;
+                    manifestVersion?: string | null;
+                    schemaId?: string | null;
+                    files?: Array<{
+                        __typename?: 'File';
+                        id: string;
+                        tag?: string | null;
+                        fileFields?: Array<{
+                            __typename?: 'FileField';
+                            id: string;
+                            name?: string | null;
+                            value?: string | null;
+                            atType?: string | null;
+                            acc?: string | null;
+                            pricing?: {
+                                __typename?: 'PricingResource';
+                                id: string;
+                                owner: string;
+                                price: string;
+                                currency: string;
+                            } | null;
+                        }> | null;
+                    }> | null;
                 } | null;
             }> | null;
-        };
+            fields?: Array<{
+                __typename?: 'SchemaField';
+                id: string;
+                name: string;
+                fieldType: string;
+            }> | null;
+        }> | null;
     }>;
 };
-export type GetPriceByFileFieldIdQueryVariables = Exact<{
-    id?: InputMaybe<Scalars['ID']['input']>;
+export type GetAllSchemaStatesByOwnerQueryVariables = Exact<{
+    owner?: InputMaybe<Scalars['Bytes']['input']>;
+    first?: InputMaybe<Scalars['Int']['input']>;
+    skip?: InputMaybe<Scalars['Int']['input']>;
 }>;
-export type GetPriceByFileFieldIdQuery = {
+export type GetAllSchemaStatesByOwnerQuery = {
     __typename?: 'Query';
-    fileFields: Array<{
-        __typename?: 'FileField';
-        pricing?: {
-            __typename?: 'PricingResource';
+    schemaStates: Array<{
+        __typename?: 'SchemaState';
+        id: string;
+        schemaId: string;
+        owner: string;
+        name: string;
+        versions?: Array<{
+            __typename?: 'Schema';
             id: string;
-            owner: string;
-            price: string;
-            currency: string;
-        } | null;
+            version?: string | null;
+            agentId?: string | null;
+            manifests?: Array<{
+                __typename?: 'ManifestState';
+                id: string;
+                owner: string;
+                schemaId: string;
+                schemaName: string;
+                manifestCid: string;
+                version: string;
+                lastUpdated: string;
+                manifest?: {
+                    __typename?: 'Manifest';
+                    id: string;
+                    manifestVersion?: string | null;
+                    schemaId?: string | null;
+                    files?: Array<{
+                        __typename?: 'File';
+                        id: string;
+                        tag?: string | null;
+                        fileFields?: Array<{
+                            __typename?: 'FileField';
+                            id: string;
+                            name?: string | null;
+                            value?: string | null;
+                            atType?: string | null;
+                            acc?: string | null;
+                            pricing?: {
+                                __typename?: 'PricingResource';
+                                id: string;
+                                owner: string;
+                                price: string;
+                                currency: string;
+                            } | null;
+                        }> | null;
+                    }> | null;
+                } | null;
+            }> | null;
+            fields?: Array<{
+                __typename?: 'SchemaField';
+                id: string;
+                name: string;
+                fieldType: string;
+            }> | null;
+        }> | null;
+    }>;
+};
+export type GetSchemaStateByNameQueryVariables = Exact<{
+    name?: InputMaybe<Scalars['String']['input']>;
+}>;
+export type GetSchemaStateByNameQuery = {
+    __typename?: 'Query';
+    schemaStates: Array<{
+        __typename?: 'SchemaState';
+        id: string;
+        schemaId: string;
+        owner: string;
+        name: string;
+        versions?: Array<{
+            __typename?: 'Schema';
+            id: string;
+            version?: string | null;
+            agentId?: string | null;
+            manifests?: Array<{
+                __typename?: 'ManifestState';
+                id: string;
+                owner: string;
+                schemaId: string;
+                schemaName: string;
+                manifestCid: string;
+                version: string;
+                lastUpdated: string;
+                manifest?: {
+                    __typename?: 'Manifest';
+                    id: string;
+                    manifestVersion?: string | null;
+                    schemaId?: string | null;
+                    files?: Array<{
+                        __typename?: 'File';
+                        id: string;
+                        tag?: string | null;
+                        fileFields?: Array<{
+                            __typename?: 'FileField';
+                            id: string;
+                            name?: string | null;
+                            value?: string | null;
+                            atType?: string | null;
+                            acc?: string | null;
+                            pricing?: {
+                                __typename?: 'PricingResource';
+                                id: string;
+                                owner: string;
+                                price: string;
+                                currency: string;
+                            } | null;
+                        }> | null;
+                    }> | null;
+                } | null;
+            }> | null;
+            fields?: Array<{
+                __typename?: 'SchemaField';
+                id: string;
+                name: string;
+                fieldType: string;
+            }> | null;
+        }> | null;
+    }>;
+};
+export type GetSchemasBySchemaIdQueryVariables = Exact<{
+    id?: InputMaybe<Scalars['Bytes']['input']>;
+    first?: InputMaybe<Scalars['Int']['input']>;
+    skip?: InputMaybe<Scalars['Int']['input']>;
+}>;
+export type GetSchemasBySchemaIdQuery = {
+    __typename?: 'Query';
+    schemaStates: Array<{
+        __typename?: 'SchemaState';
+        id: string;
+        schemaId: string;
+        owner: string;
+        name: string;
+        versions?: Array<{
+            __typename?: 'Schema';
+            id: string;
+            version?: string | null;
+            agentId?: string | null;
+            manifests?: Array<{
+                __typename?: 'ManifestState';
+                id: string;
+                owner: string;
+                schemaId: string;
+                schemaName: string;
+                manifestCid: string;
+                version: string;
+                lastUpdated: string;
+                manifest?: {
+                    __typename?: 'Manifest';
+                    id: string;
+                    manifestVersion?: string | null;
+                    schemaId?: string | null;
+                    files?: Array<{
+                        __typename?: 'File';
+                        id: string;
+                        tag?: string | null;
+                        fileFields?: Array<{
+                            __typename?: 'FileField';
+                            id: string;
+                            name?: string | null;
+                            value?: string | null;
+                            atType?: string | null;
+                            acc?: string | null;
+                            pricing?: {
+                                __typename?: 'PricingResource';
+                                id: string;
+                                owner: string;
+                                price: string;
+                                currency: string;
+                            } | null;
+                        }> | null;
+                    }> | null;
+                } | null;
+            }> | null;
+            fields?: Array<{
+                __typename?: 'SchemaField';
+                id: string;
+                name: string;
+                fieldType: string;
+            }> | null;
+        }> | null;
     }>;
 };
 export declare const SchemaStateCoreFragmentDoc: import("graphql").DocumentNode;
@@ -2332,24 +2699,40 @@ export declare const SchemaStateFragmentDoc: import("graphql").DocumentNode;
 export declare const ManifestByFileFieldFragmentDoc: import("graphql").DocumentNode;
 export declare const ManifestByFileFragmentDoc: import("graphql").DocumentNode;
 export declare const FileByFileFieldFragmentDoc: import("graphql").DocumentNode;
-export declare const GetManifestsBySchemaNameDocument: import("graphql").DocumentNode;
-export declare const GetManifestsBySchemaIdDocument: import("graphql").DocumentNode;
+export declare const GetFileByFileFieldIdDocument: import("graphql").DocumentNode;
+export declare const GetFileByFileFieldNameValuePairDocument: import("graphql").DocumentNode;
+export declare const GetFileEntriesByManifestIdDocument: import("graphql").DocumentNode;
+export declare const GetPriceByFileFieldIdDocument: import("graphql").DocumentNode;
+export declare const GetFileFieldsByFileIdDocument: import("graphql").DocumentNode;
+export declare const GetManifestStatesBySchemaNameDocument: import("graphql").DocumentNode;
+export declare const GetManifestStatesBySchemaNameAndOwnerDocument: import("graphql").DocumentNode;
+export declare const GetManifestStatesBySchemaIdDocument: import("graphql").DocumentNode;
+export declare const GetManifestByIdDocument: import("graphql").DocumentNode;
 export declare const GetManifestByFileFieldIdDocument: import("graphql").DocumentNode;
 export declare const GetManifestByFileIdDocument: import("graphql").DocumentNode;
-export declare const GetFileByFileFieldIdDocument: import("graphql").DocumentNode;
 export declare const GetManifestByFileFieldNameValuePairDocument: import("graphql").DocumentNode;
-export declare const GetFileByFileFieldNameValuePairDocument: import("graphql").DocumentNode;
-export declare const GetPriceByFileFieldIdDocument: import("graphql").DocumentNode;
+export declare const GetAllSchemaStatesDocument: import("graphql").DocumentNode;
+export declare const GetAllSchemaStatesByOwnerDocument: import("graphql").DocumentNode;
+export declare const GetSchemaStateByNameDocument: import("graphql").DocumentNode;
+export declare const GetSchemasBySchemaIdDocument: import("graphql").DocumentNode;
 export type SdkFunctionWrapper = <T>(action: (requestHeaders?: Record<string, string>) => Promise<T>, operationName: string, operationType?: string, variables?: any) => Promise<T>;
 export declare function getSdk(client: GraphQLClient, withWrapper?: SdkFunctionWrapper): {
-    GetManifestsBySchemaName(variables?: GetManifestsBySchemaNameQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit["signal"]): Promise<GetManifestsBySchemaNameQuery>;
-    GetManifestsBySchemaId(variables?: GetManifestsBySchemaIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit["signal"]): Promise<GetManifestsBySchemaIdQuery>;
+    GetFileByFileFieldId(variables?: GetFileByFileFieldIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit["signal"]): Promise<GetFileByFileFieldIdQuery>;
+    GetFileByFileFieldNameValuePair(variables?: GetFileByFileFieldNameValuePairQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit["signal"]): Promise<GetFileByFileFieldNameValuePairQuery>;
+    GetFileEntriesByManifestId(variables?: GetFileEntriesByManifestIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit["signal"]): Promise<GetFileEntriesByManifestIdQuery>;
+    GetPriceByFileFieldId(variables?: GetPriceByFileFieldIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit["signal"]): Promise<GetPriceByFileFieldIdQuery>;
+    GetFileFieldsByFileId(variables?: GetFileFieldsByFileIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit["signal"]): Promise<GetFileFieldsByFileIdQuery>;
+    GetManifestStatesBySchemaName(variables?: GetManifestStatesBySchemaNameQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit["signal"]): Promise<GetManifestStatesBySchemaNameQuery>;
+    GetManifestStatesBySchemaNameAndOwner(variables?: GetManifestStatesBySchemaNameAndOwnerQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit["signal"]): Promise<GetManifestStatesBySchemaNameAndOwnerQuery>;
+    GetManifestStatesBySchemaId(variables?: GetManifestStatesBySchemaIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit["signal"]): Promise<GetManifestStatesBySchemaIdQuery>;
+    GetManifestById(variables?: GetManifestByIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit["signal"]): Promise<GetManifestByIdQuery>;
     GetManifestByFileFieldId(variables?: GetManifestByFileFieldIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit["signal"]): Promise<GetManifestByFileFieldIdQuery>;
     GetManifestByFileId(variables?: GetManifestByFileIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit["signal"]): Promise<GetManifestByFileIdQuery>;
-    GetFileByFileFieldId(variables?: GetFileByFileFieldIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit["signal"]): Promise<GetFileByFileFieldIdQuery>;
     GetManifestByFileFieldNameValuePair(variables?: GetManifestByFileFieldNameValuePairQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit["signal"]): Promise<GetManifestByFileFieldNameValuePairQuery>;
-    GetFileByFileFieldNameValuePair(variables?: GetFileByFileFieldNameValuePairQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit["signal"]): Promise<GetFileByFileFieldNameValuePairQuery>;
-    GetPriceByFileFieldId(variables?: GetPriceByFileFieldIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit["signal"]): Promise<GetPriceByFileFieldIdQuery>;
+    GetAllSchemaStates(variables?: GetAllSchemaStatesQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit["signal"]): Promise<GetAllSchemaStatesQuery>;
+    GetAllSchemaStatesByOwner(variables?: GetAllSchemaStatesByOwnerQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit["signal"]): Promise<GetAllSchemaStatesByOwnerQuery>;
+    GetSchemaStateByName(variables?: GetSchemaStateByNameQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit["signal"]): Promise<GetSchemaStateByNameQuery>;
+    GetSchemasBySchemaId(variables?: GetSchemasBySchemaIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit["signal"]): Promise<GetSchemasBySchemaIdQuery>;
 };
 export type Sdk = ReturnType<typeof getSdk>;
 export {};
