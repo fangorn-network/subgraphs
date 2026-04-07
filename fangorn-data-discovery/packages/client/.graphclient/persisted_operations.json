@@ -1,3 +1,0 @@
-{
-  "9528d7f697b4a10a424625ae1b6720437335b0a128a4871f09d3e8bca6fd1683": "query ManifestsBySchemaName($name: String) {\n  schemaStates(where: {name: $name}) {\n    name\n    versions {\n      manifests {\n        id\n      }\n    }\n  }\n}"
-}
