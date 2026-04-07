@@ -1,0 +1,149 @@
+fragment SchemaStateCore on SchemaState {
+	id
+	schemaId
+	owner
+	name
+}
+
+fragment SchemaStateWithFields on SchemaState {
+	...SchemaStateCore
+	versions {
+		...SchemaWithFields
+	}
+}
+
+fragment SchemaStateWithManifests on SchemaState {
+	...SchemaStateCore
+	versions {
+		...SchemaWithManifests
+	}
+}
+
+fragment SchemaState on SchemaState {
+	...SchemaStateCore
+	versions {
+		...Schema
+	}
+}
+
+fragment SchemaCore on Schema {
+	id
+	version
+	agentId
+}
+
+fragment SchemaWithFields on Schema {
+	...SchemaCore
+	fields {
+		...SchemaField
+	}
+}
+
+fragment SchemaWithManifests on Schema {
+	...SchemaCore
+	manifests {
+		...ManifestState
+	}
+}
+
+fragment Schema on Schema {
+	...SchemaCore
+	manifests {
+		...ManifestState
+	}
+	fields {
+		...SchemaField
+	}
+}
+
+fragment SchemaField on SchemaField {
+	id
+	name
+	fieldType
+}
+
+fragment ManifestStateCore on ManifestState {
+	id
+	owner
+	schemaId
+	schemaName
+	manifestCid
+	version
+	lastUpdated
+}
+
+fragment ManifestState on ManifestState {
+	...ManifestStateCore
+	manifest {
+		...Manifest
+	}
+}
+
+fragment ManifestCore on Manifest {
+	id
+	manifestVersion
+	schemaId
+}
+
+fragment Manifest on Manifest {
+	...ManifestCore
+	files {
+		...File
+	}
+}
+
+fragment FileCore on File {
+	id
+	tag
+}
+
+fragment File on File {
+	...FileCore
+	fileFields {
+		...FileField
+	}
+}
+
+fragment FileFieldCore on FileField {
+	id
+	name
+	value
+	atType
+	acc
+}
+
+fragment FileField on FileField {
+	...FileFieldCore
+	pricing {
+		...PricingResource
+	}
+}
+
+fragment PricingResource on PricingResource {
+	id
+	owner
+	price
+	currency
+}
+
+fragment ManifestByFileField on FileField {
+	file {
+		manifest {
+			...Manifest
+		}
+	}
+}
+
+fragment ManifestByFile on File {
+	manifest {
+		...Manifest
+	}
+}
+
+fragment FileByFileField on FileField {
+	file {
+		fileFields{
+			...FileField
+		}
+	}
+}

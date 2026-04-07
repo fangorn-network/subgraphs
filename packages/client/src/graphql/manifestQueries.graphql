@@ -1,0 +1,49 @@
+query GetManifestsBySchemaName($name: String, $first: Int = 100, $skip: Int = 0) {
+	schemaStates (where: {name: $name}, first: $first, skip: $skip) {
+		...SchemaStateWithManifests
+	}
+}
+
+query GetManifestsBySchemaId($id: Bytes, $first: Int = 100, $skip: Int = 0) {
+	schemaStates (where: {id: $id}, first: $first, skip: $skip) {
+		...SchemaStateWithManifests
+	}
+}
+
+query GetManifestByFileFieldId($id: ID) {
+	fileFields (where: {id: $id}) {
+			...ManifestByFileField
+	}
+}
+
+query GetManifestByFileId($id: ID) {
+	files (where: {id: $id}) {
+		...ManifestByFile
+	}
+}
+
+query GetFileByFileFieldId($id: ID) {
+	fileFields (where: {id: $id}) {
+		...FileByFileField
+	}
+}
+
+query GetManifestByFileFieldNameValuePair($name: String, $value: String, $first: Int = 100, $skip: Int = 0) {
+	fileFields (where: {name: $name, value: $value}, first: $first, skip: $skip) {
+		...ManifestByFileField
+	}
+}
+
+query GetFileByFileFieldNameValuePair($name: String, $value: String, $first: Int = 100, $skip: Int = 0) {
+	fileFields (where: {name: $name, value: $value}, first: $first, skip: $skip) {
+		...FileByFileField
+	}
+}
+
+query GetPriceByFileFieldId($id: ID) {
+	fileFields (where: {id: $id}) {
+		pricing{
+			...PricingResource
+		}
+	}
+}
