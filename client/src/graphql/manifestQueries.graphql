@@ -45,3 +45,15 @@ query GetManifestByFileFieldNameValuePair($name: String, $value: String, $first:
 		}
 	}
 }
+
+query GetManifestByFileFieldName($name: String, $first: Int = 100, $skip: Int = 0) {
+	fileFields (where: {name: $name}, first: $first, skip: $skip) {
+		file {
+			manifest {
+				manifestState{
+					...ManifestState
+				}
+			}
+		}
+	}
+}

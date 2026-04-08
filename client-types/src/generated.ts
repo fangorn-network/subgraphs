@@ -381,6 +381,7 @@ export type ManifestState_Filter = {
   lastUpdated_lte?: InputMaybe<Scalars['BigInt']['input']>;
   lastUpdated_not?: InputMaybe<Scalars['BigInt']['input']>;
   lastUpdated_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  manifest?: InputMaybe<Scalars['String']['input']>;
   manifestCid?: InputMaybe<Scalars['String']['input']>;
   manifestCid_contains?: InputMaybe<Scalars['String']['input']>;
   manifestCid_contains_nocase?: InputMaybe<Scalars['String']['input']>;
@@ -402,6 +403,25 @@ export type ManifestState_Filter = {
   manifestCid_starts_with?: InputMaybe<Scalars['String']['input']>;
   manifestCid_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
   manifest_?: InputMaybe<Manifest_Filter>;
+  manifest_contains?: InputMaybe<Scalars['String']['input']>;
+  manifest_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  manifest_ends_with?: InputMaybe<Scalars['String']['input']>;
+  manifest_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  manifest_gt?: InputMaybe<Scalars['String']['input']>;
+  manifest_gte?: InputMaybe<Scalars['String']['input']>;
+  manifest_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  manifest_lt?: InputMaybe<Scalars['String']['input']>;
+  manifest_lte?: InputMaybe<Scalars['String']['input']>;
+  manifest_not?: InputMaybe<Scalars['String']['input']>;
+  manifest_not_contains?: InputMaybe<Scalars['String']['input']>;
+  manifest_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  manifest_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  manifest_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  manifest_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  manifest_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  manifest_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  manifest_starts_with?: InputMaybe<Scalars['String']['input']>;
+  manifest_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
   or?: InputMaybe<Array<InputMaybe<ManifestState_Filter>>>;
   owner?: InputMaybe<Scalars['Bytes']['input']>;
   owner_contains?: InputMaybe<Scalars['Bytes']['input']>;
@@ -1236,7 +1256,7 @@ export type GetFileByFileFieldIdQueryVariables = Exact<{
 }>;
 
 
-export type GetFileByFileFieldIdQuery = { __typename?: 'Query', fileFields: Array<{ __typename?: 'FileField', file: { __typename?: 'File', fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null } }> };
+export type GetFileByFileFieldIdQuery = { __typename?: 'Query', fileFields: Array<{ __typename?: 'FileField', file: { __typename?: 'File', id: string, tag?: string | null, fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null } }> };
 
 export type GetFileByFileFieldNameValuePairQueryVariables = Exact<{
   name?: InputMaybe<Scalars['String']['input']>;
@@ -1246,7 +1266,25 @@ export type GetFileByFileFieldNameValuePairQueryVariables = Exact<{
 }>;
 
 
-export type GetFileByFileFieldNameValuePairQuery = { __typename?: 'Query', fileFields: Array<{ __typename?: 'FileField', file: { __typename?: 'File', fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null } }> };
+export type GetFileByFileFieldNameValuePairQuery = { __typename?: 'Query', fileFields: Array<{ __typename?: 'FileField', file: { __typename?: 'File', id: string, tag?: string | null, fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null } }> };
+
+export type GetFileFieldsByFileFieldNameQueryVariables = Exact<{
+  name?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetFileFieldsByFileFieldNameQuery = { __typename?: 'Query', fileFields: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> };
+
+export type GetFilesByFileFieldNameQueryVariables = Exact<{
+  name?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetFilesByFileFieldNameQuery = { __typename?: 'Query', fileFields: Array<{ __typename?: 'FileField', file: { __typename?: 'File', id: string, tag?: string | null, fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null } }> };
 
 export type GetFileEntriesByManifestIdQueryVariables = Exact<{
   manifestId?: InputMaybe<Scalars['String']['input']>;
@@ -1313,7 +1351,7 @@ export type ManifestByFileFieldFragment = { __typename?: 'FileField', file: { __
 
 export type ManifestByFileFragment = { __typename?: 'File', manifest: { __typename?: 'Manifest', id: string, manifestVersion?: string | null, schemaId?: string | null, files?: Array<{ __typename?: 'File', id: string, tag?: string | null, fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null }> | null } };
 
-export type FileByFileFieldFragment = { __typename?: 'FileField', file: { __typename?: 'File', fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null } };
+export type FileByFileFieldFragment = { __typename?: 'FileField', file: { __typename?: 'File', id: string, tag?: string | null, fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null } };
 
 export type GetManifestStatesBySchemaNameQueryVariables = Exact<{
   name?: InputMaybe<Scalars['String']['input']>;
@@ -1373,6 +1411,15 @@ export type GetManifestByFileFieldNameValuePairQueryVariables = Exact<{
 
 
 export type GetManifestByFileFieldNameValuePairQuery = { __typename?: 'Query', fileFields: Array<{ __typename?: 'FileField', file: { __typename?: 'File', manifest: { __typename?: 'Manifest', manifestState: { __typename?: 'ManifestState', id: string, owner: string, schemaId: string, schemaName: string, manifestCid: string, version: string, lastUpdated: string, manifest?: { __typename?: 'Manifest', id: string, manifestVersion?: string | null, schemaId?: string | null, files?: Array<{ __typename?: 'File', id: string, tag?: string | null, fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null }> | null } | null } } } }> };
+
+export type GetManifestByFileFieldNameQueryVariables = Exact<{
+  name?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetManifestByFileFieldNameQuery = { __typename?: 'Query', fileFields: Array<{ __typename?: 'FileField', file: { __typename?: 'File', manifest: { __typename?: 'Manifest', manifestState: { __typename?: 'ManifestState', id: string, owner: string, schemaId: string, schemaName: string, manifestCid: string, version: string, lastUpdated: string, manifest?: { __typename?: 'Manifest', id: string, manifestVersion?: string | null, schemaId?: string | null, files?: Array<{ __typename?: 'File', id: string, tag?: string | null, fileFields?: Array<{ __typename?: 'FileField', id: string, name?: string | null, value?: string | null, atType?: string | null, acc?: string | null, pricing?: { __typename?: 'PricingResource', id: string, owner: string, price: string, currency: string } | null }> | null }> | null } | null } } } }> };
 
 export type GetAllSchemaStatesQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;

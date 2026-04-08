@@ -441,6 +441,7 @@ input ManifestState_filter {
   lastUpdated_lte: BigInt
   lastUpdated_not: BigInt
   lastUpdated_not_in: [BigInt!]
+  manifest: String
   manifestCid: String
   manifestCid_contains: String
   manifestCid_contains_nocase: String
@@ -462,6 +463,25 @@ input ManifestState_filter {
   manifestCid_starts_with: String
   manifestCid_starts_with_nocase: String
   manifest_: Manifest_filter
+  manifest_contains: String
+  manifest_contains_nocase: String
+  manifest_ends_with: String
+  manifest_ends_with_nocase: String
+  manifest_gt: String
+  manifest_gte: String
+  manifest_in: [String!]
+  manifest_lt: String
+  manifest_lte: String
+  manifest_not: String
+  manifest_not_contains: String
+  manifest_not_contains_nocase: String
+  manifest_not_ends_with: String
+  manifest_not_ends_with_nocase: String
+  manifest_not_in: [String!]
+  manifest_not_starts_with: String
+  manifest_not_starts_with_nocase: String
+  manifest_starts_with: String
+  manifest_starts_with_nocase: String
   or: [ManifestState_filter]
   owner: Bytes
   owner_contains: Bytes

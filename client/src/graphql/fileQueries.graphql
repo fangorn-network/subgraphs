@@ -11,6 +11,20 @@ query GetFileByFileFieldNameValuePair($name: String, $value: String, $first: Int
 	}
 }
 
+query GetFileFieldsByFileFieldName($name: String, $first: Int = 100, $skip: Int = 0) {
+		fileFields (where: {name: $name,}, first: $first, skip: $skip) {
+		...FileField
+	}
+}
+
+query GetFilesByFileFieldName($name: String, $first: Int = 100, $skip: Int = 0) {
+		fileFields (where: {name: $name,}, first: $first, skip: $skip) {
+		file {
+			...File
+		}
+	}
+}
+
 query GetFileEntriesByManifestId($manifestId: String, $first: Int = 100, $skip: Int = 0) {
 	files (where: {manifest: $manifestId}, first: $first, skip: $skip) {
 		...File

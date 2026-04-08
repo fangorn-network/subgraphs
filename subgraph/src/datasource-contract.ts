@@ -125,6 +125,7 @@ export function handleManifestPublished(manifestPublishedEvent: ManifestPublishe
 	manifestState.schemaId = manifestPublished.schemaId
 	manifestState.schema = schemas[0]
 	manifestState.manifestCid = manifestPublished.manifestCid
+	manifestState.manifest = manifestPublished.manifestCid
 	manifestState.version = manifestPublished.version
 	manifestState.schemaName = schemaName
 	manifestState.lastUpdated = manifestPublishedEvent.block.timestamp
@@ -144,7 +145,7 @@ export function handleManifestUpdated(manifestUpdatedEvent: ManifestUpdatedEvent
 	let schemaId = manifestUpdatedEvent.params.schema_id
 	let stateId = deriveManifestStateId(manifestOwner, schemaId)
 
-	let state = ManifestState.load(stateId)
+	let manifestState = ManifestState.load(stateId)
 
 	// record that an update has occurred
 	let manifestUpdated = new ManifestUpdated(
@@ -197,27 +198,28 @@ export function handleManifestUpdated(manifestUpdatedEvent: ManifestUpdatedEvent
 	}
 
 	// Update manifest state
-	if (state == null) {
+	if (manifestState == null) {
 		log.warning("Manifest state was found to be null with ID {}", [stateId.toHexString()])
-		state = new ManifestState(stateId)
-		state.owner = manifestUpdated.owner
-		state.schemaId = manifestUpdated.schemaId
-		state.schemaName = schemaName
-		state.schema = schemas[0]
+		manifestState = new ManifestState(stateId)
+		manifestState.owner = manifestUpdated.owner
+		manifestState.schemaId = manifestUpdated.schemaId
+		manifestState.schemaName = schemaName
+		manifestState.schema = schemas[0]
 	}
 
-	state.manifestCid = manifestUpdated.manifestCid
-	state.version = manifestUpdated.version
-	state.lastUpdated = manifestUpdated.blockTimestamp
-	state.save()
+	manifestState.manifestCid = manifestUpdated.manifestCid
+	manifestState.manifest = manifestUpdated.manifestCid
+	manifestState.version = manifestUpdated.version
+	manifestState.lastUpdated = manifestUpdated.blockTimestamp
+	manifestState.save()
 
 	let context = new DataSourceContext()
 	context.setString("schemaId", manifestUpdatedEvent.params.schema_id.toHexString())
 	context.setString("fields", fieldPairs.join(","))
-	context.setString("manifestStateId", state.id.toHexString())
-	context.setString("lastUpdated", state.lastUpdated.toString())
+	context.setString("manifestStateId", manifestState.id.toHexString())
+	context.setString("lastUpdated", manifestState.lastUpdated.toString())
 
-	ManifestTemplate.createWithContext(state.manifestCid, context)
+	ManifestTemplate.createWithContext(manifestState.manifestCid, context)
 }
 
 export function handleMetadata(content: Bytes): void {

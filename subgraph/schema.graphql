@@ -80,7 +80,7 @@ type ManifestState @entity(immutable: false) {
   schema: Schema
   schemaName: String!
   manifestCid: String!
-  manifest: Manifest @derivedFrom(field: "manifestState")
+  manifest: Manifest
   version: BigInt!
   lastUpdated: BigInt!
 }

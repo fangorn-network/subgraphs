@@ -9,3 +9,4 @@ export type { FileFragment as FileEntry } from './generated.js';
 export type { FileFieldFragment as FileField } from './generated.js';
 export type { PricingResourceFragment as PricingResource } from './generated.js';
 export type { ManifestByFileFieldFragment as ManifestByFileField } from './generated.js'
+export type { FileByFileFieldFragment as FileByFileField } from './generated.js'

@@ -144,8 +144,6 @@ fragment ManifestByFile on File {
 
 fragment FileByFileField on FileField {
 	file {
-		fileFields{
-			...FileField
-		}
+		...File
 	}
 }

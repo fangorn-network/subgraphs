@@ -14,6 +14,7 @@ export type { FileFragment as FileEntry } from './client.js';
 export type { FileFieldFragment as FileField } from './client.js';
 export type { PricingResourceFragment as PricingResource } from './client.js';
 export type { ManifestByFileFieldFragment as ManifestByFileField } from './client.js'
+export type { FileByFileFieldFragment as FileByFileField } from './client.js'
 
 
 export function getSubgraphClients(url: string): {client: GraphQLClient, typedClient: Sdk} {
