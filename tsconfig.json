@@ -1,6 +1,6 @@
 {
 	"references": [
-    { "path": "packages/client" },
-    { "path": "packages/subgraph" },
+    { "path": "client" },
+		{ "path": "client-types"}
   ],
 }

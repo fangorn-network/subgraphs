@@ -6,6 +6,14 @@ configDotenv()
 const SUBGRAPH_URL = process.env.SUBGRAPH_URL;
 
 if (!SUBGRAPH_URL) throw new Error("No Subgraph URL provided for codegen")
+	
+// The Graph uses custom scalars so we map them to TS types
+const sharedScalars = {
+  BigInt: "string",
+  BigDecimal: "string",
+  Bytes: "string",
+  Int8: "number",
+};
 
 const config: CodegenConfig = {
   overwrite: true,
@@ -20,13 +28,7 @@ const config: CodegenConfig = {
         "typescript-graphql-request",
       ],
       config: {
-        // The Graph uses custom scalars so we map them to TS types
-        scalars: {
-          BigInt: "string",
-          BigDecimal: "string",
-          Bytes: "string",
-          Int8: "number",
-        },
+        scalars: sharedScalars,
         // Use 'import type' for type-only imports
         useTypeImports: true,
         // Deduplicate fragment types
@@ -40,6 +42,20 @@ const config: CodegenConfig = {
       config: {
         includeIntrospectionTypes: false,
 				includeDirectives: true,
+      }
+    }, // Types-only output for the shared package
+    "../client-types/src/generated.ts": {
+      plugins: [
+        "typescript",
+        "typescript-operations",
+      ],
+      config: {
+        scalars: sharedScalars,
+        useTypeImports: true,
+        dedupeFragments: true,
+        enumsAsTypes: true,
+        // Only export types, no runtime code
+        onlyOperationTypes: true,
       },
     },
   },

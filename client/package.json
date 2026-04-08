@@ -1,5 +1,5 @@
 {
-  "name": "subgraph-client",
+  "name": "@fangorn-network/subgraph-client",
   "version": "1.0.0",
   "description": "Enables agents to query and interpret Fangorn subgraphs.",
   "type": "module",
