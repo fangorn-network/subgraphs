@@ -31,7 +31,7 @@ export function toSchemaField(frag: SchemaFieldFragment): SchemaField {
 		name: frag.name,
 		fieldType: frag.fieldType
 	}
-	
+
 }
 
 export function toManifestState(frag: ManifestStateFragment): ManifestState {
@@ -85,16 +85,16 @@ export function toFileField(frag: FileFieldFragment): FileField {
 	const pricingFrag = frag.pricing
 	const pricing = pricingFrag ? toPricingResource(pricingFrag) : undefined
 	return {
-	  id: frag.id,
-	  schemaId: frag.schemaId,
-	  schemaName: frag.schemaName,
-	  manifestStateId: frag.manifestStateId,
-	  fileId: frag.fileId,
-	  name: frag.name ?? undefined,
-	  value: frag.value ?? undefined,
-	  atType: frag.atType ?? undefined,
-	  acc: frag.acc ?? undefined,
-	  pricing,
+		id: frag.id,
+		schemaId: frag.schemaId,
+		schemaName: frag.schemaName,
+		manifestStateId: frag.manifestStateId,
+		fileId: frag.fileId,
+		name: frag.name ?? undefined,
+		value: frag.value ?? undefined,
+		atType: frag.atType ?? undefined,
+		acc: frag.acc ?? undefined,
+		pricing,
 	}
 }
 

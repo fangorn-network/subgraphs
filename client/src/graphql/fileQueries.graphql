@@ -5,6 +5,12 @@ query GetFileByFileFieldId($id: ID) {
 	}
 }
 
+query GetFileByFileId($id: ID) {
+	files (where: {id: $id}) {
+		...File
+	}
+}
+
 query GetFileByFileFieldNameValuePair($name: String, $value: String, $first: Int = 100, $skip: Int = 0) {
 	fileFields (where: {name: $name, value: $value}, first: $first, skip: $skip) {
 		...FileByFileField

@@ -16,8 +16,8 @@ query GetSchemaStateByName($name: String) {
 	}
 }
 
-query GetSchemasBySchemaId($id: Bytes, $first: Int = 100, $skip: Int = 0) {
-	schemaStates(where: {id: $id}, first: $first, skip: $skip) {
+query GetSchemaStateById($id: Bytes) {
+	schemaStates(where: {id: $id}) {
 		...SchemaState
 	}
 }

@@ -1,18 +1,20 @@
 import { GraphQLClient } from "graphql-request";
 import { getSdk, Sdk } from "./generated/graphql-req";
 import { FileEntry, SchemaState, ManifestState } from "@fangorn-network/client-types";
-import { FileByFileFieldFragment, GetAllSchemaStatesByOwnerQueryVariables, 
-					GetAllSchemaStatesQueryVariables, 
-					GetFileEntriesByManifestIdQueryVariables, 
-					GetFilesByFileFieldNameQueryVariables, 
-					GetManifestStateByIdQueryVariables, 
-					GetManifestStatesByFileFieldNameValuePairQueryVariables, 
-					GetManifestStatesBySchemaNameAndOwnerQueryVariables, 
-					GetManifestStatesBySchemaNameQueryVariables, 
-					GetSchemasBySchemaIdQueryVariables, 
-					GetSchemaStateByNameQueryVariables, 
-					ManifestStateByFileFieldFragment
-				} from "./generated/operations";
+import {
+	FileByFileFieldFragment, GetAllSchemaStatesByOwnerQueryVariables,
+	GetAllSchemaStatesQueryVariables,
+	GetFileByFileIdQueryVariables,
+	GetFileEntriesByManifestIdQueryVariables,
+	GetFilesByFileFieldNameQueryVariables,
+	GetManifestStateByIdQueryVariables,
+	GetManifestStatesByFileFieldNameValuePairQueryVariables,
+	GetManifestStatesBySchemaNameAndOwnerQueryVariables,
+	GetManifestStatesBySchemaNameQueryVariables,
+	GetSchemaStateByIdQueryVariables,
+	GetSchemaStateByNameQueryVariables,
+	ManifestStateByFileFieldFragment
+} from "./generated/operations";
 import { toFiles, toManifestStates, toSchemaStates, toManifestState, toFile } from "./typeMappings";
 
 
@@ -26,6 +28,42 @@ export class FangornGraphClient {
 		const typedClient = getSdk(client);
 		this.rawClient = client;
 		this.typedClient = typedClient
+	}
+
+	public getTypedClient(): Sdk {
+		return this.typedClient
+	}
+
+	public getRawClient(): GraphQLClient {
+		return this.rawClient
+	}
+
+	/** Get a single manifest by its ID. */
+	async getManifestStateById(args: GetManifestStateByIdQueryVariables): Promise<ManifestState | null> {
+
+		const result = await this.typedClient.GetManifestStateById(args)
+
+		const manifests: ManifestState[] = toManifestStates(result.manifestStates)
+
+		return manifests[0]
+	}
+
+	async getFileById(args: GetFileByFileIdQueryVariables) {
+
+		const result = await this.typedClient.GetFileByFileId(args);
+
+		const files: FileEntry[] = toFiles(result.files)
+
+		return files[0]
+	}
+
+	async getSchemaStateById(args: GetSchemaStateByIdQueryVariables) {
+
+		const result = await this.typedClient.GetSchemaStateById(args)
+
+		const schemaStates: SchemaState[] = toSchemaStates(result.schemaStates)
+
+		return schemaStates[0]
 	}
 
 	async getAllSchemaStates(args: GetAllSchemaStatesByOwnerQueryVariables): Promise<SchemaState[]> {
@@ -53,129 +91,108 @@ export class FangornGraphClient {
 		return schemaStates[0]
 	}
 
-	/** Get schemas (versions) for a given schema ID. */
-	async getSchemaById(args: GetSchemasBySchemaIdQueryVariables): Promise<SchemaState[]> {
-		const result = await this.typedClient.GetSchemasBySchemaId(args);
-		const schemaStates: SchemaState[] = toSchemaStates(result.schemaStates);
+	// ── Data Queries ────────────────────────────────────────────────────────
 
-		return schemaStates
-	}
-
-
-  // ── Data Queries ────────────────────────────────────────────────────────
-
-  /** List manifest states, filtered by schema_name and optionally owner. */
-  async getManifestStatesBySchemaNameAndOwner(args: GetManifestStatesBySchemaNameAndOwnerQueryVariables): Promise<ManifestState[]> {
+	/** List manifest states, filtered by schema_name and optionally owner. */
+	async getManifestStatesBySchemaNameAndOwner(args: GetManifestStatesBySchemaNameAndOwnerQueryVariables): Promise<ManifestState[]> {
 
 		let result;
-		if(args.owner) {
+		if (args.owner) {
 			result = await this.typedClient.GetManifestStatesBySchemaNameAndOwner(args)
 		} else {
-			const vars: GetManifestStatesBySchemaNameQueryVariables = {name: args.name, first: args.first, skip: args.skip}
+			const vars: GetManifestStatesBySchemaNameQueryVariables = { name: args.name, first: args.first, skip: args.skip }
 			result = await this.typedClient.GetManifestStatesBySchemaName(vars)
 		}
 		const manifestStates: ManifestState[] = toManifestStates(result.manifestStates)
 
 		return manifestStates
-  }
+	}
 
-  /** Get a single manifest by its ID. */
-  async getManifestStateById(args: GetManifestStateByIdQueryVariables): Promise<ManifestState | null> {
-
-		const result = await this.typedClient.GetManifestStateById(args)
-
-		const manifests: ManifestState[] = toManifestStates(result.manifestStates)
-
-		return manifests[0]
-  }
-
-  /** Get file entries for a given manifest ID. */
-  async getFilesByManifestId(args: GetFileEntriesByManifestIdQueryVariables): Promise<FileEntry[]> {
+	/** Get file entries for a given manifest ID. */
+	async getFilesByManifestId(args: GetFileEntriesByManifestIdQueryVariables): Promise<FileEntry[]> {
 		const result = await this.typedClient.GetFileEntriesByManifestId(args)
 		return toFiles(result.files)
-  }
-
-  // ── Search Queries ──────────────────────────────────────────────────────
-
-  /**
-   * Search fields within a specific schema.
-   * Returns Field[] — use manifestState.id and fileEntry.id to navigate.
-   */
-async getManifestStatesByFieldsAndSchemaName(
-  schemaName: string,
-  args: GetManifestStatesByFileFieldNameValuePairQueryVariables,
-  owner?: string
-): Promise<ManifestState[]> {
-
-	let result;
-	if (!args.value) {
-		result = await this.typedClient.GetManifestStatesByFileFieldName(args);
-	} else {
-		result = await this.typedClient.GetManifestStatesByFileFieldNameValuePair(args);
 	}
 
-	console.log("Searching Manifests by fields and schema name")
+	// ── Search Queries ──────────────────────────────────────────────────────
 
-  const manifestStates = result.fileFields
-    .filter((ff: ManifestStateByFileFieldFragment) => {
-      const manifestState = ff.file.manifest.manifestState;
-      if (manifestState.schemaName !== schemaName) return false;
-      if (owner && manifestState.owner !== owner) return false;
-      return true;
-    })
-    .map((ff: ManifestStateByFileFieldFragment) => {return toManifestState(ff.file.manifest.manifestState)})
-    .filter(
-      (m: ManifestState, index: number, self: ManifestState[]) =>
-        self.findIndex((other) => other.id === m.id) === index
-    );
+	/**
+	 * Search fields within a specific schema.
+	 * Returns Field[] — use manifestState.id and fileEntry.id to navigate.
+	 */
+	async getManifestStatesByFieldsAndSchemaName(
+		schemaName: string,
+		args: GetManifestStatesByFileFieldNameValuePairQueryVariables,
+		owner?: string
+	): Promise<ManifestState[]> {
 
-  return manifestStates;
-}
+		let result;
+		if (!args.value) {
+			result = await this.typedClient.GetManifestStatesByFileFieldName(args);
+		} else {
+			result = await this.typedClient.GetManifestStatesByFileFieldNameValuePair(args);
+		}
 
-  /**
-   * Search fields across all schemas.
-   * Returns Manifest[] — use manifestState.id and fileEntry.id to navigate.
-   */
-  async getManifestsByFields(args: GetManifestStatesByFileFieldNameValuePairQueryVariables): Promise<ManifestState[]> {
+		console.log("Searching Manifests by fields and schema name")
 
-	console.log("Searching Globally")
+		const manifestStates = result.fileFields
+			.filter((ff: ManifestStateByFileFieldFragment) => {
+				const manifestState = ff.file.manifest.manifestState;
+				if (manifestState.schemaName !== schemaName) return false;
+				if (owner && manifestState.owner !== owner) return false;
+				return true;
+			})
+			.map((ff: ManifestStateByFileFieldFragment) => { return toManifestState(ff.file.manifest.manifestState) })
+			.filter(
+				(m: ManifestState, index: number, self: ManifestState[]) =>
+					self.findIndex((other) => other.id === m.id) === index
+			);
 
-	console.log(`variables: ${JSON.stringify(args, null, 2)}`)
-
-	let result;
-	if (!args.value) {
-		result = await this.typedClient.GetManifestStatesByFileFieldName(args);
-	} else {
-		result = await this.typedClient.GetManifestStatesByFileFieldNameValuePair(args);
+		return manifestStates;
 	}
 
-  const manifests = result.fileFields
-    .filter((ff: ManifestStateByFileFieldFragment) => {
-      const manifestState = ff.file.manifest.manifestState;
-      if (!manifestState) return false;
-      return true;
-    })
-    .map((ff: ManifestStateByFileFieldFragment) => toManifestState(ff.file.manifest.manifestState))
-    .filter(
-      (m: ManifestState, index: number, self: ManifestState[]) =>
-        self.findIndex((other) => other.id === m.id) === index
-    );
-		return manifests;
-  }
+	/**
+	 * Search fields across all schemas.
+	 * Returns Manifest[] — use manifestState.id and fileEntry.id to navigate.
+	 */
+	async getManifestsByFields(args: GetManifestStatesByFileFieldNameValuePairQueryVariables): Promise<ManifestState[]> {
 
-	async searchFilesByFileFieldName(args: GetFilesByFileFieldNameQueryVariables ): Promise<FileEntry[]> {
+		console.log("Searching Globally")
+
+		console.log(`variables: ${JSON.stringify(args, null, 2)}`)
+
+		let result;
+		if (!args.value) {
+			result = await this.typedClient.GetManifestStatesByFileFieldName(args);
+		} else {
+			result = await this.typedClient.GetManifestStatesByFileFieldNameValuePair(args);
+		}
+
+		const manifestStates = result.fileFields
+			.filter((ff: ManifestStateByFileFieldFragment) => {
+				const manifestState = ff.file.manifest.manifestState;
+				if (!manifestState) return false;
+				return true;
+			})
+			.map((ff: ManifestStateByFileFieldFragment) => toManifestState(ff.file.manifest.manifestState))
+			.filter(
+				(m: ManifestState, index: number, self: ManifestState[]) =>
+					self.findIndex((other) => other.id === m.id) === index
+			);
+		return manifestStates;
+	}
+
+	async getFilesByFileFieldName(args: GetFilesByFileFieldNameQueryVariables): Promise<FileEntry[]> {
 		console.log("Searching Globally for FileFields")
 		const result = await this.typedClient.GetFilesByFileFieldName(args);
 		const files = result.fileFields.map((ff: FileByFileFieldFragment) => toFile(ff.file))
 		return files
 	}
 
-	// async searchFilesBy(args: GetManifestByFileFieldNameValuePairQueryVariables, ): Promise<ManifestState[]> {
+	// ── Raw ─────────────────────────────────────────────────────────────────
 
-  // ── Raw ─────────────────────────────────────────────────────────────────
-
-  /** Execute a raw GraphQL query. */
-  async rawQuery(gql: string): Promise<unknown> {
+	/** Execute a raw GraphQL query. */
+	async rawQuery(gql: string): Promise<unknown> {
 		return this.rawClient.rawRequest(gql)
-  }
+	}
 }
