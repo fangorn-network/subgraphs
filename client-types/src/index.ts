@@ -1,12 +1,70 @@
-export type * from './generated.js'
+export interface SchemaState {
+  id: string
+  schemaId: string
+  owner: string
+  name: string
+  versions?: Schema[]
+}
 
-export type { SchemaStateFragment as SchemaState } from './generated.js';
-export type { SchemaFragment as Schema } from './generated.js';
-export type { SchemaFieldFragment as SchemaField } from './generated.js';
-export type { ManifestStateFragment as ManifestState } from './generated.js';
-export type { ManifestFragment as Manifest } from './generated.js';
-export type { FileFragment as FileEntry } from './generated.js';
-export type { FileFieldFragment as FileField } from './generated.js';
-export type { PricingResourceFragment as PricingResource } from './generated.js';
-export type { ManifestByFileFieldFragment as ManifestByFileField } from './generated.js'
-export type { FileByFileFieldFragment as FileByFileField } from './generated.js'
+export interface Schema {
+  id: string
+  manifests?: ManifestState[]
+  version?: String
+  agentId?: String
+  fields?: SchemaField[]
+}
+
+export interface SchemaField {
+  id: string;
+  name: string;
+  fieldType: string;
+}
+
+export interface ManifestState {
+  id: string
+	schemaId: string
+  schemaName: string
+  owner: string
+  manifestCid: string
+  manifest?: Manifest
+  version: string
+  lastUpdated: string
+}
+
+export interface Manifest {
+  id: string
+	schemaId: string
+  schemaName: string
+	manifestStateId: string
+  manifestVersion?: string
+  files?: FileEntry[]
+}
+
+export interface FileEntry {
+  id: string
+	schemaId: string
+  schemaName: string
+	manifestStateId: string
+  tag?: string
+  fileFields?: FileField[]
+}
+
+export interface FileField {
+  id: string
+	schemaId: string
+  schemaName: string
+	manifestStateId: string
+	fileId: string
+  name?: string
+  value?: string
+  atType?: string
+  acc?: string
+  pricing?: PricingResource
+}
+
+export interface PricingResource {
+  id: string;
+  owner: string;
+  price: string;
+  currency: string;
+}
