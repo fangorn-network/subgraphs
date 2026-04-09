@@ -21,12 +21,26 @@ const config: CodegenConfig = {
   // All .graphql files (fragments + queries)
   documents: "src/graphql/*.graphql",
   generates: {
-    "./src/client.ts": {
+	"./src/generated/types.ts": {
+    plugins: ["typescript"],
+    config: { scalars: sharedScalars, enumsAsTypes: true },
+  },
+		"./src/generated/operations.ts": {
+    plugins: ["typescript-operations"],
+		preset: "import-types-preset",
+		presetConfig: {
+        typesPath: "./types.js",
+    },
+    config: { scalars: sharedScalars, enumsAsTypes: true },
+  },
+    "./src/generated/graphql-req.ts": {
 			plugins: [
-        "typescript",
-        "typescript-operations",
         "typescript-graphql-request",
-      ],
+      ],		
+			preset: "import-types-preset",
+		presetConfig: {
+        typesPath: "./operations.js",
+    },
       config: {
         scalars: sharedScalars,
         // Use 'import type' for type-only imports
@@ -37,27 +51,13 @@ const config: CodegenConfig = {
         enumsAsTypes: true,
       },
     },
-    "./src/schema.graphql": {
+    "./src/generated/schema.graphql": {
       plugins: ["schema-ast"],
       config: {
         includeIntrospectionTypes: false,
 				includeDirectives: true,
       }
-    }, // Types-only output for the shared package
-    "../client-types/src/generated.ts": {
-      plugins: [
-        "typescript",
-        "typescript-operations",
-      ],
-      config: {
-        scalars: sharedScalars,
-        useTypeImports: true,
-        dedupeFragments: true,
-        enumsAsTypes: true,
-        // Only export types, no runtime code
-        onlyOperationTypes: true,
-      },
-    },
+    }
   },
 };
 

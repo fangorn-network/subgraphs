@@ -67,6 +67,7 @@ fragment ManifestStateCore on ManifestState {
 	owner
 	schemaId
 	schemaName
+	owner
 	manifestCid
 	version
 	lastUpdated
@@ -81,8 +82,10 @@ fragment ManifestState on ManifestState {
 
 fragment ManifestCore on Manifest {
 	id
-	manifestVersion
 	schemaId
+	schemaName
+	manifestStateId
+	manifestVersion
 }
 
 fragment Manifest on Manifest {
@@ -94,6 +97,9 @@ fragment Manifest on Manifest {
 
 fragment FileCore on File {
 	id
+	schemaId
+	schemaName
+	manifestStateId
 	tag
 }
 
@@ -106,10 +112,14 @@ fragment File on File {
 
 fragment FileFieldCore on FileField {
 	id
+	schemaId
+	schemaName
+	manifestStateId
 	name
 	value
 	atType
 	acc
+	fileId
 }
 
 fragment FileField on FileField {
@@ -126,7 +136,7 @@ fragment PricingResource on PricingResource {
 	currency
 }
 
-fragment ManifestByFileField on FileField {
+fragment ManifestStateByFileField on FileField {
 	file {
 		manifest {
 			manifestState {
@@ -136,9 +146,11 @@ fragment ManifestByFileField on FileField {
 	}
 }
 
-fragment ManifestByFile on File {
+fragment ManifestStateByFile on File {
 	manifest {
-		...Manifest
+		manifestState {
+			...ManifestState
+		}
 	}
 }
 

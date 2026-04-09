@@ -11,9 +11,9 @@ query GetFileByFileFieldNameValuePair($name: String, $value: String, $first: Int
 	}
 }
 
-query GetFileFieldsByFileFieldName($name: String, $first: Int = 100, $skip: Int = 0) {
+query GetFilesFileFieldName($name: String, $first: Int = 100, $skip: Int = 0) {
 		fileFields (where: {name: $name,}, first: $first, skip: $skip) {
-		...FileField
+		...FileByFileField
 	}
 }
 
@@ -35,14 +35,6 @@ query GetPriceByFileFieldId($id: ID) {
 	fileFields (where: {id: $id}) {
 		pricing{
 			...PricingResource
-		}
-	}
-}
-
-query GetFileFieldsByFileId($id: ID, $first: Int = 100, $skip: Int = 0) {
-	files (where: {id: $id}, first: $first, skip: $skip) {
-		fileFields{
-			...FileField
 		}
 	}
 }

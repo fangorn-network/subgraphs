@@ -16,25 +16,25 @@ query GetManifestStatesBySchemaId($id: Bytes, $first: Int = 100, $skip: Int = 0)
 	}
 }
 
-query GetManifestById($id: ID) {
-	manifests (where: {id: $id}) {
-		...Manifest
+query GetManifestStateById($id: Bytes) {
+	manifestStates (where: {id: $id}) {
+		...ManifestState
 	}
 }
 
-query GetManifestByFileFieldId($id: ID) {
+query GetManifestStatesByFileFieldId($id: ID) {
 	fileFields (where: {id: $id}) {
-			...ManifestByFileField
+			...ManifestStateByFileField
 	}
 }
 
-query GetManifestByFileId($id: ID) {
+query GetManifestStatesByFileId($id: ID) {
 	files (where: {id: $id}) {
-		...ManifestByFile
+		...ManifestStateByFile
 	}
 }
 
-query GetManifestByFileFieldNameValuePair($name: String, $value: String, $first: Int = 100, $skip: Int = 0) {
+query GetManifestStatesByFileFieldNameValuePair($name: String, $value: String, $first: Int = 100, $skip: Int = 0) {
 	fileFields (where: {name: $name, value: $value}, first: $first, skip: $skip) {
 		file {
 			manifest {
@@ -46,7 +46,7 @@ query GetManifestByFileFieldNameValuePair($name: String, $value: String, $first:
 	}
 }
 
-query GetManifestByFileFieldName($name: String, $first: Int = 100, $skip: Int = 0) {
+query GetManifestStatesByFileFieldName($name: String, $first: Int = 100, $skip: Int = 0) {
 	fileFields (where: {name: $name}, first: $first, skip: $skip) {
 		file {
 			manifest {
