@@ -75,10 +75,10 @@ type SchemaField @entity(immutable: false) {
 
 type ManifestState @entity(immutable: false) {
   id: Bytes!
-  owner: Bytes!
-  schemaId: Bytes!
-  schema: Schema
+	schemaId: Bytes!
   schemaName: String!
+  owner: Bytes!
+  schema: Schema
   manifestCid: String!
   manifest: Manifest
   version: BigInt!
@@ -87,21 +87,29 @@ type ManifestState @entity(immutable: false) {
 
 type Manifest @entity(immutable: false) {
   id: ID!
+	schemaId: Bytes!
+  schemaName: String!
+	manifestStateId: Bytes!
   manifestVersion: BigInt
-  schemaId: String
   manifestState: ManifestState!
   files: [File!] @derivedFrom(field: "manifest")
 }
 
 type File @entity(immutable: false) {
   id: ID!
+	schemaId: Bytes!
+  schemaName: String!
+	manifestStateId: Bytes!
+	manifest: Manifest!
   tag: String
-  manifest: Manifest!
   fileFields: [FileField!] @derivedFrom(field: "file")
 }
 
 type FileField @entity(immutable: false) {
   id: ID!
+	schemaId: Bytes!
+  schemaName: String!
+	manifestStateId: Bytes!
   name: String
   value: String
   atType: String

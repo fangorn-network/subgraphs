@@ -132,10 +132,10 @@ export function handleManifestPublished(manifestPublishedEvent: ManifestPublishe
 	manifestState.save()
 
 	let context = new DataSourceContext()
-	context.setString("schemaId", manifestPublishedEvent.params.schema_id.toHexString())
+	context.setString("schemaId", manifestPublished.schemaId.toHexString())
+	context.setString("schemaName", manifestState.schemaName)
 	context.setString("fields", fieldPairs.join(","))
 	context.setString("manifestStateId", manifestState.id.toHexString())
-	context.setString("lastUpdated", manifestState.lastUpdated.toString())
 
 	ManifestTemplate.createWithContext(manifestState.manifestCid, context)
 }
@@ -214,10 +214,10 @@ export function handleManifestUpdated(manifestUpdatedEvent: ManifestUpdatedEvent
 	manifestState.save()
 
 	let context = new DataSourceContext()
-	context.setString("schemaId", manifestUpdatedEvent.params.schema_id.toHexString())
+	context.setString("schemaId", manifestState.schemaId.toHexString())
+	context.setString("schemaName", manifestState.schemaName)
 	context.setString("fields", fieldPairs.join(","))
 	context.setString("manifestStateId", manifestState.id.toHexString())
-	context.setString("lastUpdated", manifestState.lastUpdated.toString())
 
 	ManifestTemplate.createWithContext(manifestState.manifestCid, context)
 }
@@ -227,6 +227,7 @@ export function handleMetadata(content: Bytes): void {
 	let context = dataSource.context()
 
 	let schemaIdString = context.getString("schemaId")
+	let schemaName = context.getString("schemaName")
 	let fieldsString = context.getString("fields")
 	let manifestStateIdString = context.getString("manifestStateId")
 
@@ -234,6 +235,13 @@ export function handleMetadata(content: Bytes): void {
 		log.warning("No manifestStateId found", [])
 		return
 	}
+
+	if (schemaIdString == null) {
+		log.warning("Manifest found with no schema ref", [])
+		return
+	}
+
+	let schemaId = Bytes.fromHexString(schemaIdString)
 
 	let manifestStateId = Bytes.fromHexString(manifestStateIdString)
 
@@ -268,7 +276,9 @@ export function handleMetadata(content: Bytes): void {
 
 	let manifest = new Manifest(cid)
 	manifest.manifestVersion = BigInt.fromU64(versionVal.toU64())
-	manifest.schemaId = schemaIdString
+	manifest.schemaId = schemaId
+	manifest.schemaName = schemaName
+	manifest.manifestStateId = manifestStateId
 	manifest.manifestState = manifestStateId
 	manifest.save()
 
@@ -297,6 +307,9 @@ export function handleMetadata(content: Bytes): void {
 		file.tag = tag
 
 		file.manifest = manifest.id
+		file.manifestStateId = manifestStateId
+		file.schemaId = schemaId
+		file.schemaName = schemaName
 		file.save()
 
 		for (let j = 0; j < fieldNames.length; j++) {
@@ -307,6 +320,9 @@ export function handleMetadata(content: Bytes): void {
 			let fileField = new FileField(fieldEntityId)
 			fileField.name = fieldKey
 			fileField.atType = fieldType
+			fileField.manifestStateId = manifestStateId
+			fileField.schemaId = schemaId
+			fileField.schemaName = schemaName
 
 			if (fieldType == "encrypted") {
 				let valueVal = fileFields.get(fieldKey)
