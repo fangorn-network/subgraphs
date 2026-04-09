@@ -109,7 +109,7 @@ export class FangornGraphClient {
 	}
 
 	/** Get file entries for a given manifest ID. */
-	async getFilesByManifestId(args: GetFileEntriesByManifestStatetIdQueryVariables): Promise<FileEntry[]> {
+	async getFilesByManifestStatetId(args: GetFileEntriesByManifestStatetIdQueryVariables): Promise<FileEntry[]> {
 		const result = await this.typedClient.GetFileEntriesByManifestStatetId(args)
 		return toFiles(result.files)
 	}
