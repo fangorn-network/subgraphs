@@ -114,6 +114,7 @@ type FileField @entity(immutable: false) {
   value: String
   atType: String
   acc: String
+	fileId: String!
   file: File!
   pricing: PricingResource
 }

@@ -323,6 +323,8 @@ export function handleMetadata(content: Bytes): void {
 			fileField.manifestStateId = manifestStateId
 			fileField.schemaId = schemaId
 			fileField.schemaName = schemaName
+			fileField.file = file.id
+			fileField.fileId = file.id
 
 			if (fieldType == "encrypted") {
 				let valueVal = fileFields.get(fieldKey)
@@ -369,7 +371,6 @@ export function handleMetadata(content: Bytes): void {
 					fileField.value = valueObj.toString()
 				}
 			}
-			fileField.file = file.id
 			fileField.save()
 		}
 	}
