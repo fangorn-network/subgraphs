@@ -1,5 +1,5 @@
 import { FileEntry, FileField, Manifest, ManifestState, PricingResource, Schema, SchemaField, SchemaState } from "@fangorn-network/client-types";
-import { FileFieldFragment, FileFragment, ManifestFragment, ManifestStateFragment, PricingResourceFragment, SchemaFieldFragment, SchemaFragment, SchemaStateFragment } from "./generated/operations";
+import { FileFieldFragment, FileFragment, ManifestFragment, ManifestStateFragment, PricingResourceFragment, SchemaFieldFragment, SchemaFragment, SchemaStateFragment } from "./generated/operations.js";
 
 
 export function toSchemaState(frag: SchemaStateFragment): SchemaState {

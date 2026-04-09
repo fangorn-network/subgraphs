@@ -1,5 +1,5 @@
 import { GraphQLClient } from "graphql-request";
-import { getSdk, Sdk } from "./generated/graphql-req";
+import { getSdk, Sdk } from "./generated/graphql-req.js";
 import { FileEntry, SchemaState, ManifestState } from "@fangorn-network/client-types";
 import {
 	FileByFileFieldFragment, GetAllSchemaStatesByOwnerQueryVariables,
@@ -15,7 +15,7 @@ import {
 	GetSchemaStateByNameQueryVariables,
 	ManifestStateByFileFieldFragment
 } from "./generated/operations";
-import { toFiles, toManifestStates, toSchemaStates, toManifestState, toFile } from "./typeMappings";
+import { toFiles, toManifestStates, toSchemaStates, toManifestState, toFile } from "./typeMappings.js";
 
 
 export class FangornGraphClient {
