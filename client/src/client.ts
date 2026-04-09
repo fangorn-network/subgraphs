@@ -5,7 +5,7 @@ import {
 	FileByFileFieldFragment, GetAllSchemaStatesByOwnerQueryVariables,
 	GetAllSchemaStatesQueryVariables,
 	GetFileByFileIdQueryVariables,
-	GetFileEntriesByManifestIdQueryVariables,
+	GetFileEntriesByManifestStatetIdQueryVariables,
 	GetFilesByFileFieldNameQueryVariables,
 	GetManifestStateByIdQueryVariables,
 	GetManifestStatesByFileFieldNameValuePairQueryVariables,
@@ -109,8 +109,8 @@ export class FangornGraphClient {
 	}
 
 	/** Get file entries for a given manifest ID. */
-	async getFilesByManifestId(args: GetFileEntriesByManifestIdQueryVariables): Promise<FileEntry[]> {
-		const result = await this.typedClient.GetFileEntriesByManifestId(args)
+	async getFilesByManifestId(args: GetFileEntriesByManifestStatetIdQueryVariables): Promise<FileEntry[]> {
+		const result = await this.typedClient.GetFileEntriesByManifestStatetId(args)
 		return toFiles(result.files)
 	}
 
