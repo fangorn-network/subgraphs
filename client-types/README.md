@@ -1,0 +1,2 @@
+Vanilla typescript types that are imported by the Subgraph client and returned when it is used to perform queries.
+The subgraph client re-exports these types as well so there is no need for both in a single project.

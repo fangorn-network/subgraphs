@@ -1,6 +1,7 @@
 # Graph CLI generated artifacts
 build/
 generated/
+dist/
 
 # Dependency directories
 node_modules/
@@ -32,3 +33,5 @@ typechain-types
 
 # Hardhat files
 cache
+
+*.tsbuildinfo

@@ -1,0 +1,23 @@
+query GetAllSchemaStates($first: Int = 100, $skip: Int = 0) {
+	schemaStates (first: $first, skip: $skip) {
+		...SchemaState
+	}
+}
+
+query GetAllSchemaStatesByOwner($owner: Bytes, $first: Int = 100, $skip: Int = 0) {
+	schemaStates (where: {owner: $owner}, first: $first, skip: $skip) {
+		...SchemaState
+	}
+}
+
+query GetSchemaStateByName($name: String) {
+	schemaStates (where: {name: $name}) {
+		...SchemaState
+	}
+}
+
+query GetSchemaStateById($id: Bytes) {
+	schemaStates(where: {id: $id}) {
+		...SchemaState
+	}
+}

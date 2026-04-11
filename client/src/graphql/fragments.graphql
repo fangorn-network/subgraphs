@@ -1,0 +1,161 @@
+fragment SchemaStateCore on SchemaState {
+	id
+	schemaId
+	owner
+	name
+}
+
+fragment SchemaStateWithFields on SchemaState {
+	...SchemaStateCore
+	versions {
+		...SchemaWithFields
+	}
+}
+
+fragment SchemaStateWithManifests on SchemaState {
+	...SchemaStateCore
+	versions {
+		...SchemaWithManifests
+	}
+}
+
+fragment SchemaState on SchemaState {
+	...SchemaStateCore
+	versions {
+		...Schema
+	}
+}
+
+fragment SchemaCore on Schema {
+	id
+	version
+	agentId
+}
+
+fragment SchemaWithFields on Schema {
+	...SchemaCore
+	fields {
+		...SchemaField
+	}
+}
+
+fragment SchemaWithManifests on Schema {
+	...SchemaCore
+	manifests {
+		...ManifestState
+	}
+}
+
+fragment Schema on Schema {
+	...SchemaCore
+	manifests {
+		...ManifestState
+	}
+	fields {
+		...SchemaField
+	}
+}
+
+fragment SchemaField on SchemaField {
+	id
+	name
+	fieldType
+}
+
+fragment ManifestStateCore on ManifestState {
+	id
+	owner
+	schemaId
+	schemaName
+	owner
+	manifestCid
+	version
+	lastUpdated
+}
+
+fragment ManifestState on ManifestState {
+	...ManifestStateCore
+	manifest {
+		...Manifest
+	}
+}
+
+fragment ManifestCore on Manifest {
+	id
+	schemaId
+	schemaName
+	manifestStateId
+	manifestVersion
+}
+
+fragment Manifest on Manifest {
+	...ManifestCore
+	files {
+		...File
+	}
+}
+
+fragment FileCore on File {
+	id
+	schemaId
+	schemaName
+	manifestStateId
+	tag
+}
+
+fragment File on File {
+	...FileCore
+	fileFields {
+		...FileField
+	}
+}
+
+fragment FileFieldCore on FileField {
+	id
+	schemaId
+	schemaName
+	manifestStateId
+	name
+	value
+	atType
+	acc
+	fileId
+}
+
+fragment FileField on FileField {
+	...FileFieldCore
+	pricing {
+		...PricingResource
+	}
+}
+
+fragment PricingResource on PricingResource {
+	id
+	owner
+	price
+	currency
+}
+
+fragment ManifestStateByFileField on FileField {
+	file {
+		manifest {
+			manifestState {
+				...ManifestState
+			}
+		}
+	}
+}
+
+fragment ManifestStateByFile on File {
+	manifest {
+		manifestState {
+			...ManifestState
+		}
+	}
+}
+
+fragment FileByFileField on FileField {
+	file {
+		...File
+	}
+}

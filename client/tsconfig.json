@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+		"composite": true,
+		"types": ["node"],
+		"plugins": [
+			{
+				"name": "@0no-co/graphqlsp",
+				"schema": "./src/graphql/schema.graphql"
+			}
+		]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"],
+	"extends": "../tsconfig.json"
+}

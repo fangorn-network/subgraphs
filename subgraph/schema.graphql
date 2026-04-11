@@ -1,8 +1,8 @@
 type ManifestPublished @entity(immutable: true) {
   id: Bytes!
   owner: Bytes! # address
-  schema_id: Bytes! # bytes32
-  manifest_cid: String! # String
+  schemaId: Bytes! # bytes32
+  manifestCid: String! # String
   version: BigInt! # uint64
   blockNumber: BigInt!
   blockTimestamp: BigInt!
@@ -12,8 +12,8 @@ type ManifestPublished @entity(immutable: true) {
 type ManifestUpdated @entity(immutable: true) {
   id: Bytes!
   owner: Bytes! # address
-  schema_id: Bytes! # bytes32
-  manifest_cid: String! # String
+  schemaId: Bytes! # bytes32
+  manifestCid: String! # String
   version: BigInt! # uint64
   blockNumber: BigInt!
   blockTimestamp: BigInt!
@@ -25,8 +25,15 @@ type SchemaRegistered @entity(immutable: true) {
   schemaId: Bytes!
   owner: Bytes!
   name: String!
-  spec_cid: String!
-  agent_id: String!
+  ipfsCid: String!
+  agentId: String!
+}
+
+type SchemaUpdated @entity(immutable: true) {
+  id: Bytes!
+  schemaId: Bytes!
+  newIpfsCid: String!
+  newAgentId: String!
 }
 
 type ResourceCreated @entity(immutable: true) {
@@ -44,31 +51,23 @@ type PriceUpdated @entity(immutable: true) {
   price: BigInt!
 }
 
-type SchemaUpdated @entity(immutable: true) {
+type SchemaState @entity(immutable: false) {
   id: Bytes!
-  schemaId: Bytes!
-  new_spec_cid: String!
-  new_agent_id: String!
-}
-
-type Schema @entity(immutable: true) {
-  id: ID!
   schemaId: Bytes!
   owner: Bytes!
   name: String!
-  versions: [SchemaEntries!]
-  manifestStates: [ManifestState!] @derivedFrom(field: "schema")
+  versions: [Schema!]
 }
 
-type SchemaEntries @entity(immutable: true) {
+type Schema @entity(immutable: false) {
   id: ID!
-  version: BigInt!
-  spec_cid: String!
-  agent_id: String
+  manifests: [ManifestState!] @derivedFrom(field: "schema")
+  version: String
+  agentId: String
   fields: [SchemaField!]
 }
 
-type SchemaField @entity(immutable: true) {
+type SchemaField @entity(immutable: false) {
   id: ID!
   name: String!
   fieldType: String!
@@ -76,11 +75,11 @@ type SchemaField @entity(immutable: true) {
 
 type ManifestState @entity(immutable: false) {
   id: Bytes!
+	schemaId: Bytes!
+  schemaName: String!
   owner: Bytes!
-  schema_id: Bytes!
   schema: Schema
-  schema_name: String!
-  manifest_cid: String!
+  manifestCid: String!
   manifest: Manifest
   version: BigInt!
   lastUpdated: BigInt!
@@ -88,27 +87,36 @@ type ManifestState @entity(immutable: false) {
 
 type Manifest @entity(immutable: false) {
   id: ID!
+	schemaId: Bytes!
+  schemaName: String!
+	manifestStateId: Bytes!
   manifestVersion: BigInt
-  schemaId: String
-  files: [FileEntry!]
+  manifestState: ManifestState!
+  files: [File!] @derivedFrom(field: "manifest")
 }
 
-type FileEntry @entity(immutable: false) {
+type File @entity(immutable: false) {
   id: ID!
+	schemaId: Bytes!
+  schemaName: String!
+	manifestStateId: Bytes!
+	manifest: Manifest!
   tag: String
-  manifest: Manifest
-  fields: [Field!]
+  fileFields: [FileField!] @derivedFrom(field: "file")
 }
 
-type Field @entity(immutable: false) {
+type FileField @entity(immutable: false) {
   id: ID!
+	schemaId: Bytes!
+  schemaName: String!
+	manifestStateId: Bytes!
   name: String
   value: String
   atType: String
   acc: String
-  manifestState: ManifestState!
-  fileEntry: FileEntry
-  price: PricingResource
+	fileId: String!
+  file: File!
+  pricing: PricingResource
 }
 
 type PricingResource @entity(immutable: false) {

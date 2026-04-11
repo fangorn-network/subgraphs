@@ -1,0 +1,46 @@
+
+query GetFileByFileFieldId($id: ID) {
+	fileFields (where: {id: $id}) {
+		...FileByFileField
+	}
+}
+
+query GetFileByFileId($id: ID) {
+	files (where: {id: $id}) {
+		...File
+	}
+}
+
+query GetFileByFileFieldNameValuePair($name: String, $value: String, $first: Int = 100, $skip: Int = 0) {
+	fileFields (where: {name: $name, value: $value}, first: $first, skip: $skip) {
+		...FileByFileField
+	}
+}
+
+query GetFilesFileFieldName($name: String, $first: Int = 100, $skip: Int = 0) {
+		fileFields (where: {name: $name,}, first: $first, skip: $skip) {
+		...FileByFileField
+	}
+}
+
+query GetFilesByFileFieldName($name: String, $first: Int = 100, $skip: Int = 0) {
+		fileFields (where: {name: $name,}, first: $first, skip: $skip) {
+		file {
+			...File
+		}
+	}
+}
+
+query GetFileEntriesByManifestStatetId($manifestStateId: Bytes, $first: Int = 100, $skip: Int = 0) {
+	files (where: {manifestStateId: $manifestStateId}, first: $first, skip: $skip) {
+		...File
+	}
+}
+
+query GetPriceByFileFieldId($id: ID) {
+	fileFields (where: {id: $id}) {
+		pricing{
+			...PricingResource
+		}
+	}
+}

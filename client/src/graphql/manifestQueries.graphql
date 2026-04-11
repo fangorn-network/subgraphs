@@ -1,0 +1,59 @@
+query GetManifestStatesBySchemaName($name: String, $first: Int = 100, $skip: Int = 0) {
+	manifestStates(where: {schemaName: $name}, first: $first, skip: $skip) {
+		...ManifestState
+	}
+}
+
+query GetManifestStatesBySchemaNameAndOwner($name: String, $owner: Bytes, $first: Int = 100, $skip: Int = 0) {
+	manifestStates(where: {schemaName: $name, owner: $owner}, first: $first, skip: $skip) {
+		...ManifestState
+	}
+}
+
+query GetManifestStatesBySchemaId($id: Bytes, $first: Int = 100, $skip: Int = 0) {
+	manifestStates (where: {id: $id}, first: $first, skip: $skip) {
+		...ManifestState
+	}
+}
+
+query GetManifestStateById($id: Bytes) {
+	manifestStates (where: {id: $id}) {
+		...ManifestState
+	}
+}
+
+query GetManifestStatesByFileFieldId($id: ID) {
+	fileFields (where: {id: $id}) {
+			...ManifestStateByFileField
+	}
+}
+
+query GetManifestStatesByFileId($id: ID) {
+	files (where: {id: $id}) {
+		...ManifestStateByFile
+	}
+}
+
+query GetManifestStatesByFileFieldNameValuePair($name: String, $value: String, $first: Int = 100, $skip: Int = 0) {
+	fileFields (where: {name: $name, value: $value}, first: $first, skip: $skip) {
+		file {
+			manifest {
+				manifestState{
+					...ManifestState
+				}
+			}
+		}
+	}
+}
+
+query GetManifestStatesByFileFieldName($name: String, $first: Int = 100, $skip: Int = 0) {
+	fileFields (where: {name: $name}, first: $first, skip: $skip) {
+		file {
+			manifest {
+				manifestState{
+					...ManifestState
+				}
+			}
+		}
+	}
+}
