@@ -4,311 +4,311 @@ import { Field, FileEntry, Manifest, ManifestPublished, ManifestState, ManifestU
 import { Manifest as ManifestTemplate } from "../generated/templates"
 
 export function handleManifestPublished(event: ManifestPublishedEvent): void {
-  let entity = new ManifestPublished(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.owner = event.params.owner
-  entity.schema_id = event.params.schema_id
-  entity.manifest_cid = event.params.manifest_cid
-  entity.version = event.params.version
+	let entity = new ManifestPublished(
+		event.transaction.hash.concatI32(event.logIndex.toI32())
+	)
+	entity.owner = event.params.owner
+	entity.schema_id = event.params.schema_id
+	entity.manifest_cid = event.params.manifest_cid
+	entity.version = event.params.version
 
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-  entity.save()
+	entity.blockNumber = event.block.number
+	entity.blockTimestamp = event.block.timestamp
+	entity.transactionHash = event.transaction.hash
+	entity.save()
 
-  let schema = Schema.load(event.params.schema_id.toHexString())
-  if (schema == null) {
-    log.warning("Schema wasn't found for schema_id: {}", [event.params.schema_id.toHexString()])
-    return
-  }
+	let schema = Schema.load(event.params.schema_id.toHexString())
+	if (schema == null) {
+		log.warning("Schema wasn't found for schema_id: {}", [event.params.schema_id.toHexString()])
+		return
+	}
 
-  let versions = schema.versions
-  if (versions == null || versions.length == 0){
-    log.warning("Schema version wasn't proper for schema_id: {}", [event.params.schema_id.toHexString()])
-    return
-  }
+	let versions = schema.versions
+	if (versions == null || versions.length == 0) {
+		log.warning("Schema version wasn't proper for schema_id: {}", [event.params.schema_id.toHexString()])
+		return
+	}
 
-  let schemaEntries = SchemaEntries.load(versions[0])
-  if (schemaEntries == null) {
-    log.warning("Schema entries weren't found for schema_id: {}", [event.params.schema_id.toHexString()])
-    return
-  }
+	let schemaEntries = SchemaEntries.load(versions[0])
+	if (schemaEntries == null) {
+		log.warning("Schema entries weren't found for schema_id: {}", [event.params.schema_id.toHexString()])
+		return
+	}
 
-  let fieldPointers = schemaEntries.fields
-  if (fieldPointers == null) {
-    log.warning("Schema fields weren't found for schema_id: {}", [event.params.schema_id.toHexString()])
-    return
-  }
+	let fieldPointers = schemaEntries.fields
+	if (fieldPointers == null) {
+		log.warning("Schema fields weren't found for schema_id: {}", [event.params.schema_id.toHexString()])
+		return
+	}
 
-  // Build a serialized representation of the schema fields
-  // Format: "name:type,name:type,name:type"
-  let fieldPairs: string[] = []
-  for (let i = 0; i < fieldPointers.length; i++) {
-    let schemaField = SchemaField.load(fieldPointers[i])
-    if (schemaField != null) {
-      fieldPairs.push(schemaField.name + ":" + schemaField.fieldType)
-    } else {
-      log.warning("schemaField was null", [])
-    }
-  }
+	// Build a serialized representation of the schema fields
+	// Format: "name:type,name:type,name:type"
+	let fieldPairs: string[] = []
+	for (let i = 0; i < fieldPointers.length; i++) {
+		let schemaField = SchemaField.load(fieldPointers[i])
+		if (schemaField != null) {
+			fieldPairs.push(schemaField.name + ":" + schemaField.fieldType)
+		} else {
+			log.warning("schemaField was null", [])
+		}
+	}
 
-  let schemaName = schema.name
+	let schemaName = schema.name
 
-  if (schemaName == null) {
-    log.warning("schema name was null", [])
-    schemaName = "unknown_schema_name"
-  }
+	if (schemaName == null) {
+		log.warning("schema name was null", [])
+		schemaName = "unknown_schema_name"
+	}
 
-  let stateId = entity.owner.concat(entity.schema_id)
+	let stateId = entity.owner.concat(entity.schema_id)
 
-  let state = new ManifestState(stateId)
-  state.owner = entity.owner
-  state.schema_id = entity.schema_id
-  state.schema = schema.id
-  state.manifest_cid = entity.manifest_cid
-  state.version = entity.version
-  state.manifest = entity.manifest_cid
-  state.schema_name = schemaName
-  state.lastUpdated = event.block.timestamp
-  state.save()
+	let state = new ManifestState(stateId)
+	state.owner = entity.owner
+	state.schema_id = entity.schema_id
+	state.schema = schema.id
+	state.manifest_cid = entity.manifest_cid
+	state.version = entity.version
+	state.manifest = entity.manifest_cid
+	state.schema_name = schemaName
+	state.lastUpdated = event.block.timestamp
+	state.save()
 
-  let context = new DataSourceContext()
-  context.setString("schemaId", event.params.schema_id.toHexString())
-  context.setString("fields", fieldPairs.join(","))
-  context.setString("manifestStateId", state.id.toHexString())
-  context.setString("lastUpdated", state.lastUpdated.toString())
+	let context = new DataSourceContext()
+	context.setString("schemaId", event.params.schema_id.toHexString())
+	context.setString("fields", fieldPairs.join(","))
+	context.setString("manifestStateId", state.id.toHexString())
+	context.setString("lastUpdated", state.lastUpdated.toString())
 
-  ManifestTemplate.createWithContext(state.manifest_cid, context)
+	ManifestTemplate.createWithContext(state.manifest_cid, context)
 }
 
 export function handleManifestUpdated(event: ManifestUpdatedEvent): void {
 
-  let stateId = event.params.owner.concat(event.params.schema_id)
-  let state = ManifestState.load(stateId)
+	let stateId = event.params.owner.concat(event.params.schema_id)
+	let state = ManifestState.load(stateId)
 
-  // record that an update has occurred
-  let entity = new ManifestUpdated(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.owner = event.params.owner
-  entity.schema_id = event.params.schema_id
-  entity.manifest_cid = event.params.manifest_cid
-  entity.version = event.params.version
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-  entity.save()
+	// record that an update has occurred
+	let entity = new ManifestUpdated(
+		event.transaction.hash.concatI32(event.logIndex.toI32())
+	)
+	entity.owner = event.params.owner
+	entity.schema_id = event.params.schema_id
+	entity.manifest_cid = event.params.manifest_cid
+	entity.version = event.params.version
+	entity.blockNumber = event.block.number
+	entity.blockTimestamp = event.block.timestamp
+	entity.transactionHash = event.transaction.hash
+	entity.save()
 
-  let schema = Schema.load(event.params.schema_id.toHexString())
-  if (schema == null) {
-    log.warning("schema was null in manifest update for {}", [entity.manifest_cid]) 
-    return
-  }
+	let schema = Schema.load(event.params.schema_id.toHexString())
+	if (schema == null) {
+		log.warning("schema was null in manifest update for {}", [entity.manifest_cid])
+		return
+	}
 
-  let versions = schema.versions
-  if (versions == null || versions.length == 0){
-    log.warning("schema.versions was null or there were no versions in manifest update for {}", [entity.manifest_cid]) 
-    return
-  }
+	let versions = schema.versions
+	if (versions == null || versions.length == 0) {
+		log.warning("schema.versions was null or there were no versions in manifest update for {}", [entity.manifest_cid])
+		return
+	}
 
-  let schemaEntries = SchemaEntries.load(versions[0])
-  if (schemaEntries == null) {
-    log.warning("schemaEntries was null in manifest update for {}", [entity.manifest_cid]) 
-    return
-  }
+	let schemaEntries = SchemaEntries.load(versions[0])
+	if (schemaEntries == null) {
+		log.warning("schemaEntries was null in manifest update for {}", [entity.manifest_cid])
+		return
+	}
 
-  let fieldPointers = schemaEntries.fields
-  if (fieldPointers == null) {
-    log.warning("fieldPointers was null in manifest update for {}", [entity.manifest_cid]) 
-    return
-  }
+	let fieldPointers = schemaEntries.fields
+	if (fieldPointers == null) {
+		log.warning("fieldPointers was null in manifest update for {}", [entity.manifest_cid])
+		return
+	}
 
-  let schemaName = schema.name
+	let schemaName = schema.name
 
-  if (schemaName == null) {
-    log.warning("schemaName was null in manifest update for {}", [entity.manifest_cid])
-    schemaName = "unknown_schema_name"
-  }
+	if (schemaName == null) {
+		log.warning("schemaName was null in manifest update for {}", [entity.manifest_cid])
+		schemaName = "unknown_schema_name"
+	}
 
-  // Build a serialized representation of the schema fields
-  // Format: "name:type,name:type,name:type"
-  let fieldPairs: string[] = []
-  for (let i = 0; i < fieldPointers.length; i++) {
-    let schemaField = SchemaField.load(fieldPointers[i])
-    if (schemaField != null) {
-      fieldPairs.push(schemaField.name + ":" + schemaField.fieldType)
-    }
-  }
+	// Build a serialized representation of the schema fields
+	// Format: "name:type,name:type,name:type"
+	let fieldPairs: string[] = []
+	for (let i = 0; i < fieldPointers.length; i++) {
+		let schemaField = SchemaField.load(fieldPointers[i])
+		if (schemaField != null) {
+			fieldPairs.push(schemaField.name + ":" + schemaField.fieldType)
+		}
+	}
 
-  // Update manifest state
-  if (state == null) {
-    log.warning("Manifest state was found to be null with ID {}", [stateId.toHexString()])
-    state = new ManifestState(stateId)
-    state.owner = entity.owner
-    state.schema_id = entity.schema_id
-    state.schema_name = schemaName
-    state.schema = schema.id
-  }
+	// Update manifest state
+	if (state == null) {
+		log.warning("Manifest state was found to be null with ID {}", [stateId.toHexString()])
+		state = new ManifestState(stateId)
+		state.owner = entity.owner
+		state.schema_id = entity.schema_id
+		state.schema_name = schemaName
+		state.schema = schema.id
+	}
 
-  state.manifest_cid = entity.manifest_cid
-  state.version = entity.version
-  state.manifest = entity.manifest_cid
-  state.lastUpdated = entity.blockTimestamp
-  state.save()
+	state.manifest_cid = entity.manifest_cid
+	state.version = entity.version
+	state.manifest = entity.manifest_cid
+	state.lastUpdated = entity.blockTimestamp
+	state.save()
 
-  let context = new DataSourceContext()
-  context.setString("schemaId", event.params.schema_id.toHexString())
-  context.setString("fields", fieldPairs.join(","))
-  context.setString("manifestStateId", state.id.toHexString())
-  context.setString("lastUpdated", state.lastUpdated.toString())
+	let context = new DataSourceContext()
+	context.setString("schemaId", event.params.schema_id.toHexString())
+	context.setString("fields", fieldPairs.join(","))
+	context.setString("manifestStateId", state.id.toHexString())
+	context.setString("lastUpdated", state.lastUpdated.toString())
 
-  ManifestTemplate.createWithContext(state.manifest_cid, context)
+	ManifestTemplate.createWithContext(state.manifest_cid, context)
 }
 
 export function handleMetadata(content: Bytes): void {
-  let cid = dataSource.stringParam()
-  let context = dataSource.context()
+	let cid = dataSource.stringParam()
+	let context = dataSource.context()
 
-  let schemaIdString = context.getString("schemaId")
-  let fieldsString = context.getString("fields")
-  let manifestStateIdString = context.getString("manifestStateId")
+	let schemaIdString = context.getString("schemaId")
+	let fieldsString = context.getString("fields")
+	let manifestStateIdString = context.getString("manifestStateId")
 
-  if (manifestStateIdString == null) {
-    log.warning("No manifestStateId found", [])
-    return
-  }
+	if (manifestStateIdString == null) {
+		log.warning("No manifestStateId found", [])
+		return
+	}
 
-  let manifestStateId = Bytes.fromHexString(manifestStateIdString)
+	let manifestStateId = Bytes.fromHexString(manifestStateIdString)
 
-  let parsed = json.try_fromBytes(content)
-  if (parsed.isError) {
-    log.warning("Failed to parse IPFS content for CID: {}", [cid])
-    return
-  }
+	let parsed = json.try_fromBytes(content)
+	if (parsed.isError) {
+		log.warning("Failed to parse IPFS content for CID: {}", [cid])
+		return
+	}
 
-  let ipfsFileObj = parsed.value.toObject()
+	let ipfsFileObj = parsed.value.toObject()
 
-  let versionVal = ipfsFileObj.get("version")
-  let entriesVal = ipfsFileObj.get("entries")
+	let versionVal = ipfsFileObj.get("version")
+	let entriesVal = ipfsFileObj.get("entries")
 
-  if (versionVal == null || entriesVal == null) {
-    log.warning("Invalid manifest format for CID: {}", [cid])
-    return
-  }
+	if (versionVal == null || entriesVal == null) {
+		log.warning("Invalid manifest format for CID: {}", [cid])
+		return
+	}
 
-  let fieldPairs = fieldsString.split(",")
-  let fieldNames: string[] = []
-  let fieldTypes: string[] = []
-  for (let i = 0; i < fieldPairs.length; i++) {
-    let parts = fieldPairs[i].split(":")
-    if (parts.length == 2) {
-      fieldNames.push(parts[0])
-      fieldTypes.push(parts[1])
-    }
-  }
+	let fieldPairs = fieldsString.split(",")
+	let fieldNames: string[] = []
+	let fieldTypes: string[] = []
+	for (let i = 0; i < fieldPairs.length; i++) {
+		let parts = fieldPairs[i].split(":")
+		if (parts.length == 2) {
+			fieldNames.push(parts[0])
+			fieldTypes.push(parts[1])
+		}
+	}
 
-  let manifest = new Manifest(cid)
-  manifest.manifestVersion = BigInt.fromU64(versionVal.toU64())
-  manifest.schemaId = schemaIdString
+	let manifest = new Manifest(cid)
+	manifest.manifestVersion = BigInt.fromU64(versionVal.toU64())
+	manifest.schemaId = schemaIdString
 
-  let fileEntriesArray = entriesVal.toArray()
+	let fileEntriesArray = entriesVal.toArray()
 
-  let currentFiles: string[] = []
+	let currentFiles: string[] = []
 
-  for (let i = 0; i < fileEntriesArray.length; i++) {
-    let fileEntryObj = fileEntriesArray[i].toObject()
-    let entryId = cid + "-" + i.toString()
+	for (let i = 0; i < fileEntriesArray.length; i++) {
+		let fileEntryObj = fileEntriesArray[i].toObject()
+		let entryId = cid + "-" + i.toString()
 
-    let fileFieldsVal = fileEntryObj.get("fields")
-    if (fileFieldsVal == null) {
-      log.warning("File's fields object was null. Skipping this for manifest {}", [cid])
-      continue
-    }
-    let fileFields = fileFieldsVal.toObject()
+		let fileFieldsVal = fileEntryObj.get("fields")
+		if (fileFieldsVal == null) {
+			log.warning("File's fields object was null. Skipping this for manifest {}", [cid])
+			continue
+		}
+		let fileFields = fileFieldsVal.toObject()
 
-    let tagVal = fileEntryObj.get("tag")
-    let tag = ""
-    if (tagVal == null) {
-      log.warning("Tag for file entry was null, replacing with empty tag for manifest cid {}", [cid])
-    } else {
-      tag = tagVal.toString()
-    }
+		let tagVal = fileEntryObj.get("name")
+		let name = ""
+		if (tagVal == null) {
+			log.warning("name for file entry was null, replacing with empty name for manifest cid {}", [cid])
+		} else {
+			name = tagVal.toString()
+		}
 
-    let fileEntry = new FileEntry(entryId)
-    fileEntry.tag = tag
-    
-    let fileEntryFieldsArray: string[] = []
+		let fileEntry = new FileEntry(entryId)
+		fileEntry.name = name
 
-    for (let j = 0; j < fieldNames.length; j++) {
-      let fieldKey = fieldNames[j]
-      let fieldType = fieldTypes[j]
+		let fileEntryFieldsArray: string[] = []
 
-      let fieldEntityId = entryId + "-" + fieldKey
-      let fileField = new Field(fieldEntityId)
-      fileField.name = fieldKey
-      fileField.atType = fieldType
+		for (let j = 0; j < fieldNames.length; j++) {
+			let fieldKey = fieldNames[j]
+			let fieldType = fieldTypes[j]
 
-      if (fieldType == "encrypted") {
-        let valueVal = fileFields.get(fieldKey)
-        if (valueVal == null) {
-          log.warning("Field's type was encrypted, but the value was null. Skipping this for manifest {}", [cid])
-          continue
-        }
-        let valueObj = valueVal.toObject()
+			let fieldEntityId = entryId + "-" + fieldKey
+			let fileField = new Field(fieldEntityId)
+			fileField.name = fieldKey
+			fileField.atType = fieldType
 
-        let gadgetVal = valueObj.get("gadgetDescriptor")
-        if (gadgetVal == null) {
-          log.warning("Field's type was encrypted, but the gadgetVal was null. Skipping this for manifest {}", [cid])
-          continue
-        }
-        let gadget = gadgetVal.toObject()
+			if (fieldType == "encrypted") {
+				let valueVal = fileFields.get(fieldKey)
+				if (valueVal == null) {
+					log.warning("Field's type was encrypted, but the value was null. Skipping this for manifest {}", [cid])
+					continue
+				}
+				let valueObj = valueVal.toObject()
 
-        let accVal = gadget.get("type")
-        if (accVal == null) {
-          fileField.acc = "no_acc"
-          fileField.value = "unknown"
-          fileField.price = "unknown"
-        } else {
-          fileField.acc = accVal.toString()
-          fileField.value = "enc"
-          let paramsVal = gadget.get("params")
-          if(paramsVal == null) {
-            fileField.price = "unknown"
-          } else {
-            let params = paramsVal.toObject()
-            let resourceId = params.get("resourceId")
-            if (resourceId == null) {
-              fileField.price = "unknown"
-            } else {
-              fileField.price = resourceId.toString()
-            }
-          }
-        }
-      } else {
-        fileField.acc = "plain"
-        let valueVal = fileFields.get(fieldKey)
-        if (valueVal == null) {
-          fileField.value = "unknown_val"
-        } else {
-          fileField.value = valueVal.toString()
-        }
-      }
+				let gadgetVal = valueObj.get("gadgetDescriptor")
+				if (gadgetVal == null) {
+					log.warning("Field's type was encrypted, but the gadgetVal was null. Skipping this for manifest {}", [cid])
+					continue
+				}
+				let gadget = gadgetVal.toObject()
 
-      fileField.manifestState = manifestStateId
-      fileField.fileEntry = entryId
-      fileField.save()
-      fileEntryFieldsArray.push(fileField.id)
-    }
+				let accVal = gadget.get("type")
+				if (accVal == null) {
+					fileField.acc = "no_acc"
+					fileField.value = "unknown"
+					fileField.price = "unknown"
+				} else {
+					fileField.acc = accVal.toString()
+					fileField.value = "enc"
+					let paramsVal = gadget.get("params")
+					if (paramsVal == null) {
+						fileField.price = "unknown"
+					} else {
+						let params = paramsVal.toObject()
+						let resourceId = params.get("resourceId")
+						if (resourceId == null) {
+							fileField.price = "unknown"
+						} else {
+							fileField.price = resourceId.toString()
+						}
+					}
+				}
+			} else {
+				fileField.acc = "plain"
+				let valueVal = fileFields.get(fieldKey)
+				if (valueVal == null) {
+					fileField.value = "unknown_val"
+				} else {
+					fileField.value = valueVal.toString()
+				}
+			}
 
-    fileEntry.fields = fileEntryFieldsArray
-    fileEntry.manifest = cid
-    fileEntry.save()
-    currentFiles.push(fileEntry.id)
-  }
+			fileField.manifestState = manifestStateId
+			fileField.fileEntry = entryId
+			fileField.save()
+			fileEntryFieldsArray.push(fileField.id)
+		}
 
-  manifest.files = currentFiles
-  manifest.save()
+		fileEntry.fields = fileEntryFieldsArray
+		fileEntry.manifest = cid
+		fileEntry.save()
+		currentFiles.push(fileEntry.id)
+	}
 
-  log.info("Manifest processed safely: {}", [cid])
+	manifest.files = currentFiles
+	manifest.save()
+
+	log.info("Manifest processed safely: {}", [cid])
 }

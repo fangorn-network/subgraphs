@@ -1,20 +1,5 @@
 [
   {
-    "inputs": [],
-    "name": "DataSourceNotFound",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "SchemaNotFound",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "SchemaRequired",
-    "type": "error"
-  },
-  {
     "anonymous": false,
     "inputs": [
       {
@@ -77,6 +62,31 @@
     "type": "event"
   },
   {
+    "inputs": [],
+    "name": "DataSourceNotFound",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NameRequired",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ResourceSetupFailed",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "SchemaNotFound",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "SchemaRequired",
+    "type": "error"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -87,9 +97,14 @@
         "internalType": "bytes32",
         "name": "schema_id",
         "type": "bytes32"
+      },
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
       }
     ],
-    "name": "getManifest",
+    "name": "get",
     "outputs": [
       {
         "internalType": "string",
@@ -111,6 +126,69 @@
         "internalType": "bytes32",
         "name": "schema_id",
         "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "name_hash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getByHash",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "schema_id",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "name_hash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getName",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "schema_id",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
       }
     ],
     "name": "getVersion",
@@ -135,11 +213,50 @@
         "internalType": "bytes32",
         "name": "schema_id",
         "type": "bytes32"
+      },
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "price",
+        "type": "uint256"
       }
     ],
-    "name": "publishManifest",
+    "name": "publish",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "schema_id",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "name_hash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "resourceId",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   }
 ]

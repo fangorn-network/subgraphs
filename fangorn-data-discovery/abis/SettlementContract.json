@@ -1,50 +1,5 @@
 [
   {
-    "inputs": [],
-    "name": "AlreadyRegistered",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "AlreadySettled",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "GroupCreationFailed",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "HookFailed",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "IncorrectPaymentAmount",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "NotResourceOwner",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "ResourceNotFound",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "TransferFailed",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "VerificationFailed",
-    "type": "error"
-  },
-  {
     "anonymous": false,
     "inputs": [
       {
@@ -101,17 +56,59 @@
     "type": "event"
   },
   {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "resource_id",
-        "type": "bytes32"
-      }
-    ],
-    "name": "addSeedMember",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
+    "inputs": [],
+    "name": "AlreadyRegistered",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "AlreadySettled",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "GroupCreationFailed",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "HookFailed",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "IncorrectPaymentAmount",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NotAdmin",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NotAuthorizedRegistry",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NotResourceOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ResourceNotFound",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "TransferFailed",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "VerificationFailed",
+    "type": "error"
   },
   {
     "inputs": [
@@ -124,6 +121,11 @@
         "internalType": "uint256",
         "name": "price",
         "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
       }
     ],
     "name": "createResource",
@@ -151,25 +153,6 @@
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "resource_id",
-        "type": "bytes32"
-      }
-    ],
-    "name": "getHook",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -345,6 +328,24 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "registry",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "authorized",
+        "type": "bool"
+      }
+    ],
+    "name": "setRegistry",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "bytes32",
         "name": "resource_id",
         "type": "bytes32"
@@ -401,6 +402,11 @@
         "internalType": "uint256",
         "name": "price",
         "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
       }
     ],
     "name": "updatePrice",
