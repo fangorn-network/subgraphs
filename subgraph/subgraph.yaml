@@ -10,7 +10,7 @@ dataSources:
     name: DatasourceContract
     network: arbitrum-sepolia
     source:
-      address: "0xddd338e6a200012642a103c6631ea92eea94cabe"
+      address: "0xdb82c131a9d51f6e7695e744bb2bd7774cbb224c"
       abi: DatasourceContract
       startBlock: 253501857 
     mapping:
@@ -33,7 +33,7 @@ dataSources:
     name: SchemaContract
     network: arbitrum-sepolia
     source:
-      address: "0xef6754c29cfd0c8937a080695899f2a9a23c7c70"
+      address: "0x35b67934f9c75bfef6ff3f4d61ff406d81420066"
       abi: SchemaContract
       startBlock: 253501857
     mapping:
@@ -56,7 +56,7 @@ dataSources:
     name: SettlementContract
     network: arbitrum-sepolia
     source:
-      address: "0x5e918ba3fe33b0bdc68cd46eb6a77db754edef57"
+      address: "0xdb82c131a9d51f6e7695e744bb2bd7774cbb224c"
       abi: SettlementContract
       startBlock: 253501857 
     mapping:
