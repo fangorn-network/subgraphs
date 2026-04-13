@@ -74,8 +74,6 @@ export function handleManifestPublished(manifestPublishedEvent: ManifestPublishe
 	manifestPublished.owner = manifestPublishedEvent.params.owner
 	manifestPublished.schemaId = manifestPublishedEvent.params.schema_id
 	manifestPublished.manifestCid = manifestPublishedEvent.params.manifest_cid
-	manifestPublished.version = manifestPublishedEvent.params.version
-
 	manifestPublished.blockNumber = manifestPublishedEvent.block.number
 	manifestPublished.blockTimestamp = manifestPublishedEvent.block.timestamp
 	manifestPublished.transactionHash = manifestPublishedEvent.transaction.hash
@@ -126,7 +124,8 @@ export function handleManifestPublished(manifestPublishedEvent: ManifestPublishe
 	manifestState.schema = schemas[0]
 	manifestState.manifestCid = manifestPublished.manifestCid
 	manifestState.manifest = manifestPublished.manifestCid
-	manifestState.version = manifestPublished.version
+	// manifest published => always version 1
+	manifestState.version = new BigInt(1)
 	manifestState.schemaName = schemaName
 	manifestState.lastUpdated = manifestPublishedEvent.block.timestamp
 	manifestState.save()

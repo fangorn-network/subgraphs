@@ -24,9 +24,9 @@ dataSources:
         - name: DatasourceContract
           file: ./abis/DatasourceContract.json
       eventHandlers:
-        - event: ManifestPublished(indexed address,indexed bytes32,string,uint64)
+        - event: ManifestPublished(indexed address,indexed bytes32,indexed bytes32,string,string)
           handler: handleManifestPublished
-        - event: ManifestUpdated(indexed address,indexed bytes32,string,uint64)
+        - event: ManifestUpdated(indexed address,indexed bytes32,indexed bytes32,string,uint64)
           handler: handleManifestUpdated
       file: ./src/datasource-contract.ts
   - kind: ethereum
