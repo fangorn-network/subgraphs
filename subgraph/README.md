@@ -25,7 +25,7 @@ This file contains datasources and templates.
 2. **schema.graphql:**
 This file contains the entities that will be stored for a subgraph. These types will be generated when you run `graph codegen` and stored in the `generated` directory.
 
-#### Updating subgraphs when a contract is updated and deployed
+### Updating subgraphs when a contract is updated and deployed
 1. From the [contracts](https://github.com/fangorn-network/contracts) project, generate the ABI that you need and copy it into the abis directory of the corresponding subgraph project.
     - For stylus, generate the solidity interface `cargo stylus export-abi > abi.sol` and manually add your events to it (literally a copy + paste of the event definitions in the stylus! macro). You can then use this interface to generate `solc --abi abi.sol -o ./abi.json` the proper ABI json. For some reason, generating the the ABI json directly from the stylus contract does not include events.
 2. **schema.graphql:**
@@ -39,6 +39,19 @@ Implement any new logic that will be needed to handle any new events or types th
 Update this file with the new starting block and the new address for the contract.
 
 After you have ensured that your changes are correct and working, navigate to the subgraph studio dashboard, go to the subgraph's dashboard you wish to update, copy the auth command and run it `graph auth whateverSecretItGivesYou`. You can then run `graph build` and `graph deploy your-subgraph-slug`. Make sure you update the version number appropriately when prompted. You can then navigate back to the subgraph's dashboard and use the playground to confirm that everything works as expected.
+
+# Data models
+## Convention
+1. If an entity has the word `State` in its name, that means it contains the *on-chain* information regarding that entity. The exception to this is PricingResource.
+2. In the diagrams, an arrow with a dashed line indicates a virtual pointer and that the relations are created  via `@derivedFrom`
+3. `?` means a field is nullable
+
+It is good to have an understanding on how data is structured in the subgraphs since it is directly correlated with how you will query for data.
+### Schemas
+![Schema Structure](./diagrams/Schema.png)
+
+### Manifests
+![Manifest Structure](./diagrams/Manifest.png)
 
 ### Querying the Subgraph
 The entities defined in the subgraph each have a link from parent to child and vice versa. Please look at the [diagrams](./diagrams/) for how data is structured.
