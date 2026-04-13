@@ -15,66 +15,66 @@
     "type": "error"
   },
   {
-    "anonymous": false,
+    "type": "event",
+    "name": "ManifestPublished",
     "inputs": [
       {
-        "indexed": true,
-        "internalType": "address",
         "name": "owner",
-        "type": "address"
+        "type": "address",
+        "indexed": true
       },
       {
-        "indexed": true,
-        "internalType": "bytes32",
         "name": "schema_id",
-        "type": "bytes32"
+        "type": "bytes32",
+        "indexed": true
       },
       {
-        "indexed": false,
-        "internalType": "string",
+        "name": "name_hash",
+        "type": "bytes32",
+        "indexed": true
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "indexed": false
+      },
+      {
         "name": "manifest_cid",
-        "type": "string"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint64",
-        "name": "version",
-        "type": "uint64"
+        "type": "string",
+        "indexed": false
       }
-    ],
-    "name": "ManifestPublished",
-    "type": "event"
+    ]
   },
   {
-    "anonymous": false,
+    "type": "event",
+    "name": "ManifestUpdated",
     "inputs": [
       {
-        "indexed": true,
-        "internalType": "address",
         "name": "owner",
-        "type": "address"
+        "type": "address",
+        "indexed": true
       },
       {
-        "indexed": true,
-        "internalType": "bytes32",
         "name": "schema_id",
-        "type": "bytes32"
+        "type": "bytes32",
+        "indexed": true
       },
       {
-        "indexed": false,
-        "internalType": "string",
+        "name": "name_hash",
+        "type": "bytes32",
+        "indexed": true
+      },
+      {
         "name": "manifest_cid",
-        "type": "string"
+        "type": "string",
+        "indexed": false
       },
       {
-        "indexed": false,
-        "internalType": "uint64",
         "name": "version",
-        "type": "uint64"
+        "type": "uint64",
+        "indexed": false
       }
-    ],
-    "name": "ManifestUpdated",
-    "type": "event"
+    ]
   },
   {
     "inputs": [
