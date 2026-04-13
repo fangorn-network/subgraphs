@@ -17,6 +17,7 @@
   {
     "type": "event",
     "name": "ManifestPublished",
+    "anonymous": false,
     "inputs": [
       {
         "name": "owner",
@@ -48,6 +49,7 @@
   {
     "type": "event",
     "name": "ManifestUpdated",
+    "anonymous": false,
     "inputs": [
       {
         "name": "owner",
