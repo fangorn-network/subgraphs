@@ -41,12 +41,13 @@ Update this file with the new starting block and the new address for the contrac
 After you have ensured that your changes are correct and working, navigate to the subgraph studio dashboard, go to the subgraph's dashboard you wish to update, copy the auth command and run it `graph auth whateverSecretItGivesYou`. You can then run `graph build` and `graph deploy your-subgraph-slug`. Make sure you update the version number appropriately when prompted. You can then navigate back to the subgraph's dashboard and use the playground to confirm that everything works as expected.
 
 # Data models
+It is good to have an understanding on how data is structured in the subgraphs since it is directly correlated with how you will query for data.
+
 ## Convention
 1. If an entity has the word `State` in its name, that means it contains the *on-chain* information regarding that entity. The exception to this is PricingResource.
-2. In the diagrams, an arrow with a dashed line indicates a virtual pointer and that the relations are created  via `@derivedFrom`
-3. `?` means a field is nullable
+2. In the diagrams, an arrow with a dashed line indicates a virtual pointer and that the relations are created  via `@derivedFrom`.
+3. `?` means a field is nullable.
 
-It is good to have an understanding on how data is structured in the subgraphs since it is directly correlated with how you will query for data.
 ### Schemas
 ![Schema Structure](./diagrams/Schema.png)
 
