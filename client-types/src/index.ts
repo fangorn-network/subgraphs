@@ -45,7 +45,7 @@ export interface FileEntry {
 	schemaId: string
 	schemaName: string
 	manifestStateId: string
-	tag?: string
+	name?: string
 	fileFields?: FileField[]
 }
 

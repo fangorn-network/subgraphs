@@ -295,16 +295,16 @@ export function handleMetadata(content: Bytes): void {
 		}
 		let fileFields = fileFieldsObj.toObject()
 
-		let tagObj = fileEntryObj.get("tag")
-		let tag = ""
-		if (tagObj == null) {
-			log.warning("Tag for file entry was null, replacing with empty tag for manifest cid {}", [cid])
+		let nameObj = fileEntryObj.get("name")
+		let name = ""
+		if (nameObj == null) {
+			log.warning("name for file entry was null, replacing with empty name for manifest cid {}", [cid])
 		} else {
-			tag = tagObj.toString()
+			name = nameObj.toString()
 		}
 
 		let file = new File(entryId)
-		file.tag = tag
+		file.name = name
 
 		file.manifest = manifest.id
 		file.manifestStateId = manifestStateId

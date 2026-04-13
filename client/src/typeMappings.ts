@@ -76,7 +76,7 @@ export function toFile(frag: FileFragment): FileEntry {
 		schemaId: frag.schemaId,
 		schemaName: frag.schemaName,
 		manifestStateId: frag.manifestStateId,
-		tag: frag.tag ? frag.tag : undefined,
+		name: frag.name ? frag.name : undefined,
 		fileFields
 	}
 }

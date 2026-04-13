@@ -101,7 +101,7 @@ type File @entity(immutable: false) {
   schemaName: String!
 	manifestStateId: Bytes!
 	manifest: Manifest!
-  tag: String
+  name: String
   fileFields: [FileField!] @derivedFrom(field: "file")
 }
 
