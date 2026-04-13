@@ -100,7 +100,7 @@ fragment FileCore on File {
 	schemaId
 	schemaName
 	manifestStateId
-	tag
+	name
 }
 
 fragment File on File {
