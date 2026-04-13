@@ -43,15 +43,15 @@ After you have ensured that your changes are correct and working, navigate to th
 # Data models
 It is good to have an understanding on how data is structured in the subgraphs since it is directly correlated with how you will query for data.
 
-## Convention
+### Convention
 1. If an entity has the word `State` in its name, that means it contains the *on-chain* information regarding that entity. The exception to this is PricingResource.
 2. In the diagrams, an arrow with a dashed line indicates a virtual pointer and that the relations are created  via `@derivedFrom`.
 3. `?` means a field is nullable.
 
-### Schemas
+#### Schemas
 ![Schema Structure](./diagrams/Schema.png)
 
-### Manifests
+#### Manifests
 ![Manifest Structure](./diagrams/Manifest.png)
 
 ### Querying the Subgraph
