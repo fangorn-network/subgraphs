@@ -41,14 +41,14 @@ fragment SchemaWithFields on Schema {
 
 fragment SchemaWithManifests on Schema {
 	...SchemaCore
-	manifests {
+	manifestStates {
 		...ManifestState
 	}
 }
 
 fragment Schema on Schema {
 	...SchemaCore
-	manifests {
+	manifestStates {
 		...ManifestState
 	}
 	fields {

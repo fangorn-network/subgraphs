@@ -64,14 +64,16 @@ Below are two examples for obtaining data based on the parent entities.
 {
   schemaStates {
     versions {
-      manifest {
-        files {
-          fileFields {
-            name
-            value
-            pricing {
-              price
-              currency
+      manifestStates {
+        manifest{
+          files {
+            fileFields {
+              name
+              value
+              pricing {
+                price
+                currency
+              }
             }
           }
         }
