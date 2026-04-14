@@ -8,7 +8,7 @@ export interface SchemaState {
 
 export interface Schema {
 	id: string
-	manifests?: ManifestState[]
+	manifestStates?: ManifestState[]
 	version?: String
 	agentId?: String
 	fields?: SchemaField[]

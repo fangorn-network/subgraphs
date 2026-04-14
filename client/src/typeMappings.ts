@@ -14,10 +14,10 @@ export function toSchemaState(frag: SchemaStateFragment): SchemaState {
 }
 
 export function toSchema(frag: SchemaFragment): Schema {
-	const manifests = frag.manifests ? toManifestStates(frag.manifests) : undefined
+	const manifestStates = frag.manifestStates ? toManifestStates(frag.manifestStates) : undefined
 	return {
 		id: frag.id,
-		manifests,
+		manifestStates,
 		version: frag.version ? frag.version : undefined,
 		agentId: frag.agentId ? frag.agentId : undefined,
 		fields: frag.fields ? toSchemaFields(frag.fields) : undefined
