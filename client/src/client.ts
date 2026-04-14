@@ -9,6 +9,7 @@ import {
 	GetFilesByFileFieldNameQueryVariables,
 	GetManifestStateByIdQueryVariables,
 	GetManifestStatesByFileFieldNameValuePairQueryVariables,
+	GetManifestStatesByFileFieldValueQueryVariables,
 	GetManifestStatesBySchemaNameAndOwnerQueryVariables,
 	GetManifestStatesBySchemaNameQueryVariables,
 	GetSchemaStateByIdQueryVariables,
@@ -122,6 +123,7 @@ export class FangornGraphClient {
 	 */
 	async getManifestStatesByFieldsAndSchemaName(
 		schemaName: string,
+		caseSensitive: boolean,
 		args: GetManifestStatesByFileFieldNameValuePairQueryVariables,
 		owner?: string
 	): Promise<ManifestState[]> {
@@ -130,7 +132,11 @@ export class FangornGraphClient {
 		if (!args.value) {
 			result = await this.typedClient.GetManifestStatesByFileFieldName(args);
 		} else {
-			result = await this.typedClient.GetManifestStatesByFileFieldNameValuePair(args);
+			if (caseSensitive) {
+				result = await this.typedClient.GetManifestStatesByFileFieldNameValuePair(args);
+			} else {
+				result = await this.typedClient.GetManifestStatesByFileFieldNameValuePairNoCase(args);
+			}
 		}
 
 		console.log("Searching Manifests by fields and schema name")
@@ -157,10 +163,6 @@ export class FangornGraphClient {
 	 */
 	async getManifestsByFields(args: GetManifestStatesByFileFieldNameValuePairQueryVariables): Promise<ManifestState[]> {
 
-		console.log("Searching Globally")
-
-		console.log(`variables: ${JSON.stringify(args, null, 2)}`)
-
 		let result;
 		if (!args.value) {
 			result = await this.typedClient.GetManifestStatesByFileFieldName(args);
@@ -180,6 +182,30 @@ export class FangornGraphClient {
 					self.findIndex((other) => other.id === m.id) === index
 			);
 		return manifestStates;
+	}
+
+	async getManifestStatesByFileFieldValue(caseSensitive: boolean, args: GetManifestStatesByFileFieldValueQueryVariables) {
+
+		let result;
+		if (caseSensitive) {
+			result = await this.typedClient.GetManifestStatesByFileFieldValue(args)
+		} else {
+			result = await this.typedClient.GetManifestStatesByFileFieldValueNoCase(args)
+		}
+
+		const manifestStates = result.fileFields
+			.filter((ff: ManifestStateByFileFieldFragment) => {
+				const manifestState = ff.file.manifest.manifestState;
+				if (!manifestState) return false;
+				return true;
+			})
+			.map((ff: ManifestStateByFileFieldFragment) => toManifestState(ff.file.manifest.manifestState))
+			.filter(
+				(m: ManifestState, index: number, self: ManifestState[]) =>
+					self.findIndex((other) => other.id === m.id) === index
+			);
+		return manifestStates;
+
 	}
 
 	async getFilesByFileFieldName(args: GetFilesByFileFieldNameQueryVariables): Promise<FileEntry[]> {

@@ -22,3 +22,6 @@ The wrapper around the generated graphql client. It ensures that query results a
 
 #### src/typeMappings.ts
 This file contains how query results are mapped to the vanilla typescript types.
+
+# More info on Subgraphs
+For more info related to the Fangorn Subgraph please check the README in the [Fangorn Subgraph](https://github.com/fangorn-network/subgraphs/blob/main/subgraph/README.md) project.

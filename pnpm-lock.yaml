@@ -11,7 +11,7 @@ importers:
   client:
     dependencies:
       '@fangorn-network/client-types':
-        specifier: file:../client-types
+        specifier: workspace:*
         version: link:../client-types
       '@graphql-codegen/import-types-preset':
         specifier: ^4.0.0

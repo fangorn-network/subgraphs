@@ -4,8 +4,8 @@ import { FileField, File, Manifest, ManifestPublished, ManifestState, ManifestUp
 import { Manifest as ManifestTemplate } from "../generated/templates"
 
 
-function deriveManifestStateId(owner: Bytes, schemaId: Bytes): Bytes {
-	return owner.concat(schemaId)
+function deriveManifestStateId(owner: Bytes, schemaId: Bytes, nameHash: Bytes): Bytes {
+	return owner.concat(schemaId).concat(nameHash)
 }
 
 // This function is for when a SchemaState has populated CIDS, but the Schema hasn't been populated by the 
@@ -74,8 +74,8 @@ export function handleManifestPublished(manifestPublishedEvent: ManifestPublishe
 	manifestPublished.owner = manifestPublishedEvent.params.owner
 	manifestPublished.schemaId = manifestPublishedEvent.params.schema_id
 	manifestPublished.manifestCid = manifestPublishedEvent.params.manifest_cid
-	manifestPublished.version = manifestPublishedEvent.params.version
-
+	manifestPublished.name = manifestPublishedEvent.params.name
+	manifestPublished.nameHash = manifestPublishedEvent.params.name_hash
 	manifestPublished.blockNumber = manifestPublishedEvent.block.number
 	manifestPublished.blockTimestamp = manifestPublishedEvent.block.timestamp
 	manifestPublished.transactionHash = manifestPublishedEvent.transaction.hash
@@ -118,15 +118,15 @@ export function handleManifestPublished(manifestPublishedEvent: ManifestPublishe
 		schemaName = "unknown_schema_name"
 	}
 
-	let stateId = deriveManifestStateId(manifestPublished.owner, manifestPublished.schemaId)
+	let stateId = deriveManifestStateId(manifestPublished.owner, manifestPublished.schemaId, manifestPublished.nameHash)
 
 	let manifestState = new ManifestState(stateId)
 	manifestState.owner = manifestPublished.owner
 	manifestState.schemaId = manifestPublished.schemaId
 	manifestState.schema = schemas[0]
 	manifestState.manifestCid = manifestPublished.manifestCid
-	manifestState.manifest = manifestPublished.manifestCid
-	manifestState.version = manifestPublished.version
+	manifestState.manifest = manifestPublished.manifestCid + "-" + manifestState.id.toHexString()
+	manifestState.version = BigInt.fromI32(1)
 	manifestState.schemaName = schemaName
 	manifestState.lastUpdated = manifestPublishedEvent.block.timestamp
 	manifestState.save()
@@ -143,7 +143,7 @@ export function handleManifestPublished(manifestPublishedEvent: ManifestPublishe
 export function handleManifestUpdated(manifestUpdatedEvent: ManifestUpdatedEvent): void {
 	let manifestOwner = manifestUpdatedEvent.params.owner
 	let schemaId = manifestUpdatedEvent.params.schema_id
-	let stateId = deriveManifestStateId(manifestOwner, schemaId)
+	let stateId = deriveManifestStateId(manifestOwner, schemaId, manifestUpdatedEvent.params.name_hash)
 
 	let manifestState = ManifestState.load(stateId)
 
@@ -154,6 +154,7 @@ export function handleManifestUpdated(manifestUpdatedEvent: ManifestUpdatedEvent
 	manifestUpdated.owner = manifestUpdatedEvent.params.owner
 	manifestUpdated.schemaId = manifestUpdatedEvent.params.schema_id
 	manifestUpdated.manifestCid = manifestUpdatedEvent.params.manifest_cid
+	manifestUpdated.nameHash = manifestUpdatedEvent.params.name_hash
 	manifestUpdated.version = manifestUpdatedEvent.params.version
 	manifestUpdated.blockNumber = manifestUpdatedEvent.block.number
 	manifestUpdated.blockTimestamp = manifestUpdatedEvent.block.timestamp
@@ -208,7 +209,7 @@ export function handleManifestUpdated(manifestUpdatedEvent: ManifestUpdatedEvent
 	}
 
 	manifestState.manifestCid = manifestUpdated.manifestCid
-	manifestState.manifest = manifestUpdated.manifestCid
+	manifestState.manifest = manifestUpdated.manifestCid + "-" + manifestState.id.toHexString()
 	manifestState.version = manifestUpdated.version
 	manifestState.lastUpdated = manifestUpdated.blockTimestamp
 	manifestState.save()
@@ -274,7 +275,7 @@ export function handleMetadata(content: Bytes): void {
 		}
 	}
 
-	let manifest = new Manifest(cid)
+	let manifest = new Manifest(cid + "-" + manifestStateIdString)
 	manifest.manifestVersion = BigInt.fromU64(versionVal.toU64())
 	manifest.schemaId = schemaId
 	manifest.schemaName = schemaName
@@ -286,7 +287,7 @@ export function handleMetadata(content: Bytes): void {
 
 	for (let i = 0; i < fileEntriesArray.length; i++) {
 		let fileEntryObj = fileEntriesArray[i].toObject()
-		let entryId = cid + "-" + i.toString()
+		let entryId = manifest.id + "-" + i.toString()
 
 		let fileFieldsObj = fileEntryObj.get("fields")
 		if (fileFieldsObj == null) {
