@@ -46,6 +46,42 @@ query GetManifestStatesByFileFieldNameValuePair($name: String, $value: String, $
 	}
 }
 
+query GetManifestStatesByFileFieldNameValuePairNoCase($name: String, $value: String, $first: Int = 100, $skip: Int = 0) {
+	fileFields (where: {name: $name, value_contains_nocase: $value}, first: $first, skip: $skip) {
+		file {
+			manifest {
+				manifestState{
+					...ManifestState
+				}
+			}
+		}
+	}
+}
+
+query GetManifestStatesByFileFieldValue($value: String, $first: Int = 100, $skip: Int = 0) {
+	fileFields (where: {value: $value}, first: $first, skip: $skip) {
+		file {
+			manifest {
+				manifestState{
+					...ManifestState
+				}
+			}
+		}
+	}
+}
+
+query GetManifestStatesByFileFieldValueNoCase($value: String, $first: Int = 100, $skip: Int = 0) {
+	fileFields (where: {value_contains_nocase: $value}, first: $first, skip: $skip) {
+		file {
+			manifest {
+				manifestState{
+					...ManifestState
+				}
+			}
+		}
+	}
+}
+
 query GetManifestStatesByFileFieldName($name: String, $first: Int = 100, $skip: Int = 0) {
 	fileFields (where: {name: $name}, first: $first, skip: $skip) {
 		file {
