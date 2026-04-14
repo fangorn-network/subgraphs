@@ -24,8 +24,10 @@ export class FangornGraphClient {
 	private rawClient: GraphQLClient
 	private typedClient: Sdk
 
-	constructor(url: string) {
-		const client = new GraphQLClient(url);
+	constructor(url: string, apiKey?: string) {
+    const client = new GraphQLClient(url, {
+        headers: apiKey ? { 'Authorization': `Bearer ${apiKey}` } : {},
+    });
 		const typedClient = getSdk(client);
 		this.rawClient = client;
 		this.typedClient = typedClient
