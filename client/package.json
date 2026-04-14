@@ -1,7 +1,7 @@
 {
   "name": "@fangorn-network/subgraph-client",
-  "version": "1.0.0",
-  "description": "Enables agents to query and interpret Fangorn subgraphs.",
+  "version": "0.0.1",
+  "description": "Client to simplify interacting with Fangorn subgraphs.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -22,7 +22,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "@fangorn-network/client-types": "file:../client-types",
+    "@fangorn-network/client-types": "^0.0.1",
     "@graphql-codegen/import-types-preset": "^4.0.0",
     "@graphql-typed-document-node/core": "^3.2.0",
     "dotenv": "^17.4.0",
