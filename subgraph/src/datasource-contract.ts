@@ -363,6 +363,19 @@ export function handleMetadata(content: Bytes): void {
 						}
 					}
 				}
+			} else if (fieldType == "handle") {
+				let valueVal = fileFields.get(fieldKey)
+				if (valueVal == null) {
+					fileField.value = "unknown_val"
+				} else {
+					let valueObj = valueVal.toObject()
+					let value = valueObj.get("uri")
+					if (value == null) {
+						fileField.value = "unknown_val"
+					} else {
+						fileField.value = value.toString()
+					}
+				}
 			} else {
 				fileField.acc = "plain"
 				let valueObj = fileFields.get(fieldKey)
