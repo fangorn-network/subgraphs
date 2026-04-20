@@ -35,3 +35,6 @@ typechain-types
 cache
 
 *.tsbuildinfo
+
+tests/.bin/
+tests/.latest.json
