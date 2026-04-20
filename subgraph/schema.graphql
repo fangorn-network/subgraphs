@@ -65,14 +65,32 @@ type Schema @entity(immutable: false) {
   id: ID!
   manifestStates: [ManifestState!] @derivedFrom(field: "schema")
   version: String
-  agentId: String
-  fields: [SchemaField!]
+  root: SchemaNode!
+  traversalString: String!
 }
 
-type SchemaField @entity(immutable: false) {
+type SchemaNode @entity(immutable: false) {
   id: ID!
-  name: String!
-  fieldType: String!
+  key: String!
+  isList: Boolean!
+  childNodes: [SchemaNode!]
+  childLeaves: [SchemaLeaf!]
+}
+
+type SchemaLeaf @entity(immutable: false) {
+  id: ID!
+  key: String!
+  valueType: SchemaValueType!
+  isList: Boolean!
+}
+
+enum SchemaValueType {
+  STRING
+  NUMBER
+  DECIMAL
+  BOOL
+  ADDRESS
+  BYTES
 }
 
 type ManifestState @entity(immutable: false) {
@@ -94,31 +112,26 @@ type Manifest @entity(immutable: false) {
 	manifestStateId: Bytes!
   manifestVersion: BigInt
   manifestState: ManifestState!
-  files: [File!] @derivedFrom(field: "manifest")
+  root: ManifestNode!
 }
 
-type File @entity(immutable: false) {
+type ManifestNode @entity(immutable: false) {
   id: ID!
-	schemaId: Bytes!
-  schemaName: String!
-	manifestStateId: Bytes!
-	manifest: Manifest!
-  name: String
-  fileFields: [FileField!] @derivedFrom(field: "file")
+  manifest: Manifest!
+  name: String!
+  type: String!  # "object" or "array"
+  childNodes: [ManifestNode!] @derivedFrom(field: "parentNode")
+  childLeaves: [ManifestLeaf!] @derivedFrom(field: "parentNode")
+  parentNode: ManifestNode
 }
 
-type FileField @entity(immutable: false) {
+type ManifestLeaf @entity(immutable: false) {
   id: ID!
-	schemaId: Bytes!
-  schemaName: String!
-	manifestStateId: Bytes!
-  name: String
-  value: String
-  atType: String
-  acc: String
-	fileId: String!
-  file: File!
-  pricing: PricingResource
+  manifest: Manifest!
+  parentNode: ManifestNode!
+  name: String!
+  type: String!
+  value: String!
 }
 
 type PricingResource @entity(immutable: false) {

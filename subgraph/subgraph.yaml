@@ -100,7 +100,8 @@ templates:
       handler: handleSchema
       entities:
         - Schema
-        - SchemaField
+        - SchemaNode
+        - SchemaLeaf
       abis:
         - name: Dummy
           file: ./abis/Dummy.json

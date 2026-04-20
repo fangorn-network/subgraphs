@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fangorn.network/fangorn-schema.json",
+  "title": "Fangorn Subgraph Schemas",
+  "description": "Validates schema documents before IPFS upload",
+  "type": "object",
+  "minProperties": 1,
+  "additionalProperties": {
+    "$ref": "#/$defs/field"
+  },
+  "$defs": {
+    "primitiveType": {
+      "type": "string",
+      "enum": ["string", "number", "decimal", "bool", "address", "bytes"]
+    },
+    "field": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/primitiveType"
+        },
+        {
+          "type": "array",
+          "prefixItems": [
+            { "$ref": "#/$defs/primitiveType" }
+          ],
+          "items": false,
+          "minItems": 1
+        },
+        {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "$ref": "#/$defs/field"
+          }
+        },
+        {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "object",
+              "minProperties": 1,
+              "additionalProperties": {
+                "$ref": "#/$defs/field"
+              }
+            }
+          ],
+          "items": false,
+          "minItems": 1
+        }
+      ]
+    }
+  }
+}

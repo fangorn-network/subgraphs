@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["version", "schema"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "type": "string" },
+    "agentId": { "type": "string" },
+    "schema": { "$ref": "#/$defs/field" }
+  },
+  "$defs": {
+    "field": {
+      "type": "object",
+      "required": ["type", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "enum": ["object", "array", "string", "number", "boolean"] },
+        "name": { "type": "string" },
+        "value": true,
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/field" }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "enum": ["string", "number", "boolean"] } }, "required": ["type"] },
+          "then": { "children": false }
+        },
+        {
+          "if": { "properties": { "type": { "enum": ["object", "array"] } }, "required": ["type"] },
+          "then": {
+            "required": ["type", "name", "children"],
+            "properties": { "value": false }
+          }
+        }
+      ]
+    }
+  }
+}

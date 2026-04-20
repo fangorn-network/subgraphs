@@ -1,0 +1,24 @@
+{
+  "title": "string",
+  "artist": "string",
+  "releaseDate": "string",
+  "genre": "string",
+  "totalTracks": "number",
+  "duration": "decimal",
+  "tags": ["string"],
+  "credits": {
+    "producer": "string",
+    "engineer": "string",
+    "studio": "string"
+  },
+  "tracks": [{
+    "trackNumber": "number",
+    "title": "string",
+    "duration": "decimal",
+    "featuredArtists": ["string"],
+    "lyrics": {
+      "language": "string",
+      "contentHash": "bytes"
+    }
+  }]
+}

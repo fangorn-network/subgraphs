@@ -1,70 +1,21 @@
-import { BigInt, Bytes, dataSource, DataSourceContext, ipfs, json, log } from "@graphprotocol/graph-ts"
+import { BigInt, Bytes, dataSource, DataSourceContext, ipfs, json, JSONValue, JSONValueKind, log } from "@graphprotocol/graph-ts"
 import { ManifestPublished as ManifestPublishedEvent, ManifestUpdated as ManifestUpdatedEvent } from "../generated/DatasourceContract/DatasourceContract"
-import { FileField, File, Manifest, ManifestPublished, ManifestState, ManifestUpdated, SchemaState, Schema, SchemaField } from "../generated/schema"
+import { Manifest, ManifestPublished, ManifestState, ManifestUpdated, SchemaState, Schema, ManifestLeaf, ManifestNode } from "../generated/schema"
 import { Manifest as ManifestTemplate } from "../generated/templates"
+import { generateManifestStateId, generateNodeId, walkSchema } from "./utils"
 
-
-function deriveManifestStateId(owner: Bytes, schemaId: Bytes, nameHash: Bytes): Bytes {
-	return owner.concat(schemaId).concat(nameHash)
-}
-
-// This function is for when a SchemaState has populated CIDS, but the Schema hasn't been populated by the 
-// appropriate IPFS handler yet. We depend on these; attempt a direct fetch from IPFS for them.
-function deriveSchemaFieldsFromIpfs(ipfsCid: string): string[] {
-	let fieldPairs: string[] = []
-	let schemaBytes = ipfs.cat(ipfsCid)
-	if (schemaBytes === null) {
-		log.warning("Direct IPFS fetch failed for schema CID: {}", [ipfsCid])
-		return fieldPairs
+function fetchTraversalFromIpfs(schemaCid: string): string {
+  let rawBytes = ipfs.cat(schemaCid)
+  if (rawBytes === null) {
+    return ""
+  }
+  let bytes: Bytes = rawBytes
+  let jsonValue = json.try_fromBytes(bytes)
+	if (jsonValue.isError) {
+		log.warning("Direct IPFS fetch failed for schema CID: {}", [schemaCid])
+		return ""
 	}
-
-	let parsed = json.try_fromBytes(schemaBytes as Bytes)
-	if (parsed.isError) {
-		log.warning("Failed to parse schema from IPFS for CID: {}", [ipfsCid])
-		return fieldPairs
-	}
-
-	let ipfsSchemaObj = parsed.value.toObject()
-	let definitionVal = ipfsSchemaObj.get("definition")
-	if (definitionVal === null) {
-		log.warning("definitionObj was null for IPFS CID: {}", [ipfsCid])
-		return fieldPairs
-	}
-
-	let definition = definitionVal.toObject()
-	let fieldEntries = definition.entries
-	for (let i = 0; i < fieldEntries.length; i++) {
-		let entry = fieldEntries[i]
-		let key = entry.key
-		let valObj = entry.value.toObject()
-		let atTypeVal = valObj.get("@type")
-		let fieldType = "unknown"
-		if (atTypeVal !== null) {
-			fieldType = atTypeVal.toString()
-		}
-		fieldPairs.push(key + ":" + fieldType)
-	}
-
-	if (fieldPairs.length > 0) {
-		log.info("Fetching directly from IPFS succeeded for ipfsCid {}", [ipfsCid])
-	}
-
-	return fieldPairs
-}
-
-function deriveSchemaFields(fieldPointers: string[]): string[] {
-	// Build a serialized representation of the schema fields
-	// Format: "name:type,name:type,name:type"
-	let fieldPairs: string[] = []
-	for (let i = 0; i < fieldPointers.length; i++) {
-		let schemaField = SchemaField.load(fieldPointers[i])
-		if (schemaField != null) {
-			fieldPairs.push(schemaField.name + ":" + schemaField.fieldType)
-		} else {
-			log.warning("schemaField was null", [])
-		}
-	}
-	return fieldPairs;
+  return walkSchema(jsonValue.value, schemaCid, false)
 }
 
 export function handleManifestPublished(manifestPublishedEvent: ManifestPublishedEvent): void {
@@ -93,24 +44,26 @@ export function handleManifestPublished(manifestPublishedEvent: ManifestPublishe
 		return
 	}
 
-	let fieldPairs: string[] = [];
+// Try loading the Schema entity first
+let schemaCid = schemas[0]
+if (schemaCid == null || schemaCid == "") {
+	log.warning("Schemas IPFS CIDs weren't set for SchemaState: {}", [schemaState.schemaId.toHexString()])
+	return
+}
+let traversalString = ""
 
-	// Try loading the Schema entity first
-	let schema = Schema.load(schemas[0])
-	if (schema != null) {
-		let fieldPointers = schema.fields
-		if (fieldPointers != null) {
-			fieldPairs = deriveSchemaFields(fieldPointers)
-		}
-	} else {
-		log.warning("ManifestPublish: Schema failed to load. Attempting direct fetch from IPFS.", [])
-		fieldPairs = deriveSchemaFieldsFromIpfs(schemas[0])
-	}
+let schema = Schema.load(schemaCid)
+if (schema != null) {
+  traversalString = schema.traversalString
+} else {
+	log.warning("ManifestPublish: Schema not loaded. Attempting direct fetch from IPFS.", [])
+	traversalString = fetchTraversalFromIpfs(schemaCid)
+}
 
-	if (fieldPairs.length == 0) {
-		log.warning("Could not resolve schema fields for schema_id: {}", [manifestPublished.schemaId.toHexString()])
-		return
-	}
+if (traversalString == "") {
+  log.warning("Could not build traversal string for schema_id: {}", [manifestPublished.schemaId.toHexString()])
+  return
+}
 
 	let schemaName = schemaState.name
 	if (schemaName == null) {
@@ -118,7 +71,7 @@ export function handleManifestPublished(manifestPublishedEvent: ManifestPublishe
 		schemaName = "unknown_schema_name"
 	}
 
-	let stateId = deriveManifestStateId(manifestPublished.owner, manifestPublished.schemaId, manifestPublished.nameHash)
+	let stateId = generateManifestStateId(manifestPublished.owner, manifestPublished.schemaId, manifestPublished.nameHash)
 
 	let manifestState = new ManifestState(stateId)
 	manifestState.owner = manifestPublished.owner
@@ -134,7 +87,7 @@ export function handleManifestPublished(manifestPublishedEvent: ManifestPublishe
 	let context = new DataSourceContext()
 	context.setString("schemaId", manifestPublished.schemaId.toHexString())
 	context.setString("schemaName", manifestState.schemaName)
-	context.setString("fields", fieldPairs.join(","))
+	context.setString("traversalString", traversalString)
 	context.setString("manifestStateId", manifestState.id.toHexString())
 
 	ManifestTemplate.createWithContext(manifestState.manifestCid, context)
@@ -143,7 +96,7 @@ export function handleManifestPublished(manifestPublishedEvent: ManifestPublishe
 export function handleManifestUpdated(manifestUpdatedEvent: ManifestUpdatedEvent): void {
 	let manifestOwner = manifestUpdatedEvent.params.owner
 	let schemaId = manifestUpdatedEvent.params.schema_id
-	let stateId = deriveManifestStateId(manifestOwner, schemaId, manifestUpdatedEvent.params.name_hash)
+	let stateId = generateManifestStateId(manifestOwner, schemaId, manifestUpdatedEvent.params.name_hash)
 
 	let manifestState = ManifestState.load(stateId)
 
@@ -173,24 +126,26 @@ export function handleManifestUpdated(manifestUpdatedEvent: ManifestUpdatedEvent
 		return
 	}
 
-	let fieldPairs: string[] = [];
-	// Try loading the Schema entity first
-	let schema = Schema.load(schemas[0])
-	if (schema != null) {
-		let fieldPointers = schema.fields
-		if (fieldPointers != null) {
-			fieldPairs = deriveSchemaFields(fieldPointers)
-		}
-	} else {
-		log.warning("ManifestUpdate: Schema failed to load. Attempting direct fetch from IPFS.", [])
-		fieldPairs = deriveSchemaFieldsFromIpfs(schemas[0])
-	}
+// Try loading the Schema entity first
+let schemaCid = schemas[0]
+if (schemaCid == null || schemaCid == "") {
+	log.warning("Schemas IPFS CIDs weren't set for SchemaState: {}", [schemaState.schemaId.toHexString()])
+	return
+}
+let traversalString = ""
 
-	if (fieldPairs.length == 0) {
-		log.warning("Could not resolve schema fields for schema_id: {}", [manifestUpdated.schemaId.toHexString()])
-		return
-	}
+let schema = Schema.load(schemaCid)
+if (schema != null) {
+  traversalString = schema.traversalString
+} else {
+	log.warning("ManifestPublish: Schema not loaded. Attempting direct fetch from IPFS.", [])
+	traversalString = fetchTraversalFromIpfs(schemaCid)
+}
 
+if (traversalString == "") {
+  log.warning("Could not build traversal string for schema_id: {}", [manifestUpdated.schemaId.toHexString()])
+  return
+}
 	let schemaName = schemaState.name
 
 	if (schemaName == null) {
@@ -217,164 +172,243 @@ export function handleManifestUpdated(manifestUpdatedEvent: ManifestUpdatedEvent
 	let context = new DataSourceContext()
 	context.setString("schemaId", manifestState.schemaId.toHexString())
 	context.setString("schemaName", manifestState.schemaName)
-	context.setString("fields", fieldPairs.join(","))
+	context.setString("traversalString", traversalString)
 	context.setString("manifestStateId", manifestState.id.toHexString())
 
 	ManifestTemplate.createWithContext(manifestState.manifestCid, context)
 }
 
+class TraversalEntry {
+  kind: string       // "node" or "leaf"
+  path: string
+  isList: boolean
+  valueType: string  // only for leaves
+
+  constructor(kind: string, path: string, isList: boolean, valueType: string) {
+    this.kind = kind
+    this.path = path
+    this.isList = isList
+    this.valueType = valueType
+  }
+}
+
+class WorkItem {
+  jsonValue: JSONValue
+  key: string
+  traversalPath: string
+  parentNodeId: string | null
+  nodeType: string   // "object" or "array"
+
+  constructor(
+    jsonValue: JSONValue,
+    key: string,
+    traversalPath: string,
+    parentNodeId: string | null,
+    nodeType: string
+  ) {
+    this.jsonValue = jsonValue
+    this.key = key
+    this.traversalPath = traversalPath
+    this.parentNodeId = parentNodeId
+    this.nodeType = nodeType
+  }
+}
+
 export function handleMetadata(content: Bytes): void {
-	let cid = dataSource.stringParam()
-	let context = dataSource.context()
+  let cid = dataSource.stringParam()
+  let context = dataSource.context()
 
-	let schemaIdString = context.getString("schemaId")
-	let schemaName = context.getString("schemaName")
-	let fieldsString = context.getString("fields")
-	let manifestStateIdString = context.getString("manifestStateId")
+  let schemaIdString = context.getString("schemaId")
+  let schemaName = context.getString("schemaName")
+  let traversalString = context.getString("traversalString")
+  let manifestStateIdString = context.getString("manifestStateId")
 
-	if (manifestStateIdString == null) {
-		log.warning("No manifestStateId found", [])
-		return
-	}
+  let jsonValue = json.fromBytes(content)
 
-	if (schemaIdString == null) {
-		log.warning("Manifest found with no schema ref", [])
-		return
-	}
+  if (jsonValue.kind != JSONValueKind.OBJECT) {
+    log.warning("Manifest root is not an object, skipping CID {}", [cid])
+    return
+  }
 
-	let schemaId = Bytes.fromHexString(schemaIdString)
+  let traversalMap = new Map<string, TraversalEntry>()
+  let lines = traversalString.split("\n")
+  for (let i = 0; i < lines.length; i++) {
+    let parts = lines[i].split("|")
+    if (parts.length < 3) {
+      continue
+    }
 
-	let manifestStateId = Bytes.fromHexString(manifestStateIdString)
+    let kind = parts[0]
+    let path = parts[1]
 
-	let parsed = json.try_fromBytes(content)
-	if (parsed.isError) {
-		log.warning("Failed to parse IPFS content for CID: {}", [cid])
-		return
-	}
+    if (kind == "node") {
+      let isList = parts[2] == "true"
+      traversalMap.set(path, new TraversalEntry(kind, path, isList, ""))
+    } else if (kind == "leaf" && parts.length >= 4) {
+      let valueType = parts[2]
+      let isList = parts[3] == "true"
+      traversalMap.set(path, new TraversalEntry(kind, path, isList, valueType))
+    }
+  }
 
-	let ipfsFileObj = parsed.value.toObject()
+  let rootNodeId = generateNodeId(cid, "root")
 
-	let versionVal = ipfsFileObj.get("version")
-	let entriesVal = ipfsFileObj.get("entries")
+  let stack: WorkItem[] = []
+  stack.push(new WorkItem(jsonValue, "root", "root", null, "object"))
 
-	if (versionVal == null || entriesVal == null) {
-		log.warning("Invalid manifest format for CID: {}", [cid])
-		return
-	}
+  while (stack.length > 0) {
+    let item = stack.pop()
+    let nodeId = generateNodeId(cid, item.traversalPath)
 
-	let fieldPairs = fieldsString.split(",")
-	let fieldNames: string[] = []
-	let fieldTypes: string[] = []
-	for (let i = 0; i < fieldPairs.length; i++) {
-		let parts = fieldPairs[i].split(":")
-		if (parts.length == 2) {
-			fieldNames.push(parts[0])
-			fieldTypes.push(parts[1])
-		} else {
-			log.warning("SchemField name value pair found no pair for ManifestState ID {}", [manifestStateIdString])
-		}
-	}
+    let node = new ManifestNode(nodeId)
+    node.manifest = cid
+    node.name = item.key
+    node.type = item.nodeType
+    node.parentNode = item.parentNodeId
+    node.save()
 
-	let manifest = new Manifest(cid + "-" + manifestStateIdString)
-	manifest.manifestVersion = BigInt.fromU64(versionVal.toU64())
-	manifest.schemaId = schemaId
-	manifest.schemaName = schemaName
-	manifest.manifestStateId = manifestStateId
-	manifest.manifestState = manifestStateId
-	manifest.save()
+    if (item.nodeType == "array") {
+      let arr = item.jsonValue.toArray()
+      for (let i = 0; i < arr.length; i++) {
+        let element = arr[i]
 
-	let fileEntriesArray = entriesVal.toArray()
+        if (element.kind == JSONValueKind.OBJECT) {
+          let childPath = item.traversalPath + "[" + i.toString() + "]"
+          stack.push(new WorkItem(element, item.key + "[" + i.toString() + "]", childPath, nodeId, "object"))
+        } else {
+          let lookupPath = stripArrayIndices(item.traversalPath)
+          let valueType = "STRING"
+          if (traversalMap.has(lookupPath)) {
+            let mapEntry = traversalMap.get(lookupPath)
+            valueType = mapEntry.valueType
+          }
+          let leafId = generateNodeId(cid, item.traversalPath + "[" + i.toString() + "]")
 
-	for (let i = 0; i < fileEntriesArray.length; i++) {
-		let fileEntryObj = fileEntriesArray[i].toObject()
-		let entryId = manifest.id + "-" + i.toString()
+          let leaf = new ManifestLeaf(leafId)
+          leaf.manifest = cid
+          leaf.parentNode = nodeId
+          leaf.name = item.key + "[" + i.toString() + "]"
+          leaf.type = valueType
+          leaf.value = jsonValueToString(element, valueType)
+          leaf.save()
+        }
+      }
+    } else {
+      let obj = item.jsonValue.toObject()
+      let entries = obj.entries
 
-		let fileFieldsObj = fileEntryObj.get("fields")
-		if (fileFieldsObj == null) {
-			log.warning("File's fields object was null. Skipping this for manifest {}", [cid])
-			continue
-		}
-		let fileFields = fileFieldsObj.toObject()
+      for (let i = 0; i < entries.length; i++) {
+        let entryKey = entries[i].key
+        let entryValue = entries[i].value
+        let childPath = ""
+        if (item.traversalPath == "root") {
+          childPath = entryKey
+        } else {
+          childPath = item.traversalPath + "." + entryKey
+        }
 
-		let nameObj = fileEntryObj.get("name")
-		let name = ""
-		if (nameObj == null) {
-			log.warning("name for file entry was null, replacing with empty name for manifest cid {}", [cid])
-		} else {
-			name = nameObj.toString()
-		}
+        let lookupPath = stripArrayIndices(childPath)
 
-		let file = new File(entryId)
-		file.name = name
+        if (!traversalMap.has(lookupPath)) {
+          log.warning("No traversal entry for path {}, skipping", [childPath])
+          continue
+        }
+        let entry = traversalMap.get(lookupPath)
 
-		file.manifest = manifest.id
-		file.manifestStateId = manifestStateId
-		file.schemaId = schemaId
-		file.schemaName = schemaName
-		file.save()
+        if (entry.kind == "node") {
+          if (entry.isList) {
+            if (entryValue.kind != JSONValueKind.ARRAY) {
+              log.warning("Expected array at path {}", [childPath])
+              continue
+            }
+            stack.push(new WorkItem(entryValue, entryKey, childPath, nodeId, "array"))
+          } else {
+            if (entryValue.kind != JSONValueKind.OBJECT) {
+              log.warning("Expected object at path {}", [childPath])
+              continue
+            }
+            stack.push(new WorkItem(entryValue, entryKey, childPath, nodeId, "object"))
+          }
+        } else if (entry.kind == "leaf") {
+          if (entry.isList) {
+            if (entryValue.kind != JSONValueKind.ARRAY) {
+              log.warning("Expected array at path {}", [childPath])
+              continue
+            }
+            let arrayNodeId = generateNodeId(cid, childPath)
+            let arrayNode = new ManifestNode(arrayNodeId)
+            arrayNode.manifest = cid
+            arrayNode.name = entryKey
+            arrayNode.type = "array"
+            arrayNode.parentNode = nodeId
+            arrayNode.save()
 
-		for (let j = 0; j < fieldNames.length; j++) {
-			let fieldKey = fieldNames[j]
-			let fieldType = fieldTypes[j]
+            let arr = entryValue.toArray()
+            for (let j = 0; j < arr.length; j++) {
+              let leafId = generateNodeId(cid, childPath + "[" + j.toString() + "]")
+              let leaf = new ManifestLeaf(leafId)
+              leaf.manifest = cid
+              leaf.parentNode = arrayNodeId
+              leaf.name = entryKey + "[" + j.toString() + "]"
+              leaf.type = entry.valueType
+              leaf.value = jsonValueToString(arr[j], leaf.type)
+              leaf.save()
+            }
+          } else {
+            let leafId = generateNodeId(cid, childPath)
+            let leaf = new ManifestLeaf(leafId)
+            leaf.manifest = cid
+            leaf.parentNode = nodeId
+            leaf.name = entryKey
+            leaf.type = entry.valueType
+            leaf.value = jsonValueToString(entryValue, leaf.type)
+            leaf.save()
+          }
+        }
+      }
+    }
+  }
 
-			let fieldEntityId = entryId + "-" + fieldKey
-			let fileField = new FileField(fieldEntityId)
-			fileField.name = fieldKey
-			fileField.atType = fieldType
-			fileField.manifestStateId = manifestStateId
-			fileField.schemaId = schemaId
-			fileField.schemaName = schemaName
-			fileField.file = file.id
-			fileField.fileId = file.id
+  let manifest = new Manifest(cid)
+  manifest.schemaId = Bytes.fromHexString(schemaIdString)
+  manifest.schemaName = schemaName
+  manifest.manifestStateId = Bytes.fromHexString(manifestStateIdString)
+	manifest.manifestState = Bytes.fromHexString(manifestStateIdString)
+  manifest.root = rootNodeId
+  manifest.save()
+}
 
-			if (fieldType == "encrypted") {
-				let valueVal = fileFields.get(fieldKey)
-				if (valueVal == null) {
-					log.warning("Field's type was encrypted, but the value was null. Skipping this for manifest {}", [cid])
-					continue
-				}
-				let valueObj = valueVal.toObject()
+function stripArrayIndices(path: string): string {
+  let result = ""
+  let i = 0
+  while (i < path.length) {
+    if (path.charAt(i) == "[") {
+      while (i < path.length && path.charAt(i) != "]") {
+        i++
+      }
+      i++
+    } else {
+      result = result + path.charAt(i)
+      i++
+    }
+  }
+  return result
+}
 
-				let gadgetObj = valueObj.get("gadgetDescriptor")
-				if (gadgetObj == null) {
-					log.warning("Field's type was encrypted, but the gadgetVal was null. Skipping this for manifest {}", [cid])
-					continue
-				}
-				let gadget = gadgetObj.toObject()
-
-				let accObj = gadget.get("type")
-				if (accObj == null) {
-					fileField.acc = "no_acc"
-					fileField.value = "unknown"
-					fileField.pricing = "unknown"
-				} else {
-					fileField.acc = accObj.toString()
-					fileField.value = "enc"
-					let paramsObj = gadget.get("params")
-					if (paramsObj == null) {
-						fileField.pricing = "unknown"
-					} else {
-						let params = paramsObj.toObject()
-						let resourceId = params.get("resourceId")
-						if (resourceId == null) {
-							fileField.pricing = "unknown"
-						} else {
-							fileField.pricing = resourceId.toString()
-						}
-					}
-				}
-			} else {
-				fileField.acc = "plain"
-				let valueObj = fileFields.get(fieldKey)
-				if (valueObj == null) {
-					fileField.value = "unknown_val"
-				} else {
-					fileField.value = valueObj.toString()
-				}
-			}
-			fileField.save()
-		}
-	}
-
-	log.info("Manifest processed safely: {}", [cid])
+function jsonValueToString(value: JSONValue, valueType: string): string {
+  if (valueType == "STRING") {
+    return value.toString()
+  } else if (valueType == "NUMBER") {
+    return i64(value.toF64()).toString()
+  } else if (valueType == "DECIMAL") {
+    return value.toF64().toString()
+  } else if (valueType == "BOOL") {
+    if (value.toBool()) {
+      return "true"
+    }
+    return "false"
+  } else if (valueType == "ADDRESS" || valueType == "BYTES") {
+    return value.toString()
+  }
+  return ""
 }

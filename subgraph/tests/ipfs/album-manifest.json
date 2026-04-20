@@ -1,0 +1,46 @@
+{
+  "title": "Midnight Frequencies",
+  "artist": "Nova Drift",
+  "releaseDate": "2026-03-15",
+  "genre": "Electronic",
+  "totalTracks": 3,
+  "duration": 847.5,
+  "tags": ["electronic", "ambient", "experimental"],
+  "credits": {
+    "producer": "Alex Chen",
+    "engineer": "Maria Santos",
+    "studio": "Echo Chamber Studios"
+  },
+  "tracks": [
+    {
+      "trackNumber": 1,
+      "title": "Signal Loss",
+      "duration": 245.8,
+      "featuredArtists": ["Pale Circuit"],
+      "lyrics": {
+        "language": "en",
+        "contentHash": "0x1a2b3c4d5e6f"
+      }
+    },
+    {
+      "trackNumber": 2,
+      "title": "Deep Horizon",
+      "duration": 312.4,
+      "featuredArtists": ["Neon Veil", "Glass Fauna"],
+      "lyrics": {
+        "language": "en",
+        "contentHash": "0x7a8b9c0d1e2f"
+      }
+    },
+    {
+      "trackNumber": 3,
+      "title": "Last Transmission",
+      "duration": 289.3,
+      "featuredArtists": [],
+      "lyrics": {
+        "language": "ja",
+        "contentHash": "0x3f4e5d6c7b8a"
+      }
+    }
+  ]
+}

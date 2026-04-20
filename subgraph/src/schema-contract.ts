@@ -1,7 +1,8 @@
-import { BigInt, Bytes, dataSource, json, log } from "@graphprotocol/graph-ts"
+import { Bytes, JSONValue, JSONValueKind, dataSource, json, TypedMap, log } from "@graphprotocol/graph-ts";
 import { SchemaRegistered as SchemaRegisteredEvent, SchemaUpdated as SchemaUpdatedEvent } from "../generated/SchemaContract/SchemaContract"
-import { SchemaRegistered, SchemaUpdated, SchemaState, Schema, SchemaField } from "../generated/schema"
+import { SchemaRegistered, SchemaUpdated, SchemaState, Schema, SchemaNode, SchemaLeaf } from "../generated/schema"
 import { Schema as SchemaTemplate } from "../generated/templates"
+import { generateNodeId, walkSchema } from "./utils"
 
 export function handleSchemaRegistered(schemaRegisteredEvent: SchemaRegisteredEvent): void {
 
@@ -65,52 +66,18 @@ export function handleSchemaUpdated(schemaUpdatedEvent: SchemaUpdatedEvent): voi
   schema.save();
   SchemaTemplate.create(schemaUpdate.newIpfsCid)
 }
-
 export function handleSchema(content: Bytes): void {
-
   let cid = dataSource.stringParam()
-  let schema = new Schema(cid)
+  let jsonValue = json.fromBytes(content)
 
-  let parsed = json.try_fromBytes(content)
-  if (parsed.isError) {
-    log.warning("parsing failed in handleSchema for cid ", [cid])
+  let traversalString = walkSchema(jsonValue, cid, true)
+  if (traversalString == "") {
+    log.warning("Failed to process schema for CID {}", [cid])
     return
   }
 
-  let ipfsSchemaObj = parsed.value.toObject()
-
-  let version = "";
-  let versionObj = ipfsSchemaObj.get("version")
-  if (versionObj == null) {
-    log.warning("versionObj was null for cid {}", [cid])
-  } else {
-    version = versionObj.toU64().toString()
-  }
-
-  schema.version = version
-  schema.agentId = ""
-
-  let definitionObj = ipfsSchemaObj.get("definition")
-  if (definitionObj == null) {
-    log.warning("definitionObj was null for cid {}", [cid])
-  } else {
-    let definition = definitionObj.toObject()
-    let fieldEntries = definition.entries;
-    let schemaFields: string[] = []
-    for (let i = 0; i < fieldEntries.length; i++) {
-      let key = fieldEntries[i].key;
-      let val = fieldEntries[i].value.toObject()
-      let atTypeVal = val.get("@type")
-      let fieldType = atTypeVal != null ? atTypeVal.toString() : "unknown"
-      let schemaFieldId = cid.concat(key)
-      let schemaField = new SchemaField(schemaFieldId)
-      schemaField.fieldType = fieldType
-      schemaField.name = key
-      schemaField.save()
-      schemaFields.push(schemaFieldId)
-    }
-    schema.fields = schemaFields
-  }
-
+  let schema = new Schema(cid)
+  schema.root = generateNodeId(cid, "root")
+  schema.traversalString = traversalString
   schema.save()
 }
