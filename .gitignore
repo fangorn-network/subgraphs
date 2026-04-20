@@ -36,5 +36,5 @@ cache
 
 *.tsbuildinfo
 
-*/tests/.bin/
+*/tests/.bin/*
 */tests/.latest.json
