@@ -17,7 +17,7 @@ query GetFileByFileFieldNameValuePair($name: String, $value: String, $first: Int
 	}
 }
 
-query GetFilesFileFieldName($name: String, $first: Int = 100, $skip: Int = 0) {
+query GetFilesByFileFieldName($name: String, $first: Int = 100, $skip: Int = 0) {
 		fileFields (where: {name: $name,}, first: $first, skip: $skip) {
 		...FileByFileField
 	}
