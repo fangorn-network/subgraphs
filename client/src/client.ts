@@ -9,6 +9,7 @@ import {
 	GetFileEntriesByManifestStatetIdQueryVariables,
 	GetFilesByFileFieldNameQueryVariables,
 	GetManifestStateByIdQueryVariables,
+	GetManifestStatesByFileFieldNameQueryVariables,
 	GetManifestStatesByFileFieldNameValuePairQueryVariables,
 	GetManifestStatesByFileFieldValueQueryVariables,
 	GetManifestStatesBySchemaNameAndOwnerQueryVariables,
@@ -133,7 +134,8 @@ export class FangornGraphClient {
 
 		let result;
 		if (!args.value) {
-			result = await this.typedClient.GetManifestStatesByFileFieldName(args);
+			const newArgs: GetManifestStatesByFileFieldNameQueryVariables = {name: args.name, first: args.first, skip: args.skip}
+			result = await this.typedClient.GetManifestStatesByFileFieldName(newArgs);
 		} else {
 			if (caseSensitive) {
 				result = await this.typedClient.GetManifestStatesByFileFieldNameValuePair(args);
@@ -168,7 +170,8 @@ export class FangornGraphClient {
 
 		let result;
 		if (!args.value) {
-			result = await this.typedClient.GetManifestStatesByFileFieldName(args);
+			const newArgs: GetManifestStatesByFileFieldNameQueryVariables = {name: args.name, first: args.first, skip: args.skip}
+			result = await this.typedClient.GetManifestStatesByFileFieldName(newArgs);
 		} else {
 			result = await this.typedClient.GetManifestStatesByFileFieldNameValuePair(args);
 		}
@@ -223,10 +226,15 @@ export class FangornGraphClient {
 	async GetFileByFileFieldNameValuePair(caseSensitive: boolean, args: GetFileByFileFieldNameValuePairQueryVariables): Promise<FileEntry[]> {
 		console.log("Searching Globally for FileFields")
 		let result
-		if(caseSensitive) {
-			result = await this.typedClient.GetFileByFileFieldNameValuePair(args);
+		if (!args.value) {
+			const newArgs: GetFilesByFileFieldNameQueryVariables = {name: args.name, first: args.first, skip: args.skip}
+			result = await this.typedClient.GetFilesByFileFieldName(newArgs)
 		} else {
-			result = await this.typedClient.GetFileByFileFieldNameValuePairNoCase(args);
+			if(caseSensitive) {
+				result = await this.typedClient.GetFileByFileFieldNameValuePair(args);
+			} else {
+				result = await this.typedClient.GetFileByFileFieldNameValuePairNoCase(args);
+			}
 		}
 		const files = result.fileFields.map((ff: FileByFileFieldFragment) => toFile(ff.file))
 		const uniqueFiles = files.filter((f: FileEntry, index: number, self: FileEntry[]) => 
