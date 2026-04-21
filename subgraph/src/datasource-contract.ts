@@ -363,6 +363,59 @@ export function handleMetadata(content: Bytes): void {
 						}
 					}
 				}
+			} else if (fieldType == "handle") {
+				let valueVal = fileFields.get(fieldKey)
+				if (valueVal == null) {
+					fileField.value = "unknown_val"
+				} else {
+					let valueObj = valueVal.toObject()
+					let uriValue = valueObj.get("uri")
+					if (uriValue == null) {
+						fileField.value = "unknown_val"
+					} else {
+						fileField.value = uriValue.toString()
+					}
+
+
+					let fileField3 = new FileField(fieldEntityId + "price")
+
+					fileField3.name = "price"
+					fileField3.atType = "string"
+					fileField3.manifestStateId = manifestStateId
+					fileField3.schemaId = schemaId
+					fileField3.schemaName = schemaName
+					fileField3.file = file.id
+					fileField3.fileId = file.id
+
+						let priceObj = valueObj.get("price")
+						if (priceObj == null) {
+							fileField3.value = "free"
+						} else {
+							fileField3.value = priceObj.toString()
+						}
+
+					fileField3.save()
+
+					let fileField2 = new FileField(fieldEntityId + "ww")
+
+					fileField2.name = "workerUrl"
+					fileField2.atType = "string"
+					fileField2.manifestStateId = manifestStateId
+					fileField2.schemaId = schemaId
+					fileField2.schemaName = schemaName
+					fileField2.file = file.id
+					fileField2.fileId = file.id
+
+					let webWorkerValue = valueObj.get("workerUrl")
+
+					if (webWorkerValue == null) {
+						fileField2.value = "no_ww_val_given"
+					} else {
+						let webWorkerString = webWorkerValue.toString();
+						fileField2.value = webWorkerString
+					}
+					fileField2.save()
+				}
 			} else {
 				fileField.acc = "plain"
 				let valueObj = fileFields.get(fieldKey)
