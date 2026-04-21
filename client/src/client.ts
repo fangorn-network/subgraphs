@@ -8,6 +8,7 @@ import {
 	GetFileEntriesByManifestStatetIdQueryVariables,
 	GetFilesByFileFieldNameQueryVariables,
 	GetFilesByFileFieldNameValuePairQueryVariables,
+	GetFilesByFileFieldValueQueryVariables,
 	GetManifestStateByIdQueryVariables,
 	GetManifestStatesByFileFieldNameQueryVariables,
 	GetManifestStatesByFileFieldNameValuePairQueryVariables,
@@ -215,7 +216,6 @@ export class FangornGraphClient {
 	}
 
 	async getFilesByFileFieldName(args: GetFilesByFileFieldNameQueryVariables): Promise<FileEntry[]> {
-		console.log("Searching Globally for FileFields")
 		const result = await this.typedClient.GetFilesByFileFieldName(args);
 		const files = result.fileFields.map((ff: FileByFileFieldFragment) => toFile(ff.file))
 		const uniqueFiles = files.filter((f: FileEntry, index: number, self: FileEntry[]) => 
@@ -224,7 +224,6 @@ export class FangornGraphClient {
 	}
 
 	async GetFilesByFileFieldNameValuePair(caseSensitive: boolean, args: GetFilesByFileFieldNameValuePairQueryVariables): Promise<FileEntry[]> {
-		console.log("Searching Globally for FileFields")
 		let result
 		if (!args.value) {
 			const newArgs: GetFilesByFileFieldNameQueryVariables = {name: args.name, first: args.first, skip: args.skip}
@@ -235,6 +234,19 @@ export class FangornGraphClient {
 			} else {
 				result = await this.typedClient.GetFilesByFileFieldNameValuePairNoCase(args);
 			}
+		}
+		const files = result.fileFields.map((ff: FileByFileFieldFragment) => toFile(ff.file))
+		const uniqueFiles = files.filter((f: FileEntry, index: number, self: FileEntry[]) => 
+			self.findIndex((other) => other.id === f.id) === index)
+		return uniqueFiles
+	}
+
+	async getFilesByFileFieldValue(caseSensitive: boolean, args: GetFilesByFileFieldValueQueryVariables): Promise<FileEntry[]> {
+		let result;
+		if (caseSensitive) {
+			result = await this.typedClient.GetFilesByFileFieldValue(args);
+		} else {
+			result = await this.typedClient.GetFilesByFileFieldValueNoCase(args);
 		}
 		const files = result.fileFields.map((ff: FileByFileFieldFragment) => toFile(ff.file))
 		const uniqueFiles = files.filter((f: FileEntry, index: number, self: FileEntry[]) => 

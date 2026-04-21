@@ -23,6 +23,18 @@ query GetFilesByFileFieldNameValuePairNoCase($name: String, $value: String, $fir
 	}
 }
 
+query GetFilesByFileFieldValue($value: String, $first: Int = 100, $skip: Int = 0) {
+	fileFields (where: {value: $value}, first: $first, skip: $skip) {
+		...FileByFileField
+	}
+}
+
+query GetFilesByFileFieldValueNoCase($value: String, $first: Int = 100, $skip: Int = 0) {
+	fileFields (where: {value_contains_nocase: $value}, first: $first, skip: $skip) {
+		...FileByFileField
+	}
+}
+
 query GetFilesByFileFieldName($name: String, $first: Int = 100, $skip: Int = 0) {
 		fileFields (where: {name: $name,}, first: $first, skip: $skip) {
 		...FileByFileField
