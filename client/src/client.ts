@@ -220,9 +220,14 @@ export class FangornGraphClient {
 		return uniqueFiles
 	}
 
-	async GetFileByFileFieldNameValuePair(args: GetFileByFileFieldNameValuePairQueryVariables): Promise<FileEntry[]> {
+	async GetFileByFileFieldNameValuePair(caseSensitive: boolean, args: GetFileByFileFieldNameValuePairQueryVariables): Promise<FileEntry[]> {
 		console.log("Searching Globally for FileFields")
-		const result = await this.typedClient.GetFileByFileFieldNameValuePair(args);
+		let result
+		if(caseSensitive) {
+			result = await this.typedClient.GetFileByFileFieldNameValuePair(args);
+		} else {
+			result = await this.typedClient.GetFileByFileFieldNameValuePairNoCase(args);
+		}
 		const files = result.fileFields.map((ff: FileByFileFieldFragment) => toFile(ff.file))
 		const uniqueFiles = files.filter((f: FileEntry, index: number, self: FileEntry[]) => 
 			self.findIndex((other) => other.id === f.id) === index)
