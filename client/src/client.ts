@@ -4,6 +4,7 @@ import { FileEntry, SchemaState, ManifestState } from "@fangorn-network/client-t
 import {
 	FileByFileFieldFragment, GetAllSchemaStatesByOwnerQueryVariables,
 	GetAllSchemaStatesQueryVariables,
+	GetFileByFileFieldNameValuePairQueryVariables,
 	GetFileByFileIdQueryVariables,
 	GetFileEntriesByManifestStatetIdQueryVariables,
 	GetFilesByFileFieldNameQueryVariables,
@@ -214,8 +215,20 @@ export class FangornGraphClient {
 		console.log("Searching Globally for FileFields")
 		const result = await this.typedClient.GetFilesByFileFieldName(args);
 		const files = result.fileFields.map((ff: FileByFileFieldFragment) => toFile(ff.file))
-		return files
+		const uniqueFiles = files.filter((f: FileEntry, index: number, self: FileEntry[]) => 
+			self.findIndex((other) => other.id === f.id) === index)
+		return uniqueFiles
 	}
+
+	async GetFileByFileFieldNameValuePair(args: GetFileByFileFieldNameValuePairQueryVariables): Promise<FileEntry[]> {
+		console.log("Searching Globally for FileFields")
+		const result = await this.typedClient.GetFileByFileFieldNameValuePair(args);
+		const files = result.fileFields.map((ff: FileByFileFieldFragment) => toFile(ff.file))
+		const uniqueFiles = files.filter((f: FileEntry, index: number, self: FileEntry[]) => 
+			self.findIndex((other) => other.id === f.id) === index)
+		return uniqueFiles
+	}
+
 
 	// ── Raw ─────────────────────────────────────────────────────────────────
 

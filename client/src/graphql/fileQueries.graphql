@@ -23,14 +23,6 @@ query GetFilesFileFieldName($name: String, $first: Int = 100, $skip: Int = 0) {
 	}
 }
 
-query GetFilesByFileFieldName($name: String, $first: Int = 100, $skip: Int = 0) {
-		fileFields (where: {name: $name,}, first: $first, skip: $skip) {
-		file {
-			...File
-		}
-	}
-}
-
 query GetFileEntriesByManifestStatetId($manifestStateId: Bytes, $first: Int = 100, $skip: Int = 0) {
 	files (where: {manifestStateId: $manifestStateId}, first: $first, skip: $skip) {
 		...File
