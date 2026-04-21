@@ -4,10 +4,10 @@ import { FileEntry, SchemaState, ManifestState } from "@fangorn-network/client-t
 import {
 	FileByFileFieldFragment, GetAllSchemaStatesByOwnerQueryVariables,
 	GetAllSchemaStatesQueryVariables,
-	GetFileByFileFieldNameValuePairQueryVariables,
 	GetFileByFileIdQueryVariables,
 	GetFileEntriesByManifestStatetIdQueryVariables,
 	GetFilesByFileFieldNameQueryVariables,
+	GetFilesByFileFieldNameValuePairQueryVariables,
 	GetManifestStateByIdQueryVariables,
 	GetManifestStatesByFileFieldNameQueryVariables,
 	GetManifestStatesByFileFieldNameValuePairQueryVariables,
@@ -223,7 +223,7 @@ export class FangornGraphClient {
 		return uniqueFiles
 	}
 
-	async GetFileByFileFieldNameValuePair(caseSensitive: boolean, args: GetFileByFileFieldNameValuePairQueryVariables): Promise<FileEntry[]> {
+	async GetFilesByFileFieldNameValuePair(caseSensitive: boolean, args: GetFilesByFileFieldNameValuePairQueryVariables): Promise<FileEntry[]> {
 		console.log("Searching Globally for FileFields")
 		let result
 		if (!args.value) {
@@ -231,9 +231,9 @@ export class FangornGraphClient {
 			result = await this.typedClient.GetFilesByFileFieldName(newArgs)
 		} else {
 			if(caseSensitive) {
-				result = await this.typedClient.GetFileByFileFieldNameValuePair(args);
+				result = await this.typedClient.GetFilesByFileFieldNameValuePair(args);
 			} else {
-				result = await this.typedClient.GetFileByFileFieldNameValuePairNoCase(args);
+				result = await this.typedClient.GetFilesByFileFieldNameValuePairNoCase(args);
 			}
 		}
 		const files = result.fileFields.map((ff: FileByFileFieldFragment) => toFile(ff.file))

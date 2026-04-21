@@ -11,13 +11,13 @@ query GetFileByFileId($id: ID) {
 	}
 }
 
-query GetFileByFileFieldNameValuePair($name: String, $value: String, $first: Int = 100, $skip: Int = 0) {
+query GetFilesByFileFieldNameValuePair($name: String, $value: String, $first: Int = 100, $skip: Int = 0) {
 	fileFields (where: {name: $name, value: $value}, first: $first, skip: $skip) {
 		...FileByFileField
 	}
 }
 
-query GetFileByFileFieldNameValuePairNoCase($name: String, $value: String, $first: Int = 100, $skip: Int = 0) {
+query GetFilesByFileFieldNameValuePairNoCase($name: String, $value: String, $first: Int = 100, $skip: Int = 0) {
 	fileFields (where: {name: $name, value_contains_nocase: $value}, first: $first, skip: $skip) {
 		...FileByFileField
 	}
