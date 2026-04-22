@@ -11,23 +11,33 @@ query GetFileByFileId($id: ID) {
 	}
 }
 
-query GetFileByFileFieldNameValuePair($name: String, $value: String, $first: Int = 100, $skip: Int = 0) {
+query GetFilesByFileFieldNameValuePair($name: String, $value: String, $first: Int = 100, $skip: Int = 0) {
 	fileFields (where: {name: $name, value: $value}, first: $first, skip: $skip) {
 		...FileByFileField
 	}
 }
 
-query GetFilesFileFieldName($name: String, $first: Int = 100, $skip: Int = 0) {
-		fileFields (where: {name: $name,}, first: $first, skip: $skip) {
+query GetFilesByFileFieldNameValuePairNoCase($name: String, $value: String, $first: Int = 100, $skip: Int = 0) {
+	fileFields (where: {name: $name, value_contains_nocase: $value}, first: $first, skip: $skip) {
+		...FileByFileField
+	}
+}
+
+query GetFilesByFileFieldValue($value: String, $first: Int = 100, $skip: Int = 0) {
+	fileFields (where: {value: $value}, first: $first, skip: $skip) {
+		...FileByFileField
+	}
+}
+
+query GetFilesByFileFieldValueNoCase($value: String, $first: Int = 100, $skip: Int = 0) {
+	fileFields (where: {value_contains_nocase: $value}, first: $first, skip: $skip) {
 		...FileByFileField
 	}
 }
 
 query GetFilesByFileFieldName($name: String, $first: Int = 100, $skip: Int = 0) {
 		fileFields (where: {name: $name,}, first: $first, skip: $skip) {
-		file {
-			...File
-		}
+		...FileByFileField
 	}
 }
 

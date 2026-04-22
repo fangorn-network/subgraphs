@@ -7,7 +7,10 @@ import {
 	GetFileByFileIdQueryVariables,
 	GetFileEntriesByManifestStatetIdQueryVariables,
 	GetFilesByFileFieldNameQueryVariables,
+	GetFilesByFileFieldNameValuePairQueryVariables,
+	GetFilesByFileFieldValueQueryVariables,
 	GetManifestStateByIdQueryVariables,
+	GetManifestStatesByFileFieldNameQueryVariables,
 	GetManifestStatesByFileFieldNameValuePairQueryVariables,
 	GetManifestStatesByFileFieldValueQueryVariables,
 	GetManifestStatesBySchemaNameAndOwnerQueryVariables,
@@ -132,7 +135,8 @@ export class FangornGraphClient {
 
 		let result;
 		if (!args.value) {
-			result = await this.typedClient.GetManifestStatesByFileFieldName(args);
+			const newArgs: GetManifestStatesByFileFieldNameQueryVariables = {name: args.name, first: args.first, skip: args.skip}
+			result = await this.typedClient.GetManifestStatesByFileFieldName(newArgs);
 		} else {
 			if (caseSensitive) {
 				result = await this.typedClient.GetManifestStatesByFileFieldNameValuePair(args);
@@ -167,7 +171,8 @@ export class FangornGraphClient {
 
 		let result;
 		if (!args.value) {
-			result = await this.typedClient.GetManifestStatesByFileFieldName(args);
+			const newArgs: GetManifestStatesByFileFieldNameQueryVariables = {name: args.name, first: args.first, skip: args.skip}
+			result = await this.typedClient.GetManifestStatesByFileFieldName(newArgs);
 		} else {
 			result = await this.typedClient.GetManifestStatesByFileFieldNameValuePair(args);
 		}
@@ -211,11 +216,44 @@ export class FangornGraphClient {
 	}
 
 	async getFilesByFileFieldName(args: GetFilesByFileFieldNameQueryVariables): Promise<FileEntry[]> {
-		console.log("Searching Globally for FileFields")
 		const result = await this.typedClient.GetFilesByFileFieldName(args);
 		const files = result.fileFields.map((ff: FileByFileFieldFragment) => toFile(ff.file))
-		return files
+		const uniqueFiles = files.filter((f: FileEntry, index: number, self: FileEntry[]) => 
+			self.findIndex((other) => other.id === f.id) === index)
+		return uniqueFiles
 	}
+
+	async GetFilesByFileFieldNameValuePair(caseSensitive: boolean, args: GetFilesByFileFieldNameValuePairQueryVariables): Promise<FileEntry[]> {
+		let result
+		if (!args.value) {
+			const newArgs: GetFilesByFileFieldNameQueryVariables = {name: args.name, first: args.first, skip: args.skip}
+			result = await this.typedClient.GetFilesByFileFieldName(newArgs)
+		} else {
+			if(caseSensitive) {
+				result = await this.typedClient.GetFilesByFileFieldNameValuePair(args);
+			} else {
+				result = await this.typedClient.GetFilesByFileFieldNameValuePairNoCase(args);
+			}
+		}
+		const files = result.fileFields.map((ff: FileByFileFieldFragment) => toFile(ff.file))
+		const uniqueFiles = files.filter((f: FileEntry, index: number, self: FileEntry[]) => 
+			self.findIndex((other) => other.id === f.id) === index)
+		return uniqueFiles
+	}
+
+	async getFilesByFileFieldValue(caseSensitive: boolean, args: GetFilesByFileFieldValueQueryVariables): Promise<FileEntry[]> {
+		let result;
+		if (caseSensitive) {
+			result = await this.typedClient.GetFilesByFileFieldValue(args);
+		} else {
+			result = await this.typedClient.GetFilesByFileFieldValueNoCase(args);
+		}
+		const files = result.fileFields.map((ff: FileByFileFieldFragment) => toFile(ff.file))
+		const uniqueFiles = files.filter((f: FileEntry, index: number, self: FileEntry[]) => 
+			self.findIndex((other) => other.id === f.id) === index)
+		return uniqueFiles
+	}
+
 
 	// ── Raw ─────────────────────────────────────────────────────────────────
 
