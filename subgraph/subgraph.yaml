@@ -10,9 +10,9 @@ dataSources:
     name: DatasourceContract
     network: arbitrum-sepolia
     source:
-      address: "0xe8a5906825680a5816a7f28f2a0fa2d9ceec3755"
+      address: "0x14cff4b583cabde7066d12f04bf9eaba408a426f"
       abi: DatasourceContract
-      startBlock: 262022757
+      startBlock: 262295523
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -33,9 +33,9 @@ dataSources:
     name: SchemaContract
     network: arbitrum-sepolia
     source:
-      address: "0x267084865813550d9d97d3842c4a2d33a872908f"
+      address: "0xfe63c0748cc992c7258dc3c92b44247f44f88577"
       abi: SchemaContract
-      startBlock: 262022757
+      startBlock: 262295523
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -56,9 +56,9 @@ dataSources:
     name: SettlementContract
     network: arbitrum-sepolia
     source:
-      address: "0x1d21545f536a2f026348477960ca59f9f1d7fabd"
+      address: "0x282915f5c6f6c9b15c131fa379916da47754fbef"
       abi: SettlementContract
-      startBlock: 262022757 
+      startBlock: 262295523 
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
