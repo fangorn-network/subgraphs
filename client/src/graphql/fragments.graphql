@@ -129,6 +129,10 @@ fragment FileField on FileField {
 	}
 }
 
+fragment FileFieldValue on FileField {
+	value
+}
+
 fragment PricingResource on PricingResource {
 	id
 	owner
