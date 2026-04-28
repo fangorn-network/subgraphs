@@ -2,10 +2,11 @@ import { GraphQLClient } from "graphql-request";
 import { getSdk, Sdk } from "./generated/graphql-req.js";
 import { FileEntry, SchemaState, ManifestState } from "@fangorn-network/client-types";
 import {
-	FileByFileFieldFragment, GetAllSchemaStatesByOwnerQueryVariables,
+	FileByFileFieldFragment, FileFieldValueFragment, GetAllSchemaStatesByOwnerQueryVariables,
 	GetAllSchemaStatesQueryVariables,
 	GetFileByFileIdQueryVariables,
 	GetFileEntriesByManifestStatetIdQueryVariables,
+	GetFileFieldValuesByFileFieldNameQueryVariables,
 	GetFilesByFileFieldNameQueryVariables,
 	GetFilesByFileFieldNameValuePairQueryVariables,
 	GetFilesByFileFieldValueQueryVariables,
@@ -252,6 +253,18 @@ export class FangornGraphClient {
 		const uniqueFiles = files.filter((f: FileEntry, index: number, self: FileEntry[]) => 
 			self.findIndex((other) => other.id === f.id) === index)
 		return uniqueFiles
+	}
+
+	async getFileFieldValuesByFileFieldName(args: GetFileFieldValuesByFileFieldNameQueryVariables): Promise<string[]> {
+
+		const result = await this.typedClient.GetFileFieldValuesByFileFieldName(args);
+
+		const fieldValues = result.fileFields.map((ffv: FileFieldValueFragment) => ffv.value ?? "")
+		const uniqueFields = fieldValues.filter((value: string, index: number, self: string[]) => 
+			self.findIndex((other) => other === value) === index)
+
+		return uniqueFields
+
 	}
 
 

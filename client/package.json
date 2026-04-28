@@ -1,6 +1,6 @@
 {
   "name": "@fangorn-network/subgraph-client",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Client to simplify interacting with Fangorn subgraphs.",
   "type": "module",
   "main": "dist/index.js",

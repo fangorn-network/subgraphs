@@ -54,3 +54,9 @@ query GetPriceByFileFieldId($id: ID) {
 		}
 	}
 }
+
+query GetFileFieldValuesByFileFieldName($name: String) {
+	fileFields(where: {name: $name}) {
+		...FileFieldValue
+	}
+}
