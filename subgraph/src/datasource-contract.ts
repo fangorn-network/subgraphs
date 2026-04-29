@@ -1,4 +1,4 @@
-import { BigInt, Bytes, dataSource, DataSourceContext, ipfs, json, log } from "@graphprotocol/graph-ts"
+import { BigInt, Bytes, dataSource, DataSourceContext, ipfs, json, JSONValueKind, log } from "@graphprotocol/graph-ts"
 import { ManifestPublished as ManifestPublishedEvent, ManifestUpdated as ManifestUpdatedEvent } from "../generated/DatasourceContract/DatasourceContract"
 import { FileField, File, Manifest, ManifestPublished, ManifestState, ManifestUpdated, SchemaState, Schema, SchemaField } from "../generated/schema"
 import { Manifest as ManifestTemplate } from "../generated/templates"
@@ -387,12 +387,12 @@ export function handleMetadata(content: Bytes): void {
 					fileField3.file = file.id
 					fileField3.fileId = file.id
 
-						let priceObj = valueObj.get("price")
-						if (priceObj == null) {
-							fileField3.value = "free"
-						} else {
-							fileField3.value = priceObj.toString()
-						}
+					let priceObj = valueObj.get("price")
+					if (priceObj == null) {
+						fileField3.value = "free"
+					} else {
+						fileField3.value = priceObj.toString()
+					}
 
 					fileField3.save()
 
@@ -416,6 +416,47 @@ export function handleMetadata(content: Bytes): void {
 					}
 					fileField2.save()
 				}
+			} else if (fieldType == "array" || fieldType.startsWith("array")) {
+				let valueVal = fileFields.get(fieldKey)
+				if (valueVal == null) {
+					log.warning("Array field's value was null. Skipping for manifest {}", [cid])
+					continue
+				}
+				let arr = valueVal.toArray()
+
+				// optional inner type encoded as "array<string>" — defaults to "string"
+				let innerType = "string"
+				let lt = fieldType.indexOf("<")
+				let gt = fieldType.indexOf(">")
+				if (lt > 0 && gt > lt) {
+					innerType = fieldType.substring(lt + 1, gt)
+				}
+
+				for (let k = 0; k < arr.length; k++) {
+					let elem = arr[k]
+					let elemId = fieldEntityId + "-" + k.toString()
+					let elemField = new FileField(elemId)
+					elemField.name = fieldKey               // same name → queryable as a tag
+					elemField.atType = innerType
+					elemField.acc = "plain"
+					elemField.manifestStateId = manifestStateId
+					elemField.schemaId = schemaId
+					elemField.schemaName = schemaName
+					elemField.file = file.id
+					elemField.fileId = file.id
+
+					if (elem.kind == JSONValueKind.STRING) {
+						elemField.value = elem.toString()
+					} else if (elem.kind == JSONValueKind.NUMBER) {
+						elemField.value = elem.toBigInt().toString()
+					} else if (elem.kind == JSONValueKind.BOOL) {
+						elemField.value = elem.toBool() ? "true" : "false"
+					} else {
+						elemField.value = ""
+					}
+					elemField.save()
+				}
+				continue   // skip the parent fileField.save() at the bottom
 			} else {
 				fileField.acc = "plain"
 				let valueObj = fileFields.get(fieldKey)

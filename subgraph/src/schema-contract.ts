@@ -62,6 +62,7 @@ export function handleSchemaUpdated(schemaUpdatedEvent: SchemaUpdatedEvent): voi
       schema.versions = versions
     }
   }
+  
   schema.save();
   SchemaTemplate.create(schemaUpdate.newIpfsCid)
 }
@@ -98,10 +99,26 @@ export function handleSchema(content: Bytes): void {
     let fieldEntries = definition.entries;
     let schemaFields: string[] = []
     for (let i = 0; i < fieldEntries.length; i++) {
-      let key = fieldEntries[i].key;
+      let key = fieldEntries[i].key
       let val = fieldEntries[i].value.toObject()
       let atTypeVal = val.get("@type")
       let fieldType = atTypeVal != null ? atTypeVal.toString() : "unknown"
+
+      // handle arrays: encode inner type as "array<innerType>"
+      if (fieldType == "array") {
+        let itemsVal = val.get("items")
+        // default to string
+        let innerType = "string"
+        if (itemsVal != null) {
+          let itemsObj = itemsVal.toObject()
+          let innerAtType = itemsObj.get("@type")
+          if (innerAtType != null) {
+            innerType = innerAtType.toString()
+          }
+        }
+        fieldType = "array<" + innerType + ">"
+      }
+
       let schemaFieldId = cid.concat(key)
       let schemaField = new SchemaField(schemaFieldId)
       schemaField.fieldType = fieldType
