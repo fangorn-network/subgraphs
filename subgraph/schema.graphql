@@ -1,10 +1,10 @@
 type ManifestPublished @entity(immutable: true) {
   id: Bytes!
-  owner: Bytes! # address
-  schemaId: Bytes! # bytes32
-  nameHash: Bytes! # bytes32
-  name: String! # string
-  manifestCid: String! # string
+  owner: Bytes!
+  schemaId: Bytes!
+  nameHash: Bytes!
+  name: String!
+  manifestCid: String!
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -12,11 +12,11 @@ type ManifestPublished @entity(immutable: true) {
 
 type ManifestUpdated @entity(immutable: true) {
   id: Bytes!
-  owner: Bytes! # address
-  schemaId: Bytes! # bytes32
-  nameHash: Bytes! # bytes32
-  manifestCid: String! # string
-  version: BigInt! # uint64
+  owner: Bytes!
+  schemaId: Bytes!
+  nameHash: Bytes!
+  manifestCid: String!
+  version: BigInt!
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -51,74 +51,6 @@ type PriceUpdated @entity(immutable: true) {
   resourceId: Bytes!
   owner: Bytes!
   price: BigInt!
-}
-
-type SchemaState @entity(immutable: false) {
-  id: Bytes!
-  schemaId: Bytes!
-  owner: Bytes!
-  name: String!
-  versions: [Schema!]
-}
-
-type Schema @entity(immutable: false) {
-  id: ID!
-  manifestStates: [ManifestState!] @derivedFrom(field: "schema")
-  version: String
-  agentId: String
-  fields: [SchemaField!]
-}
-
-type SchemaField @entity(immutable: false) {
-  id: ID!
-  name: String!
-  fieldType: String!
-}
-
-type ManifestState @entity(immutable: false) {
-  id: Bytes!
-	schemaId: Bytes!
-  schemaName: String!
-  owner: Bytes!
-  schema: Schema
-  manifestCid: String!
-  manifest: Manifest
-  version: BigInt!
-  lastUpdated: BigInt!
-}
-
-type Manifest @entity(immutable: false) {
-  id: ID!
-	schemaId: Bytes!
-  schemaName: String!
-	manifestStateId: Bytes!
-  manifestVersion: BigInt
-  manifestState: ManifestState!
-  files: [File!] @derivedFrom(field: "manifest")
-}
-
-type File @entity(immutable: false) {
-  id: ID!
-	schemaId: Bytes!
-  schemaName: String!
-	manifestStateId: Bytes!
-	manifest: Manifest!
-  name: String
-  fileFields: [FileField!] @derivedFrom(field: "file")
-}
-
-type FileField @entity(immutable: false) {
-  id: ID!
-	schemaId: Bytes!
-  schemaName: String!
-	manifestStateId: Bytes!
-  name: String
-  value: String
-  atType: String
-  acc: String
-	fileId: String!
-  file: File!
-  pricing: PricingResource
 }
 
 type PricingResource @entity(immutable: false) {
